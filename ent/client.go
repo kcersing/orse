@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"log"
 
-	"saas/ent/migrate"
+	"orse/ent/migrate"
 
-	"saas/ent/menu"
-	"saas/ent/order"
-	"saas/ent/orderpay"
+	"orse/ent/menu"
+	"orse/ent/order"
+	"orse/ent/orderpay"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

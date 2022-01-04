@@ -4,9 +4,9 @@ package enttest
 
 import (
 	"context"
-	"saas/ent"
+	"orse/ent"
 	// required by schema hooks.
-	_ "saas/ent/runtime"
+	_ "orse/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
 )

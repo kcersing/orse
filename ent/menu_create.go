@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"saas/ent/menu"
-	"saas/ent/property"
+	"orse/ent/menu"
+	"orse/ent/property"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"

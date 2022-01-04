@@ -3,8 +3,8 @@
 package menu
 
 import (
-	"saas/ent/predicate"
-	"saas/ent/property"
+	"orse/ent/predicate"
+	"orse/ent/property"
 	"time"
 
 	"entgo.io/ent/dialect/sql"

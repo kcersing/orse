@@ -5,9 +5,9 @@ package ent
 import (
 	"errors"
 	"fmt"
-	"saas/ent/menu"
-	"saas/ent/order"
-	"saas/ent/orderpay"
+	"orse/ent/menu"
+	"orse/ent/order"
+	"orse/ent/orderpay"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

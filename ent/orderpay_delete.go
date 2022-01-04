@@ -5,8 +5,8 @@ package ent
 import (
 	"context"
 	"fmt"
-	"saas/ent/orderpay"
-	"saas/ent/predicate"
+	"orse/ent/orderpay"
+	"orse/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

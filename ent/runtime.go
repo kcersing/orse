@@ -3,10 +3,10 @@
 package ent
 
 import (
-	"saas/ent/menu"
-	"saas/ent/order"
-	"saas/ent/orderpay"
-	"saas/ent/schema"
+	"orse/ent/menu"
+	"orse/ent/order"
+	"orse/ent/orderpay"
+	"orse/ent/schema"
 	"time"
 )
 

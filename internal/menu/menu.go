@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"net/http"
-	"saas/internal/database"
-	"saas/internal/errors"
+	"orse/internal/database"
+	"orse/internal/errors"
 )
 
 type Menu struct {

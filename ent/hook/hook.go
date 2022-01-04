@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"saas/ent"
+	"orse/ent"
 )
 
 // The MenuFunc type is an adapter to allow the use of ordinary

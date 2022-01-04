@@ -2,8 +2,8 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"saas/internal/auth"
-	"saas/internal/menu"
+	"orse/internal/auth"
+	"orse/internal/menu"
 )
 
 func Api(r *gin.Engine)  {

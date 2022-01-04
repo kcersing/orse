@@ -5,9 +5,9 @@ package ent
 import (
 	"context"
 	"fmt"
-	"saas/ent/menu"
-	"saas/ent/predicate"
-	"saas/ent/property"
+	"orse/ent/menu"
+	"orse/ent/predicate"
+	"orse/ent/property"
 	"time"
 
 	"entgo.io/ent/dialect/sql"

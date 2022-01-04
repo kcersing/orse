@@ -5,11 +5,11 @@ package ent
 import (
 	"context"
 	"fmt"
-	"saas/ent/menu"
-	"saas/ent/order"
-	"saas/ent/orderpay"
-	"saas/ent/predicate"
-	"saas/ent/property"
+	"orse/ent/menu"
+	"orse/ent/order"
+	"orse/ent/orderpay"
+	"orse/ent/predicate"
+	"orse/ent/property"
 	"sync"
 	"time"
 

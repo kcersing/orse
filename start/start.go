@@ -4,8 +4,8 @@ import (
 	"context"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
-	"saas/ent/migrate"
-	"saas/internal/database"
+	"orse/ent/migrate"
+	"orse/internal/database"
 )
 
 func main() {

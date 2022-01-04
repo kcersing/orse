@@ -3,7 +3,7 @@
 package order
 
 import (
-	"saas/ent/predicate"
+	"orse/ent/predicate"
 	"time"
 
 	"entgo.io/ent/dialect/sql"

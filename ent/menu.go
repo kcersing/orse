@@ -4,8 +4,8 @@ package ent
 
 import (
 	"fmt"
-	"saas/ent/menu"
-	"saas/ent/property"
+	"orse/ent/menu"
+	"orse/ent/property"
 	"strings"
 	"time"
 
