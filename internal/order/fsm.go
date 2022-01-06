@@ -6,10 +6,9 @@ import (
 	"sync"
 )
 
-type State int                           //状态
-type Event string                        //事件
-type Handler func(opt *Opt)(State,error) //处理方法，并返回新的状态
-
+type State int                             //状态
+type Event string                          //事件
+type Handler func(opt *Opt) (State, error) //处理方法，并返回新的状态
 
 //FSM 有限状态机
 type FSM struct {
@@ -17,16 +16,19 @@ type FSM struct {
 	state    State                       //当前状态
 	handlers map[State]map[Event]Handler //当前状态可触发的有限个事件
 }
+
 //获取当前状态
-func (f *FSM)getState() State {
+func (f *FSM) getState() State {
 	return f.state
 }
+
 //设置当前状态
-func (f *FSM)setState(newState State){
-	f.state=newState
+func (f *FSM) setState(newState State) {
+	f.state = newState
 }
+
 //addHandlers 添加事件和处理方法
-func (f *FSM) addHandlers()(*FSM,error){
+func (f *FSM) addHandlers() (*FSM, error) {
 	if statusEvent == nil || len(statusEvent) <= 0 {
 		return nil, errors.New("[警告] 未定义 statusEvent")
 	}
@@ -56,8 +58,9 @@ func (f *FSM) addHandlers()(*FSM,error){
 
 	return f, nil
 }
+
 //Call 事件处理
-func (f *FSM)Call(event Event,opts ...Option)(State,error){
+func (f *FSM) Call(event Event, opts ...Option) (State, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
@@ -89,13 +92,14 @@ func (f *FSM)Call(event Event,opts ...Option)(State,error){
 
 	return f.getState(), nil
 }
+
 //NewFSM 实例化 FSM
-func NewFSM(initState State)(fsm *FSM,err error){
-	fsm=new(FSM)
-	fsm.state=initState
-	fsm.handlers=make(map[State]map[Event]Handler)
-	fsm,err=fsm.addHandlers()
-	if err != nil{
+func NewFSM(initState State) (fsm *FSM, err error) {
+	fsm = new(FSM)
+	fsm.state = initState
+	fsm.handlers = make(map[State]map[Event]Handler)
+	fsm, err = fsm.addHandlers()
+	if err != nil {
 		return
 	}
 	return
