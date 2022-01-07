@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
 )
 
 type ProductAttributeValue struct {
@@ -21,7 +22,13 @@ func (ProductAttributeValue) Mixin() []ent.Mixin {
 }
 
 func (ProductAttributeValue) Fields() []ent.Field {
-	return []ent.Field{}
+	return []ent.Field{
+		field.Int("product_id"),
+		field.String("value").
+			Optional().
+			Comment("键值"),
+		field.Int("sort"),
+	}
 }
 
 func (ProductAttributeValue) Edges() []ent.Edge {

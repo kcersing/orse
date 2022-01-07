@@ -58,7 +58,9 @@ func (Menu) Fields() []ent.Field {
 
 		field.Enum("status").
 			GoType((property.Status(""))),
-		field.String("icon").
+
+
+			field.String("icon").
 			Optional().
 			Comment("样式"),
 

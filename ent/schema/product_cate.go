@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
 )
 
 type ProductCate struct {
@@ -21,7 +22,10 @@ func (ProductCate) Mixin() []ent.Mixin {
 }
 
 func (ProductCate) Fields() []ent.Field {
-	return []ent.Field{}
+	return []ent.Field{
+		field.String("name"),
+		field.Int("sort"),
+	}
 }
 
 func (ProductCate) Edges() []ent.Edge {

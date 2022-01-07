@@ -2,6 +2,8 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+	"orse/ent/property"
 )
 
 type Product struct {
@@ -21,7 +23,17 @@ func (Product) Mixin() []ent.Mixin {
 }
 
 func (Product) Fields() []ent.Field {
-	return []ent.Field{}
+	return []ent.Field{
+		field.Int("cate_id"),
+		field.String("name").
+			Optional().
+			Comment("名称"),
+		field.Enum("status").
+			GoType((property.Status(""))),
+		field.Int("create_id").
+			Optional().
+			Default(0),
+	}
 }
 
 func (Product) Edges() []ent.Edge {

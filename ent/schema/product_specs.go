@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
 )
 
 // ProductSpecs 商品规格表
@@ -22,7 +23,15 @@ func (ProductSpecs) Mixin() []ent.Mixin {
 }
 
 func (ProductSpecs) Fields() []ent.Field {
-	return []ent.Field{}
+	return []ent.Field{
+		field.Int("product_id"),
+		field.String("specs"),
+		field.Int("stock"),
+		field.Float("price"),
+		field.Int("create_id").
+			Optional().
+			Default(0),
+	}
 }
 
 func (ProductSpecs) Edges() []ent.Edge {
