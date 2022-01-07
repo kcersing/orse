@@ -17,9 +17,9 @@ type Menu struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Pid holds the value of the "pid" field.
+	// ParentID holds the value of the "parent_id" field.
 	// 上级id
-	Pid int `json:"pid,omitempty"`
+	ParentID int `json:"parent_id,omitempty"`
 	// Tree holds the value of the "tree" field.
 	// 树
 	Tree string `json:"tree,omitempty"`
@@ -55,47 +55,41 @@ type Menu struct {
 	Desc string `json:"desc,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MenuQuery when eager-loading is set.
-	Edges     MenuEdges `json:"edges"`
-	menu_prev *int
+	Edges MenuEdges `json:"edges"`
 }
 
 // MenuEdges holds the relations/edges for other nodes in the graph.
 type MenuEdges struct {
-	// Next holds the value of the next edge.
-	Next *Menu `json:"next,omitempty"`
-	// Prev holds the value of the prev edge.
-	Prev *Menu `json:"prev,omitempty"`
+	// Parent holds the value of the parent edge.
+	Parent *Menu `json:"parent,omitempty"`
+	// Children holds the value of the children edge.
+	Children []*Menu `json:"children,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
 }
 
-// NextOrErr returns the Next value or an error if the edge
+// ParentOrErr returns the Parent value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e MenuEdges) NextOrErr() (*Menu, error) {
+func (e MenuEdges) ParentOrErr() (*Menu, error) {
 	if e.loadedTypes[0] {
-		if e.Next == nil {
-			// The edge next was loaded in eager-loading,
+		if e.Parent == nil {
+			// The edge parent was loaded in eager-loading,
 			// but was not found.
 			return nil, &NotFoundError{label: menu.Label}
 		}
-		return e.Next, nil
+		return e.Parent, nil
 	}
-	return nil, &NotLoadedError{edge: "next"}
+	return nil, &NotLoadedError{edge: "parent"}
 }
 
-// PrevOrErr returns the Prev value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e MenuEdges) PrevOrErr() (*Menu, error) {
+// ChildrenOrErr returns the Children value or an error if the edge
+// was not loaded in eager-loading.
+func (e MenuEdges) ChildrenOrErr() ([]*Menu, error) {
 	if e.loadedTypes[1] {
-		if e.Prev == nil {
-			// The edge prev was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: menu.Label}
-		}
-		return e.Prev, nil
+		return e.Children, nil
 	}
-	return nil, &NotLoadedError{edge: "prev"}
+	return nil, &NotLoadedError{edge: "children"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -103,14 +97,12 @@ func (*Menu) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case menu.FieldID, menu.FieldPid, menu.FieldLevel, menu.FieldSort:
+		case menu.FieldID, menu.FieldParentID, menu.FieldLevel, menu.FieldSort:
 			values[i] = new(sql.NullInt64)
 		case menu.FieldTree, menu.FieldTitle, menu.FieldName, menu.FieldURL, menu.FieldStatus, menu.FieldIcon, menu.FieldHidden, menu.FieldDesc:
 			values[i] = new(sql.NullString)
 		case menu.FieldCreatedAt, menu.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case menu.ForeignKeys[0]: // menu_prev
-			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Menu", columns[i])
 		}
@@ -132,11 +124,11 @@ func (m *Menu) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			m.ID = int(value.Int64)
-		case menu.FieldPid:
+		case menu.FieldParentID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field pid", values[i])
+				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
 			} else if value.Valid {
-				m.Pid = int(value.Int64)
+				m.ParentID = int(value.Int64)
 			}
 		case menu.FieldTree:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -210,26 +202,19 @@ func (m *Menu) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				m.Desc = value.String
 			}
-		case menu.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field menu_prev", value)
-			} else if value.Valid {
-				m.menu_prev = new(int)
-				*m.menu_prev = int(value.Int64)
-			}
 		}
 	}
 	return nil
 }
 
-// QueryNext queries the "next" edge of the Menu entity.
-func (m *Menu) QueryNext() *MenuQuery {
-	return (&MenuClient{config: m.config}).QueryNext(m)
+// QueryParent queries the "parent" edge of the Menu entity.
+func (m *Menu) QueryParent() *MenuQuery {
+	return (&MenuClient{config: m.config}).QueryParent(m)
 }
 
-// QueryPrev queries the "prev" edge of the Menu entity.
-func (m *Menu) QueryPrev() *MenuQuery {
-	return (&MenuClient{config: m.config}).QueryPrev(m)
+// QueryChildren queries the "children" edge of the Menu entity.
+func (m *Menu) QueryChildren() *MenuQuery {
+	return (&MenuClient{config: m.config}).QueryChildren(m)
 }
 
 // Update returns a builder for updating this Menu.
@@ -255,8 +240,8 @@ func (m *Menu) String() string {
 	var builder strings.Builder
 	builder.WriteString("Menu(")
 	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
-	builder.WriteString(", pid=")
-	builder.WriteString(fmt.Sprintf("%v", m.Pid))
+	builder.WriteString(", parent_id=")
+	builder.WriteString(fmt.Sprintf("%v", m.ParentID))
 	builder.WriteString(", tree=")
 	builder.WriteString(m.Tree)
 	builder.WriteString(", created_at=")

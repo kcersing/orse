@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"orse/ent/order"
 	"orse/ent/orderpay"
@@ -58,6 +57,26 @@ func (opu *OrderPayUpdate) SetUpdatedAt(t time.Time) *OrderPayUpdate {
 // ClearUpdatedAt clears the value of the "updated_at" field.
 func (opu *OrderPayUpdate) ClearUpdatedAt() *OrderPayUpdate {
 	opu.mutation.ClearUpdatedAt()
+	return opu
+}
+
+// SetOrderID sets the "order_id" field.
+func (opu *OrderPayUpdate) SetOrderID(i int) *OrderPayUpdate {
+	opu.mutation.SetOrderID(i)
+	return opu
+}
+
+// SetNillableOrderID sets the "order_id" field if the given value is not nil.
+func (opu *OrderPayUpdate) SetNillableOrderID(i *int) *OrderPayUpdate {
+	if i != nil {
+		opu.SetOrderID(*i)
+	}
+	return opu
+}
+
+// ClearOrderID clears the value of the "order_id" field.
+func (opu *OrderPayUpdate) ClearOrderID() *OrderPayUpdate {
+	opu.mutation.ClearOrderID()
 	return opu
 }
 
@@ -148,15 +167,9 @@ func (opu *OrderPayUpdate) ClearPayMode() *OrderPayUpdate {
 	return opu
 }
 
-// SetOwnerID sets the "owner" edge to the Order entity by ID.
-func (opu *OrderPayUpdate) SetOwnerID(id int) *OrderPayUpdate {
-	opu.mutation.SetOwnerID(id)
-	return opu
-}
-
-// SetOwner sets the "owner" edge to the Order entity.
-func (opu *OrderPayUpdate) SetOwner(o *Order) *OrderPayUpdate {
-	return opu.SetOwnerID(o.ID)
+// SetOrder sets the "order" edge to the Order entity.
+func (opu *OrderPayUpdate) SetOrder(o *Order) *OrderPayUpdate {
+	return opu.SetOrderID(o.ID)
 }
 
 // Mutation returns the OrderPayMutation object of the builder.
@@ -164,9 +177,9 @@ func (opu *OrderPayUpdate) Mutation() *OrderPayMutation {
 	return opu.mutation
 }
 
-// ClearOwner clears the "owner" edge to the Order entity.
-func (opu *OrderPayUpdate) ClearOwner() *OrderPayUpdate {
-	opu.mutation.ClearOwner()
+// ClearOrder clears the "order" edge to the Order entity.
+func (opu *OrderPayUpdate) ClearOrder() *OrderPayUpdate {
+	opu.mutation.ClearOrder()
 	return opu
 }
 
@@ -178,18 +191,12 @@ func (opu *OrderPayUpdate) Save(ctx context.Context) (int, error) {
 	)
 	opu.defaults()
 	if len(opu.hooks) == 0 {
-		if err = opu.check(); err != nil {
-			return 0, err
-		}
 		affected, err = opu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*OrderPayMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = opu.check(); err != nil {
-				return 0, err
 			}
 			opu.mutation = mutation
 			affected, err = opu.sqlSave(ctx)
@@ -237,14 +244,6 @@ func (opu *OrderPayUpdate) defaults() {
 		v := orderpay.UpdateDefaultUpdatedAt()
 		opu.mutation.SetUpdatedAt(v)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (opu *OrderPayUpdate) check() error {
-	if _, ok := opu.mutation.OwnerID(); opu.mutation.OwnerCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"owner\"")
-	}
-	return nil
 }
 
 func (opu *OrderPayUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -359,12 +358,12 @@ func (opu *OrderPayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: orderpay.FieldPayMode,
 		})
 	}
-	if opu.mutation.OwnerCleared() {
+	if opu.mutation.OrderCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   orderpay.OwnerTable,
-			Columns: []string{orderpay.OwnerColumn},
+			Table:   orderpay.OrderTable,
+			Columns: []string{orderpay.OrderColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -375,12 +374,12 @@ func (opu *OrderPayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := opu.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := opu.mutation.OrderIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   orderpay.OwnerTable,
-			Columns: []string{orderpay.OwnerColumn},
+			Table:   orderpay.OrderTable,
+			Columns: []string{orderpay.OrderColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -442,6 +441,26 @@ func (opuo *OrderPayUpdateOne) SetUpdatedAt(t time.Time) *OrderPayUpdateOne {
 // ClearUpdatedAt clears the value of the "updated_at" field.
 func (opuo *OrderPayUpdateOne) ClearUpdatedAt() *OrderPayUpdateOne {
 	opuo.mutation.ClearUpdatedAt()
+	return opuo
+}
+
+// SetOrderID sets the "order_id" field.
+func (opuo *OrderPayUpdateOne) SetOrderID(i int) *OrderPayUpdateOne {
+	opuo.mutation.SetOrderID(i)
+	return opuo
+}
+
+// SetNillableOrderID sets the "order_id" field if the given value is not nil.
+func (opuo *OrderPayUpdateOne) SetNillableOrderID(i *int) *OrderPayUpdateOne {
+	if i != nil {
+		opuo.SetOrderID(*i)
+	}
+	return opuo
+}
+
+// ClearOrderID clears the value of the "order_id" field.
+func (opuo *OrderPayUpdateOne) ClearOrderID() *OrderPayUpdateOne {
+	opuo.mutation.ClearOrderID()
 	return opuo
 }
 
@@ -532,15 +551,9 @@ func (opuo *OrderPayUpdateOne) ClearPayMode() *OrderPayUpdateOne {
 	return opuo
 }
 
-// SetOwnerID sets the "owner" edge to the Order entity by ID.
-func (opuo *OrderPayUpdateOne) SetOwnerID(id int) *OrderPayUpdateOne {
-	opuo.mutation.SetOwnerID(id)
-	return opuo
-}
-
-// SetOwner sets the "owner" edge to the Order entity.
-func (opuo *OrderPayUpdateOne) SetOwner(o *Order) *OrderPayUpdateOne {
-	return opuo.SetOwnerID(o.ID)
+// SetOrder sets the "order" edge to the Order entity.
+func (opuo *OrderPayUpdateOne) SetOrder(o *Order) *OrderPayUpdateOne {
+	return opuo.SetOrderID(o.ID)
 }
 
 // Mutation returns the OrderPayMutation object of the builder.
@@ -548,9 +561,9 @@ func (opuo *OrderPayUpdateOne) Mutation() *OrderPayMutation {
 	return opuo.mutation
 }
 
-// ClearOwner clears the "owner" edge to the Order entity.
-func (opuo *OrderPayUpdateOne) ClearOwner() *OrderPayUpdateOne {
-	opuo.mutation.ClearOwner()
+// ClearOrder clears the "order" edge to the Order entity.
+func (opuo *OrderPayUpdateOne) ClearOrder() *OrderPayUpdateOne {
+	opuo.mutation.ClearOrder()
 	return opuo
 }
 
@@ -569,18 +582,12 @@ func (opuo *OrderPayUpdateOne) Save(ctx context.Context) (*OrderPay, error) {
 	)
 	opuo.defaults()
 	if len(opuo.hooks) == 0 {
-		if err = opuo.check(); err != nil {
-			return nil, err
-		}
 		node, err = opuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*OrderPayMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = opuo.check(); err != nil {
-				return nil, err
 			}
 			opuo.mutation = mutation
 			node, err = opuo.sqlSave(ctx)
@@ -628,14 +635,6 @@ func (opuo *OrderPayUpdateOne) defaults() {
 		v := orderpay.UpdateDefaultUpdatedAt()
 		opuo.mutation.SetUpdatedAt(v)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (opuo *OrderPayUpdateOne) check() error {
-	if _, ok := opuo.mutation.OwnerID(); opuo.mutation.OwnerCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"owner\"")
-	}
-	return nil
 }
 
 func (opuo *OrderPayUpdateOne) sqlSave(ctx context.Context) (_node *OrderPay, err error) {
@@ -767,12 +766,12 @@ func (opuo *OrderPayUpdateOne) sqlSave(ctx context.Context) (_node *OrderPay, er
 			Column: orderpay.FieldPayMode,
 		})
 	}
-	if opuo.mutation.OwnerCleared() {
+	if opuo.mutation.OrderCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   orderpay.OwnerTable,
-			Columns: []string{orderpay.OwnerColumn},
+			Table:   orderpay.OrderTable,
+			Columns: []string{orderpay.OrderColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -783,12 +782,12 @@ func (opuo *OrderPayUpdateOne) sqlSave(ctx context.Context) (_node *OrderPay, er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := opuo.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := opuo.mutation.OrderIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   orderpay.OwnerTable,
-			Columns: []string{orderpay.OwnerColumn},
+			Table:   orderpay.OrderTable,
+			Columns: []string{orderpay.OrderColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

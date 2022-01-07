@@ -34,20 +34,20 @@ type Order struct {
 
 // OrderEdges holds the relations/edges for other nodes in the graph.
 type OrderEdges struct {
-	// Pay holds the value of the pay edge.
-	Pay []*OrderPay `json:"pay,omitempty"`
+	// Pays holds the value of the pays edge.
+	Pays []*OrderPay `json:"pays,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// PayOrErr returns the Pay value or an error if the edge
+// PaysOrErr returns the Pays value or an error if the edge
 // was not loaded in eager-loading.
-func (e OrderEdges) PayOrErr() ([]*OrderPay, error) {
+func (e OrderEdges) PaysOrErr() ([]*OrderPay, error) {
 	if e.loadedTypes[0] {
-		return e.Pay, nil
+		return e.Pays, nil
 	}
-	return nil, &NotLoadedError{edge: "pay"}
+	return nil, &NotLoadedError{edge: "pays"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -117,9 +117,9 @@ func (o *Order) assignValues(columns []string, values []interface{}) error {
 	return nil
 }
 
-// QueryPay queries the "pay" edge of the Order entity.
-func (o *Order) QueryPay() *OrderPayQuery {
-	return (&OrderClient{config: o.config}).QueryPay(o)
+// QueryPays queries the "pays" edge of the Order entity.
+func (o *Order) QueryPays() *OrderPayQuery {
+	return (&OrderClient{config: o.config}).QueryPays(o)
 }
 
 // Update returns a builder for updating this Order.

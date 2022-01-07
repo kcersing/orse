@@ -99,14 +99,14 @@ func (ou *OrderUpdate) ClearStatus() *OrderUpdate {
 	return ou
 }
 
-// AddPayIDs adds the "pay" edge to the OrderPay entity by IDs.
+// AddPayIDs adds the "pays" edge to the OrderPay entity by IDs.
 func (ou *OrderUpdate) AddPayIDs(ids ...int) *OrderUpdate {
 	ou.mutation.AddPayIDs(ids...)
 	return ou
 }
 
-// AddPay adds the "pay" edges to the OrderPay entity.
-func (ou *OrderUpdate) AddPay(o ...*OrderPay) *OrderUpdate {
+// AddPays adds the "pays" edges to the OrderPay entity.
+func (ou *OrderUpdate) AddPays(o ...*OrderPay) *OrderUpdate {
 	ids := make([]int, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
@@ -119,20 +119,20 @@ func (ou *OrderUpdate) Mutation() *OrderMutation {
 	return ou.mutation
 }
 
-// ClearPay clears all "pay" edges to the OrderPay entity.
-func (ou *OrderUpdate) ClearPay() *OrderUpdate {
-	ou.mutation.ClearPay()
+// ClearPays clears all "pays" edges to the OrderPay entity.
+func (ou *OrderUpdate) ClearPays() *OrderUpdate {
+	ou.mutation.ClearPays()
 	return ou
 }
 
-// RemovePayIDs removes the "pay" edge to OrderPay entities by IDs.
+// RemovePayIDs removes the "pays" edge to OrderPay entities by IDs.
 func (ou *OrderUpdate) RemovePayIDs(ids ...int) *OrderUpdate {
 	ou.mutation.RemovePayIDs(ids...)
 	return ou
 }
 
-// RemovePay removes "pay" edges to OrderPay entities.
-func (ou *OrderUpdate) RemovePay(o ...*OrderPay) *OrderUpdate {
+// RemovePays removes "pays" edges to OrderPay entities.
+func (ou *OrderUpdate) RemovePays(o ...*OrderPay) *OrderUpdate {
 	ids := make([]int, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
@@ -297,12 +297,12 @@ func (ou *OrderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: order.FieldStatus,
 		})
 	}
-	if ou.mutation.PayCleared() {
+	if ou.mutation.PaysCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   order.PayTable,
-			Columns: []string{order.PayColumn},
+			Table:   order.PaysTable,
+			Columns: []string{order.PaysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -313,12 +313,12 @@ func (ou *OrderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ou.mutation.RemovedPayIDs(); len(nodes) > 0 && !ou.mutation.PayCleared() {
+	if nodes := ou.mutation.RemovedPaysIDs(); len(nodes) > 0 && !ou.mutation.PaysCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   order.PayTable,
-			Columns: []string{order.PayColumn},
+			Table:   order.PaysTable,
+			Columns: []string{order.PaysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -332,12 +332,12 @@ func (ou *OrderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ou.mutation.PayIDs(); len(nodes) > 0 {
+	if nodes := ou.mutation.PaysIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   order.PayTable,
-			Columns: []string{order.PayColumn},
+			Table:   order.PaysTable,
+			Columns: []string{order.PaysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -441,14 +441,14 @@ func (ouo *OrderUpdateOne) ClearStatus() *OrderUpdateOne {
 	return ouo
 }
 
-// AddPayIDs adds the "pay" edge to the OrderPay entity by IDs.
+// AddPayIDs adds the "pays" edge to the OrderPay entity by IDs.
 func (ouo *OrderUpdateOne) AddPayIDs(ids ...int) *OrderUpdateOne {
 	ouo.mutation.AddPayIDs(ids...)
 	return ouo
 }
 
-// AddPay adds the "pay" edges to the OrderPay entity.
-func (ouo *OrderUpdateOne) AddPay(o ...*OrderPay) *OrderUpdateOne {
+// AddPays adds the "pays" edges to the OrderPay entity.
+func (ouo *OrderUpdateOne) AddPays(o ...*OrderPay) *OrderUpdateOne {
 	ids := make([]int, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
@@ -461,20 +461,20 @@ func (ouo *OrderUpdateOne) Mutation() *OrderMutation {
 	return ouo.mutation
 }
 
-// ClearPay clears all "pay" edges to the OrderPay entity.
-func (ouo *OrderUpdateOne) ClearPay() *OrderUpdateOne {
-	ouo.mutation.ClearPay()
+// ClearPays clears all "pays" edges to the OrderPay entity.
+func (ouo *OrderUpdateOne) ClearPays() *OrderUpdateOne {
+	ouo.mutation.ClearPays()
 	return ouo
 }
 
-// RemovePayIDs removes the "pay" edge to OrderPay entities by IDs.
+// RemovePayIDs removes the "pays" edge to OrderPay entities by IDs.
 func (ouo *OrderUpdateOne) RemovePayIDs(ids ...int) *OrderUpdateOne {
 	ouo.mutation.RemovePayIDs(ids...)
 	return ouo
 }
 
-// RemovePay removes "pay" edges to OrderPay entities.
-func (ouo *OrderUpdateOne) RemovePay(o ...*OrderPay) *OrderUpdateOne {
+// RemovePays removes "pays" edges to OrderPay entities.
+func (ouo *OrderUpdateOne) RemovePays(o ...*OrderPay) *OrderUpdateOne {
 	ids := make([]int, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
@@ -663,12 +663,12 @@ func (ouo *OrderUpdateOne) sqlSave(ctx context.Context) (_node *Order, err error
 			Column: order.FieldStatus,
 		})
 	}
-	if ouo.mutation.PayCleared() {
+	if ouo.mutation.PaysCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   order.PayTable,
-			Columns: []string{order.PayColumn},
+			Table:   order.PaysTable,
+			Columns: []string{order.PaysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -679,12 +679,12 @@ func (ouo *OrderUpdateOne) sqlSave(ctx context.Context) (_node *Order, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ouo.mutation.RemovedPayIDs(); len(nodes) > 0 && !ouo.mutation.PayCleared() {
+	if nodes := ouo.mutation.RemovedPaysIDs(); len(nodes) > 0 && !ouo.mutation.PaysCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   order.PayTable,
-			Columns: []string{order.PayColumn},
+			Table:   order.PaysTable,
+			Columns: []string{order.PaysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -698,12 +698,12 @@ func (ouo *OrderUpdateOne) sqlSave(ctx context.Context) (_node *Order, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ouo.mutation.PayIDs(); len(nodes) > 0 {
+	if nodes := ouo.mutation.PaysIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   order.PayTable,
-			Columns: []string{order.PayColumn},
+			Table:   order.PaysTable,
+			Columns: []string{order.PaysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

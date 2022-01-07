@@ -26,8 +26,7 @@ type OrderPayQuery struct {
 	fields     []string
 	predicates []predicate.OrderPay
 	// eager-loading edges.
-	withOwner *OrderQuery
-	withFKs   bool
+	withOrder *OrderQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -64,8 +63,8 @@ func (opq *OrderPayQuery) Order(o ...OrderFunc) *OrderPayQuery {
 	return opq
 }
 
-// QueryOwner chains the current query on the "owner" edge.
-func (opq *OrderPayQuery) QueryOwner() *OrderQuery {
+// QueryOrder chains the current query on the "order" edge.
+func (opq *OrderPayQuery) QueryOrder() *OrderQuery {
 	query := &OrderQuery{config: opq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := opq.prepareQuery(ctx); err != nil {
@@ -78,7 +77,7 @@ func (opq *OrderPayQuery) QueryOwner() *OrderQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(orderpay.Table, orderpay.FieldID, selector),
 			sqlgraph.To(order.Table, order.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, orderpay.OwnerTable, orderpay.OwnerColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, orderpay.OrderTable, orderpay.OrderColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(opq.driver.Dialect(), step)
 		return fromU, nil
@@ -267,21 +266,21 @@ func (opq *OrderPayQuery) Clone() *OrderPayQuery {
 		offset:     opq.offset,
 		order:      append([]OrderFunc{}, opq.order...),
 		predicates: append([]predicate.OrderPay{}, opq.predicates...),
-		withOwner:  opq.withOwner.Clone(),
+		withOrder:  opq.withOrder.Clone(),
 		// clone intermediate query.
 		sql:  opq.sql.Clone(),
 		path: opq.path,
 	}
 }
 
-// WithOwner tells the query-builder to eager-load the nodes that are connected to
-// the "owner" edge. The optional arguments are used to configure the query builder of the edge.
-func (opq *OrderPayQuery) WithOwner(opts ...func(*OrderQuery)) *OrderPayQuery {
+// WithOrder tells the query-builder to eager-load the nodes that are connected to
+// the "order" edge. The optional arguments are used to configure the query builder of the edge.
+func (opq *OrderPayQuery) WithOrder(opts ...func(*OrderQuery)) *OrderPayQuery {
 	query := &OrderQuery{config: opq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	opq.withOwner = query
+	opq.withOrder = query
 	return opq
 }
 
@@ -349,18 +348,11 @@ func (opq *OrderPayQuery) prepareQuery(ctx context.Context) error {
 func (opq *OrderPayQuery) sqlAll(ctx context.Context) ([]*OrderPay, error) {
 	var (
 		nodes       = []*OrderPay{}
-		withFKs     = opq.withFKs
 		_spec       = opq.querySpec()
 		loadedTypes = [1]bool{
-			opq.withOwner != nil,
+			opq.withOrder != nil,
 		}
 	)
-	if opq.withOwner != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, orderpay.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &OrderPay{config: opq.config}
 		nodes = append(nodes, node)
@@ -381,14 +373,11 @@ func (opq *OrderPayQuery) sqlAll(ctx context.Context) ([]*OrderPay, error) {
 		return nodes, nil
 	}
 
-	if query := opq.withOwner; query != nil {
+	if query := opq.withOrder; query != nil {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*OrderPay)
 		for i := range nodes {
-			if nodes[i].order_pay == nil {
-				continue
-			}
-			fk := *nodes[i].order_pay
+			fk := nodes[i].OrderID
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -402,10 +391,10 @@ func (opq *OrderPayQuery) sqlAll(ctx context.Context) ([]*OrderPay, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "order_pay" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "order_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.Owner = n
+				nodes[i].Edges.Order = n
 			}
 		}
 	}

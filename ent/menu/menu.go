@@ -13,8 +13,8 @@ const (
 	Label = "menu"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldPid holds the string denoting the pid field in the database.
-	FieldPid = "pid"
+	// FieldParentID holds the string denoting the parent_id field in the database.
+	FieldParentID = "parent_id"
 	// FieldTree holds the string denoting the tree field in the database.
 	FieldTree = "tree"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -39,26 +39,26 @@ const (
 	FieldHidden = "hidden"
 	// FieldDesc holds the string denoting the desc field in the database.
 	FieldDesc = "desc"
-	// EdgeNext holds the string denoting the next edge name in mutations.
-	EdgeNext = "next"
-	// EdgePrev holds the string denoting the prev edge name in mutations.
-	EdgePrev = "prev"
+	// EdgeParent holds the string denoting the parent edge name in mutations.
+	EdgeParent = "parent"
+	// EdgeChildren holds the string denoting the children edge name in mutations.
+	EdgeChildren = "children"
 	// Table holds the table name of the menu in the database.
 	Table = "menu"
-	// NextTable is the table that holds the next relation/edge.
-	NextTable = "menu"
-	// NextColumn is the table column denoting the next relation/edge.
-	NextColumn = "menu_prev"
-	// PrevTable is the table that holds the prev relation/edge.
-	PrevTable = "menu"
-	// PrevColumn is the table column denoting the prev relation/edge.
-	PrevColumn = "menu_prev"
+	// ParentTable is the table that holds the parent relation/edge.
+	ParentTable = "menu"
+	// ParentColumn is the table column denoting the parent relation/edge.
+	ParentColumn = "parent_id"
+	// ChildrenTable is the table that holds the children relation/edge.
+	ChildrenTable = "menu"
+	// ChildrenColumn is the table column denoting the children relation/edge.
+	ChildrenColumn = "parent_id"
 )
 
 // Columns holds all SQL columns for menu fields.
 var Columns = []string{
 	FieldID,
-	FieldPid,
+	FieldParentID,
 	FieldTree,
 	FieldCreatedAt,
 	FieldUpdatedAt,
@@ -73,21 +73,10 @@ var Columns = []string{
 	FieldDesc,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "menu"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"menu_prev",
-}
-
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}

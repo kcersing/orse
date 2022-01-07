@@ -27,7 +27,7 @@ type OrderQuery struct {
 	fields     []string
 	predicates []predicate.Order
 	// eager-loading edges.
-	withPay *OrderPayQuery
+	withPays *OrderPayQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -64,8 +64,8 @@ func (oq *OrderQuery) Order(o ...OrderFunc) *OrderQuery {
 	return oq
 }
 
-// QueryPay chains the current query on the "pay" edge.
-func (oq *OrderQuery) QueryPay() *OrderPayQuery {
+// QueryPays chains the current query on the "pays" edge.
+func (oq *OrderQuery) QueryPays() *OrderPayQuery {
 	query := &OrderPayQuery{config: oq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := oq.prepareQuery(ctx); err != nil {
@@ -78,7 +78,7 @@ func (oq *OrderQuery) QueryPay() *OrderPayQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(order.Table, order.FieldID, selector),
 			sqlgraph.To(orderpay.Table, orderpay.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, order.PayTable, order.PayColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, order.PaysTable, order.PaysColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(oq.driver.Dialect(), step)
 		return fromU, nil
@@ -267,21 +267,21 @@ func (oq *OrderQuery) Clone() *OrderQuery {
 		offset:     oq.offset,
 		order:      append([]OrderFunc{}, oq.order...),
 		predicates: append([]predicate.Order{}, oq.predicates...),
-		withPay:    oq.withPay.Clone(),
+		withPays:   oq.withPays.Clone(),
 		// clone intermediate query.
 		sql:  oq.sql.Clone(),
 		path: oq.path,
 	}
 }
 
-// WithPay tells the query-builder to eager-load the nodes that are connected to
-// the "pay" edge. The optional arguments are used to configure the query builder of the edge.
-func (oq *OrderQuery) WithPay(opts ...func(*OrderPayQuery)) *OrderQuery {
+// WithPays tells the query-builder to eager-load the nodes that are connected to
+// the "pays" edge. The optional arguments are used to configure the query builder of the edge.
+func (oq *OrderQuery) WithPays(opts ...func(*OrderPayQuery)) *OrderQuery {
 	query := &OrderPayQuery{config: oq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	oq.withPay = query
+	oq.withPays = query
 	return oq
 }
 
@@ -351,7 +351,7 @@ func (oq *OrderQuery) sqlAll(ctx context.Context) ([]*Order, error) {
 		nodes       = []*Order{}
 		_spec       = oq.querySpec()
 		loadedTypes = [1]bool{
-			oq.withPay != nil,
+			oq.withPays != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -374,32 +374,28 @@ func (oq *OrderQuery) sqlAll(ctx context.Context) ([]*Order, error) {
 		return nodes, nil
 	}
 
-	if query := oq.withPay; query != nil {
+	if query := oq.withPays; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[int]*Order)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Pay = []*OrderPay{}
+			nodes[i].Edges.Pays = []*OrderPay{}
 		}
-		query.withFKs = true
 		query.Where(predicate.OrderPay(func(s *sql.Selector) {
-			s.Where(sql.InValues(order.PayColumn, fks...))
+			s.Where(sql.InValues(order.PaysColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.order_pay
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "order_pay" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			fk := n.OrderID
+			node, ok := nodeids[fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "order_pay" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "order_id" returned %v for node %v`, fk, n.ID)
 			}
-			node.Edges.Pay = append(node.Edges.Pay, n)
+			node.Edges.Pays = append(node.Edges.Pays, n)
 		}
 	}
 

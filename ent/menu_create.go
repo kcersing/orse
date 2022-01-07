@@ -21,16 +21,16 @@ type MenuCreate struct {
 	hooks    []Hook
 }
 
-// SetPid sets the "pid" field.
-func (mc *MenuCreate) SetPid(i int) *MenuCreate {
-	mc.mutation.SetPid(i)
+// SetParentID sets the "parent_id" field.
+func (mc *MenuCreate) SetParentID(i int) *MenuCreate {
+	mc.mutation.SetParentID(i)
 	return mc
 }
 
-// SetNillablePid sets the "pid" field if the given value is not nil.
-func (mc *MenuCreate) SetNillablePid(i *int) *MenuCreate {
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (mc *MenuCreate) SetNillableParentID(i *int) *MenuCreate {
 	if i != nil {
-		mc.SetPid(*i)
+		mc.SetParentID(*i)
 	}
 	return mc
 }
@@ -187,42 +187,24 @@ func (mc *MenuCreate) SetNillableDesc(s *string) *MenuCreate {
 	return mc
 }
 
-// SetNextID sets the "next" edge to the Menu entity by ID.
-func (mc *MenuCreate) SetNextID(id int) *MenuCreate {
-	mc.mutation.SetNextID(id)
+// SetParent sets the "parent" edge to the Menu entity.
+func (mc *MenuCreate) SetParent(m *Menu) *MenuCreate {
+	return mc.SetParentID(m.ID)
+}
+
+// AddChildIDs adds the "children" edge to the Menu entity by IDs.
+func (mc *MenuCreate) AddChildIDs(ids ...int) *MenuCreate {
+	mc.mutation.AddChildIDs(ids...)
 	return mc
 }
 
-// SetNillableNextID sets the "next" edge to the Menu entity by ID if the given value is not nil.
-func (mc *MenuCreate) SetNillableNextID(id *int) *MenuCreate {
-	if id != nil {
-		mc = mc.SetNextID(*id)
+// AddChildren adds the "children" edges to the Menu entity.
+func (mc *MenuCreate) AddChildren(m ...*Menu) *MenuCreate {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
 	}
-	return mc
-}
-
-// SetNext sets the "next" edge to the Menu entity.
-func (mc *MenuCreate) SetNext(m *Menu) *MenuCreate {
-	return mc.SetNextID(m.ID)
-}
-
-// SetPrevID sets the "prev" edge to the Menu entity by ID.
-func (mc *MenuCreate) SetPrevID(id int) *MenuCreate {
-	mc.mutation.SetPrevID(id)
-	return mc
-}
-
-// SetNillablePrevID sets the "prev" edge to the Menu entity by ID if the given value is not nil.
-func (mc *MenuCreate) SetNillablePrevID(id *int) *MenuCreate {
-	if id != nil {
-		mc = mc.SetPrevID(*id)
-	}
-	return mc
-}
-
-// SetPrev sets the "prev" edge to the Menu entity.
-func (mc *MenuCreate) SetPrev(m *Menu) *MenuCreate {
-	return mc.SetPrevID(m.ID)
+	return mc.AddChildIDs(ids...)
 }
 
 // Mutation returns the MenuMutation object of the builder.
@@ -365,14 +347,6 @@ func (mc *MenuCreate) createSpec() (*Menu, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
-	if value, ok := mc.mutation.Pid(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: menu.FieldPid,
-		})
-		_node.Pid = value
-	}
 	if value, ok := mc.mutation.Tree(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -469,12 +443,12 @@ func (mc *MenuCreate) createSpec() (*Menu, *sqlgraph.CreateSpec) {
 		})
 		_node.Desc = value
 	}
-	if nodes := mc.mutation.NextIDs(); len(nodes) > 0 {
+	if nodes := mc.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   menu.NextTable,
-			Columns: []string{menu.NextColumn},
+			Table:   menu.ParentTable,
+			Columns: []string{menu.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -486,15 +460,15 @@ func (mc *MenuCreate) createSpec() (*Menu, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.menu_prev = &nodes[0]
+		_node.ParentID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := mc.mutation.PrevIDs(); len(nodes) > 0 {
+	if nodes := mc.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   menu.PrevTable,
-			Columns: []string{menu.PrevColumn},
+			Table:   menu.ChildrenTable,
+			Columns: []string{menu.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

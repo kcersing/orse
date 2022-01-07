@@ -20,7 +20,7 @@ func (OrderPay) Config() ent.Config {
 // Fields of the Order.
 func (OrderPay) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("order_id"),
+		field.Int("order_id").Optional(),
 		field.Int("user_id"),
 		field.Int("create_id").
 			Optional().
@@ -37,8 +37,8 @@ func (OrderPay) Fields() []ent.Field {
 // Edges of the OrderPay.
 func (OrderPay) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("pays", Order.Type).
-			Ref("pay").
+		edge.From("order", Order.Type).
+			Ref("pays").
 			Unique().
 			Field("order_id"),
 	}

@@ -550,25 +550,25 @@ func StatusNotNil() predicate.Order {
 	})
 }
 
-// HasPay applies the HasEdge predicate on the "pay" edge.
-func HasPay() predicate.Order {
+// HasPays applies the HasEdge predicate on the "pays" edge.
+func HasPays() predicate.Order {
 	return predicate.Order(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PayTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PayTable, PayColumn),
+			sqlgraph.To(PaysTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PaysTable, PaysColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasPayWith applies the HasEdge predicate on the "pay" edge with a given conditions (other predicates).
-func HasPayWith(preds ...predicate.OrderPay) predicate.Order {
+// HasPaysWith applies the HasEdge predicate on the "pays" edge with a given conditions (other predicates).
+func HasPaysWith(preds ...predicate.OrderPay) predicate.Order {
 	return predicate.Order(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PayInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PayTable, PayColumn),
+			sqlgraph.To(PaysInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PaysTable, PaysColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

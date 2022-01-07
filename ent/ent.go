@@ -8,6 +8,12 @@ import (
 	"orse/ent/menu"
 	"orse/ent/order"
 	"orse/ent/orderpay"
+	"orse/ent/product"
+	"orse/ent/productattributekey"
+	"orse/ent/productattributevalue"
+	"orse/ent/productcate"
+	"orse/ent/productspecs"
+	"orse/ent/productspecsitem"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -31,9 +37,15 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		menu.Table:     menu.ValidColumn,
-		order.Table:    order.ValidColumn,
-		orderpay.Table: orderpay.ValidColumn,
+		menu.Table:                  menu.ValidColumn,
+		order.Table:                 order.ValidColumn,
+		orderpay.Table:              orderpay.ValidColumn,
+		product.Table:               product.ValidColumn,
+		productattributekey.Table:   productattributekey.ValidColumn,
+		productattributevalue.Table: productattributevalue.ValidColumn,
+		productcate.Table:           productcate.ValidColumn,
+		productspecs.Table:          productspecs.ValidColumn,
+		productspecsitem.Table:      productspecsitem.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

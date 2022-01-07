@@ -12,7 +12,6 @@ var (
 	// MenuColumns holds the columns for the "menu" table.
 	MenuColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "pid", Type: field.TypeInt, Nullable: true},
 		{Name: "tree", Type: field.TypeString, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
@@ -25,7 +24,7 @@ var (
 		{Name: "icon", Type: field.TypeString, Nullable: true},
 		{Name: "hidden", Type: field.TypeEnum, Nullable: true, Enums: []string{"0", "1"}},
 		{Name: "desc", Type: field.TypeString, Nullable: true},
-		{Name: "menu_prev", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "parent_id", Type: field.TypeInt, Nullable: true},
 	}
 	// MenuTable holds the schema information for the "menu" table.
 	MenuTable = &schema.Table{
@@ -34,8 +33,8 @@ var (
 		PrimaryKey: []*schema.Column{MenuColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "menu_menu_prev",
-				Columns:    []*schema.Column{MenuColumns[14]},
+				Symbol:     "menu_menu_children",
+				Columns:    []*schema.Column{MenuColumns[13]},
 				RefColumns: []*schema.Column{MenuColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -44,7 +43,7 @@ var (
 			{
 				Name:    "menu_url",
 				Unique:  false,
-				Columns: []*schema.Column{MenuColumns[7]},
+				Columns: []*schema.Column{MenuColumns[6]},
 			},
 			{
 				Name:    "menu_id",
@@ -78,7 +77,7 @@ var (
 		{Name: "sn", Type: field.TypeString, Unique: true},
 		{Name: "price", Type: field.TypeFloat64, Default: 0},
 		{Name: "pay_mode", Type: field.TypeString, Nullable: true},
-		{Name: "order_pay", Type: field.TypeInt, Nullable: true},
+		{Name: "order_id", Type: field.TypeInt, Nullable: true},
 	}
 	// OrderPayTable holds the schema information for the "order_pay" table.
 	OrderPayTable = &schema.Table{
@@ -87,10 +86,162 @@ var (
 		PrimaryKey: []*schema.Column{OrderPayColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "order_pay_order_pay",
+				Symbol:     "order_pay_order_pays",
 				Columns:    []*schema.Column{OrderPayColumns[8]},
 				RefColumns: []*schema.Column{OrderColumns[0]},
 				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// ProductColumns holds the columns for the "product" table.
+	ProductColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"0", "1"}},
+		{Name: "create_id", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "cate_id", Type: field.TypeInt, Nullable: true},
+	}
+	// ProductTable holds the schema information for the "product" table.
+	ProductTable = &schema.Table{
+		Name:       "product",
+		Columns:    ProductColumns,
+		PrimaryKey: []*schema.Column{ProductColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "product_product_cate_products",
+				Columns:    []*schema.Column{ProductColumns[6]},
+				RefColumns: []*schema.Column{ProductCateColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// ProductAttributeKeyColumns holds the columns for the "product_attribute_key" table.
+	ProductAttributeKeyColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "product_id", Type: field.TypeInt, Nullable: true},
+		{Name: "name", Type: field.TypeString, Nullable: true},
+		{Name: "sort", Type: field.TypeInt},
+	}
+	// ProductAttributeKeyTable holds the schema information for the "product_attribute_key" table.
+	ProductAttributeKeyTable = &schema.Table{
+		Name:       "product_attribute_key",
+		Columns:    ProductAttributeKeyColumns,
+		PrimaryKey: []*schema.Column{ProductAttributeKeyColumns[0]},
+	}
+	// ProductAttributeValueColumns holds the columns for the "product_attribute_value" table.
+	ProductAttributeValueColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "value", Type: field.TypeString, Nullable: true},
+		{Name: "sort", Type: field.TypeInt},
+		{Name: "key_id", Type: field.TypeInt, Nullable: true},
+	}
+	// ProductAttributeValueTable holds the schema information for the "product_attribute_value" table.
+	ProductAttributeValueTable = &schema.Table{
+		Name:       "product_attribute_value",
+		Columns:    ProductAttributeValueColumns,
+		PrimaryKey: []*schema.Column{ProductAttributeValueColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "product_attribute_value_product_attribute_key_values",
+				Columns:    []*schema.Column{ProductAttributeValueColumns[5]},
+				RefColumns: []*schema.Column{ProductAttributeKeyColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// ProductCateColumns holds the columns for the "product_cate" table.
+	ProductCateColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "sort", Type: field.TypeInt},
+	}
+	// ProductCateTable holds the schema information for the "product_cate" table.
+	ProductCateTable = &schema.Table{
+		Name:       "product_cate",
+		Columns:    ProductCateColumns,
+		PrimaryKey: []*schema.Column{ProductCateColumns[0]},
+	}
+	// ProductSpecsColumns holds the columns for the "product_specs" table.
+	ProductSpecsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "sn", Type: field.TypeString},
+		{Name: "stock", Type: field.TypeInt},
+		{Name: "sales", Type: field.TypeInt},
+		{Name: "price", Type: field.TypeFloat64},
+		{Name: "sale_price", Type: field.TypeFloat64},
+		{Name: "create_id", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "product_id", Type: field.TypeInt, Nullable: true},
+	}
+	// ProductSpecsTable holds the schema information for the "product_specs" table.
+	ProductSpecsTable = &schema.Table{
+		Name:       "product_specs",
+		Columns:    ProductSpecsColumns,
+		PrimaryKey: []*schema.Column{ProductSpecsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "product_specs_product_specs",
+				Columns:    []*schema.Column{ProductSpecsColumns[10]},
+				RefColumns: []*schema.Column{ProductColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// ProductSpecsItemColumns holds the columns for the "product_specs_item" table.
+	ProductSpecsItemColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "value_id", Type: field.TypeInt, Nullable: true},
+		{Name: "sort", Type: field.TypeInt},
+		{Name: "product_specs_id", Type: field.TypeInt, Nullable: true},
+	}
+	// ProductSpecsItemTable holds the schema information for the "product_specs_item" table.
+	ProductSpecsItemTable = &schema.Table{
+		Name:       "product_specs_item",
+		Columns:    ProductSpecsItemColumns,
+		PrimaryKey: []*schema.Column{ProductSpecsItemColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "product_specs_item_product_specs_items",
+				Columns:    []*schema.Column{ProductSpecsItemColumns[5]},
+				RefColumns: []*schema.Column{ProductSpecsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// ProductSpecsItemValuesColumns holds the columns for the "product_specs_item_values" table.
+	ProductSpecsItemValuesColumns = []*schema.Column{
+		{Name: "product_specs_item_id", Type: field.TypeInt},
+		{Name: "product_attribute_value_id", Type: field.TypeInt},
+	}
+	// ProductSpecsItemValuesTable holds the schema information for the "product_specs_item_values" table.
+	ProductSpecsItemValuesTable = &schema.Table{
+		Name:       "product_specs_item_values",
+		Columns:    ProductSpecsItemValuesColumns,
+		PrimaryKey: []*schema.Column{ProductSpecsItemValuesColumns[0], ProductSpecsItemValuesColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "product_specs_item_values_product_specs_item_id",
+				Columns:    []*schema.Column{ProductSpecsItemValuesColumns[0]},
+				RefColumns: []*schema.Column{ProductSpecsItemColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "product_specs_item_values_product_attribute_value_id",
+				Columns:    []*schema.Column{ProductSpecsItemValuesColumns[1]},
+				RefColumns: []*schema.Column{ProductAttributeValueColumns[0]},
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -99,6 +250,13 @@ var (
 		MenuTable,
 		OrderTable,
 		OrderPayTable,
+		ProductTable,
+		ProductAttributeKeyTable,
+		ProductAttributeValueTable,
+		ProductCateTable,
+		ProductSpecsTable,
+		ProductSpecsItemTable,
+		ProductSpecsItemValuesTable,
 	}
 )
 
@@ -108,4 +266,10 @@ func init() {
 		Table: "menu",
 	}
 	OrderPayTable.ForeignKeys[0].RefTable = OrderTable
+	ProductTable.ForeignKeys[0].RefTable = ProductCateTable
+	ProductAttributeValueTable.ForeignKeys[0].RefTable = ProductAttributeKeyTable
+	ProductSpecsTable.ForeignKeys[0].RefTable = ProductTable
+	ProductSpecsItemTable.ForeignKeys[0].RefTable = ProductSpecsTable
+	ProductSpecsItemValuesTable.ForeignKeys[0].RefTable = ProductSpecsItemTable
+	ProductSpecsItemValuesTable.ForeignKeys[1].RefTable = ProductAttributeValueTable
 }

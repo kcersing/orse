@@ -26,9 +26,8 @@ type MenuQuery struct {
 	fields     []string
 	predicates []predicate.Menu
 	// eager-loading edges.
-	withNext *MenuQuery
-	withPrev *MenuQuery
-	withFKs  bool
+	withParent   *MenuQuery
+	withChildren *MenuQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -65,8 +64,8 @@ func (mq *MenuQuery) Order(o ...OrderFunc) *MenuQuery {
 	return mq
 }
 
-// QueryNext chains the current query on the "next" edge.
-func (mq *MenuQuery) QueryNext() *MenuQuery {
+// QueryParent chains the current query on the "parent" edge.
+func (mq *MenuQuery) QueryParent() *MenuQuery {
 	query := &MenuQuery{config: mq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := mq.prepareQuery(ctx); err != nil {
@@ -79,7 +78,7 @@ func (mq *MenuQuery) QueryNext() *MenuQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(menu.Table, menu.FieldID, selector),
 			sqlgraph.To(menu.Table, menu.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, menu.NextTable, menu.NextColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, menu.ParentTable, menu.ParentColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
 		return fromU, nil
@@ -87,8 +86,8 @@ func (mq *MenuQuery) QueryNext() *MenuQuery {
 	return query
 }
 
-// QueryPrev chains the current query on the "prev" edge.
-func (mq *MenuQuery) QueryPrev() *MenuQuery {
+// QueryChildren chains the current query on the "children" edge.
+func (mq *MenuQuery) QueryChildren() *MenuQuery {
 	query := &MenuQuery{config: mq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := mq.prepareQuery(ctx); err != nil {
@@ -101,7 +100,7 @@ func (mq *MenuQuery) QueryPrev() *MenuQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(menu.Table, menu.FieldID, selector),
 			sqlgraph.To(menu.Table, menu.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, menu.PrevTable, menu.PrevColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, menu.ChildrenTable, menu.ChildrenColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
 		return fromU, nil
@@ -285,38 +284,38 @@ func (mq *MenuQuery) Clone() *MenuQuery {
 		return nil
 	}
 	return &MenuQuery{
-		config:     mq.config,
-		limit:      mq.limit,
-		offset:     mq.offset,
-		order:      append([]OrderFunc{}, mq.order...),
-		predicates: append([]predicate.Menu{}, mq.predicates...),
-		withNext:   mq.withNext.Clone(),
-		withPrev:   mq.withPrev.Clone(),
+		config:       mq.config,
+		limit:        mq.limit,
+		offset:       mq.offset,
+		order:        append([]OrderFunc{}, mq.order...),
+		predicates:   append([]predicate.Menu{}, mq.predicates...),
+		withParent:   mq.withParent.Clone(),
+		withChildren: mq.withChildren.Clone(),
 		// clone intermediate query.
 		sql:  mq.sql.Clone(),
 		path: mq.path,
 	}
 }
 
-// WithNext tells the query-builder to eager-load the nodes that are connected to
-// the "next" edge. The optional arguments are used to configure the query builder of the edge.
-func (mq *MenuQuery) WithNext(opts ...func(*MenuQuery)) *MenuQuery {
+// WithParent tells the query-builder to eager-load the nodes that are connected to
+// the "parent" edge. The optional arguments are used to configure the query builder of the edge.
+func (mq *MenuQuery) WithParent(opts ...func(*MenuQuery)) *MenuQuery {
 	query := &MenuQuery{config: mq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	mq.withNext = query
+	mq.withParent = query
 	return mq
 }
 
-// WithPrev tells the query-builder to eager-load the nodes that are connected to
-// the "prev" edge. The optional arguments are used to configure the query builder of the edge.
-func (mq *MenuQuery) WithPrev(opts ...func(*MenuQuery)) *MenuQuery {
+// WithChildren tells the query-builder to eager-load the nodes that are connected to
+// the "children" edge. The optional arguments are used to configure the query builder of the edge.
+func (mq *MenuQuery) WithChildren(opts ...func(*MenuQuery)) *MenuQuery {
 	query := &MenuQuery{config: mq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	mq.withPrev = query
+	mq.withChildren = query
 	return mq
 }
 
@@ -326,12 +325,12 @@ func (mq *MenuQuery) WithPrev(opts ...func(*MenuQuery)) *MenuQuery {
 // Example:
 //
 //	var v []struct {
-//		Pid int `json:"pid,omitempty"`
+//		ParentID int `json:"parent_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Menu.Query().
-//		GroupBy(menu.FieldPid).
+//		GroupBy(menu.FieldParentID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -353,11 +352,11 @@ func (mq *MenuQuery) GroupBy(field string, fields ...string) *MenuGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Pid int `json:"pid,omitempty"`
+//		ParentID int `json:"parent_id,omitempty"`
 //	}
 //
 //	client.Menu.Query().
-//		Select(menu.FieldPid).
+//		Select(menu.FieldParentID).
 //		Scan(ctx, &v)
 //
 func (mq *MenuQuery) Select(fields ...string) *MenuSelect {
@@ -384,19 +383,12 @@ func (mq *MenuQuery) prepareQuery(ctx context.Context) error {
 func (mq *MenuQuery) sqlAll(ctx context.Context) ([]*Menu, error) {
 	var (
 		nodes       = []*Menu{}
-		withFKs     = mq.withFKs
 		_spec       = mq.querySpec()
 		loadedTypes = [2]bool{
-			mq.withNext != nil,
-			mq.withPrev != nil,
+			mq.withParent != nil,
+			mq.withChildren != nil,
 		}
 	)
-	if mq.withNext != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, menu.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Menu{config: mq.config}
 		nodes = append(nodes, node)
@@ -417,14 +409,11 @@ func (mq *MenuQuery) sqlAll(ctx context.Context) ([]*Menu, error) {
 		return nodes, nil
 	}
 
-	if query := mq.withNext; query != nil {
+	if query := mq.withParent; query != nil {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Menu)
 		for i := range nodes {
-			if nodes[i].menu_prev == nil {
-				continue
-			}
-			fk := *nodes[i].menu_prev
+			fk := nodes[i].ParentID
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -438,39 +427,36 @@ func (mq *MenuQuery) sqlAll(ctx context.Context) ([]*Menu, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "menu_prev" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.Next = n
+				nodes[i].Edges.Parent = n
 			}
 		}
 	}
 
-	if query := mq.withPrev; query != nil {
+	if query := mq.withChildren; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[int]*Menu)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Children = []*Menu{}
 		}
-		query.withFKs = true
 		query.Where(predicate.Menu(func(s *sql.Selector) {
-			s.Where(sql.InValues(menu.PrevColumn, fks...))
+			s.Where(sql.InValues(menu.ChildrenColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.menu_prev
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "menu_prev" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			fk := n.ParentID
+			node, ok := nodeids[fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "menu_prev" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
 			}
-			node.Edges.Prev = n
+			node.Edges.Children = append(node.Edges.Children, n)
 		}
 	}
 

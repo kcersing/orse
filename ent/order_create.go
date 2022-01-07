@@ -75,14 +75,14 @@ func (oc *OrderCreate) SetNillableStatus(o *order.Status) *OrderCreate {
 	return oc
 }
 
-// AddPayIDs adds the "pay" edge to the OrderPay entity by IDs.
+// AddPayIDs adds the "pays" edge to the OrderPay entity by IDs.
 func (oc *OrderCreate) AddPayIDs(ids ...int) *OrderCreate {
 	oc.mutation.AddPayIDs(ids...)
 	return oc
 }
 
-// AddPay adds the "pay" edges to the OrderPay entity.
-func (oc *OrderCreate) AddPay(o ...*OrderPay) *OrderCreate {
+// AddPays adds the "pays" edges to the OrderPay entity.
+func (oc *OrderCreate) AddPays(o ...*OrderPay) *OrderCreate {
 	ids := make([]int, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
@@ -255,12 +255,12 @@ func (oc *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 		})
 		_node.Status = value
 	}
-	if nodes := oc.mutation.PayIDs(); len(nodes) > 0 {
+	if nodes := oc.mutation.PaysIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   order.PayTable,
-			Columns: []string{order.PayColumn},
+			Table:   order.PaysTable,
+			Columns: []string{order.PaysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

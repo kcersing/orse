@@ -15,7 +15,7 @@ type PidMixin struct{
 
 func (PidMixin) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("pid").
+		field.Int("parent_id").
 			Optional().
 			Comment("上级id"),
 		field.String("tree").

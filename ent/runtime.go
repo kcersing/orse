@@ -6,6 +6,12 @@ import (
 	"orse/ent/menu"
 	"orse/ent/order"
 	"orse/ent/orderpay"
+	"orse/ent/product"
+	"orse/ent/productattributekey"
+	"orse/ent/productattributevalue"
+	"orse/ent/productcate"
+	"orse/ent/productspecs"
+	"orse/ent/productspecsitem"
 	"orse/ent/schema"
 	"time"
 )
@@ -68,11 +74,109 @@ func init() {
 	// orderpay.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	orderpay.UpdateDefaultUpdatedAt = orderpayDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// orderpayDescCreateID is the schema descriptor for create_id field.
-	orderpayDescCreateID := orderpayFields[1].Descriptor()
+	orderpayDescCreateID := orderpayFields[2].Descriptor()
 	// orderpay.DefaultCreateID holds the default value on creation for the create_id field.
 	orderpay.DefaultCreateID = orderpayDescCreateID.Default.(int)
 	// orderpayDescPrice is the schema descriptor for price field.
-	orderpayDescPrice := orderpayFields[3].Descriptor()
+	orderpayDescPrice := orderpayFields[4].Descriptor()
 	// orderpay.DefaultPrice holds the default value on creation for the price field.
 	orderpay.DefaultPrice = orderpayDescPrice.Default.(float64)
+	productMixin := schema.Product{}.Mixin()
+	productMixinFields0 := productMixin[0].Fields()
+	_ = productMixinFields0
+	productFields := schema.Product{}.Fields()
+	_ = productFields
+	// productDescCreatedAt is the schema descriptor for created_at field.
+	productDescCreatedAt := productMixinFields0[0].Descriptor()
+	// product.DefaultCreatedAt holds the default value on creation for the created_at field.
+	product.DefaultCreatedAt = productDescCreatedAt.Default.(func() time.Time)
+	// productDescUpdatedAt is the schema descriptor for updated_at field.
+	productDescUpdatedAt := productMixinFields0[1].Descriptor()
+	// product.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	product.DefaultUpdatedAt = productDescUpdatedAt.Default.(func() time.Time)
+	// product.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	product.UpdateDefaultUpdatedAt = productDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// productDescCreateID is the schema descriptor for create_id field.
+	productDescCreateID := productFields[3].Descriptor()
+	// product.DefaultCreateID holds the default value on creation for the create_id field.
+	product.DefaultCreateID = productDescCreateID.Default.(int)
+	productattributekeyMixin := schema.ProductAttributeKey{}.Mixin()
+	productattributekeyMixinFields0 := productattributekeyMixin[0].Fields()
+	_ = productattributekeyMixinFields0
+	productattributekeyFields := schema.ProductAttributeKey{}.Fields()
+	_ = productattributekeyFields
+	// productattributekeyDescCreatedAt is the schema descriptor for created_at field.
+	productattributekeyDescCreatedAt := productattributekeyMixinFields0[0].Descriptor()
+	// productattributekey.DefaultCreatedAt holds the default value on creation for the created_at field.
+	productattributekey.DefaultCreatedAt = productattributekeyDescCreatedAt.Default.(func() time.Time)
+	// productattributekeyDescUpdatedAt is the schema descriptor for updated_at field.
+	productattributekeyDescUpdatedAt := productattributekeyMixinFields0[1].Descriptor()
+	// productattributekey.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	productattributekey.DefaultUpdatedAt = productattributekeyDescUpdatedAt.Default.(func() time.Time)
+	// productattributekey.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	productattributekey.UpdateDefaultUpdatedAt = productattributekeyDescUpdatedAt.UpdateDefault.(func() time.Time)
+	productattributevalueMixin := schema.ProductAttributeValue{}.Mixin()
+	productattributevalueMixinFields0 := productattributevalueMixin[0].Fields()
+	_ = productattributevalueMixinFields0
+	productattributevalueFields := schema.ProductAttributeValue{}.Fields()
+	_ = productattributevalueFields
+	// productattributevalueDescCreatedAt is the schema descriptor for created_at field.
+	productattributevalueDescCreatedAt := productattributevalueMixinFields0[0].Descriptor()
+	// productattributevalue.DefaultCreatedAt holds the default value on creation for the created_at field.
+	productattributevalue.DefaultCreatedAt = productattributevalueDescCreatedAt.Default.(func() time.Time)
+	// productattributevalueDescUpdatedAt is the schema descriptor for updated_at field.
+	productattributevalueDescUpdatedAt := productattributevalueMixinFields0[1].Descriptor()
+	// productattributevalue.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	productattributevalue.DefaultUpdatedAt = productattributevalueDescUpdatedAt.Default.(func() time.Time)
+	// productattributevalue.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	productattributevalue.UpdateDefaultUpdatedAt = productattributevalueDescUpdatedAt.UpdateDefault.(func() time.Time)
+	productcateMixin := schema.ProductCate{}.Mixin()
+	productcateMixinFields0 := productcateMixin[0].Fields()
+	_ = productcateMixinFields0
+	productcateFields := schema.ProductCate{}.Fields()
+	_ = productcateFields
+	// productcateDescCreatedAt is the schema descriptor for created_at field.
+	productcateDescCreatedAt := productcateMixinFields0[0].Descriptor()
+	// productcate.DefaultCreatedAt holds the default value on creation for the created_at field.
+	productcate.DefaultCreatedAt = productcateDescCreatedAt.Default.(func() time.Time)
+	// productcateDescUpdatedAt is the schema descriptor for updated_at field.
+	productcateDescUpdatedAt := productcateMixinFields0[1].Descriptor()
+	// productcate.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	productcate.DefaultUpdatedAt = productcateDescUpdatedAt.Default.(func() time.Time)
+	// productcate.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	productcate.UpdateDefaultUpdatedAt = productcateDescUpdatedAt.UpdateDefault.(func() time.Time)
+	productspecsMixin := schema.ProductSpecs{}.Mixin()
+	productspecsMixinFields0 := productspecsMixin[0].Fields()
+	_ = productspecsMixinFields0
+	productspecsFields := schema.ProductSpecs{}.Fields()
+	_ = productspecsFields
+	// productspecsDescCreatedAt is the schema descriptor for created_at field.
+	productspecsDescCreatedAt := productspecsMixinFields0[0].Descriptor()
+	// productspecs.DefaultCreatedAt holds the default value on creation for the created_at field.
+	productspecs.DefaultCreatedAt = productspecsDescCreatedAt.Default.(func() time.Time)
+	// productspecsDescUpdatedAt is the schema descriptor for updated_at field.
+	productspecsDescUpdatedAt := productspecsMixinFields0[1].Descriptor()
+	// productspecs.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	productspecs.DefaultUpdatedAt = productspecsDescUpdatedAt.Default.(func() time.Time)
+	// productspecs.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	productspecs.UpdateDefaultUpdatedAt = productspecsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// productspecsDescCreateID is the schema descriptor for create_id field.
+	productspecsDescCreateID := productspecsFields[7].Descriptor()
+	// productspecs.DefaultCreateID holds the default value on creation for the create_id field.
+	productspecs.DefaultCreateID = productspecsDescCreateID.Default.(int)
+	productspecsitemMixin := schema.ProductSpecsItem{}.Mixin()
+	productspecsitemMixinFields0 := productspecsitemMixin[0].Fields()
+	_ = productspecsitemMixinFields0
+	productspecsitemFields := schema.ProductSpecsItem{}.Fields()
+	_ = productspecsitemFields
+	// productspecsitemDescCreatedAt is the schema descriptor for created_at field.
+	productspecsitemDescCreatedAt := productspecsitemMixinFields0[0].Descriptor()
+	// productspecsitem.DefaultCreatedAt holds the default value on creation for the created_at field.
+	productspecsitem.DefaultCreatedAt = productspecsitemDescCreatedAt.Default.(func() time.Time)
+	// productspecsitemDescUpdatedAt is the schema descriptor for updated_at field.
+	productspecsitemDescUpdatedAt := productspecsitemMixinFields0[1].Descriptor()
+	// productspecsitem.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	productspecsitem.DefaultUpdatedAt = productspecsitemDescUpdatedAt.Default.(func() time.Time)
+	// productspecsitem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	productspecsitem.UpdateDefaultUpdatedAt = productspecsitemDescUpdatedAt.UpdateDefault.(func() time.Time)
 }

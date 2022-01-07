@@ -78,11 +78,10 @@ func (Menu) Fields() []ent.Field {
 // Edges of the Node.
 func (Menu) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("prev", Menu.Type).
+		edge.To("children", Menu.Type).
+			From("parent").
 			Unique().
-			Field("pid").
-			From("next").
-			Unique(),
+			Field("parent_id"),
 	}
 }
 

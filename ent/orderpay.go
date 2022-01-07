@@ -21,6 +21,8 @@ type OrderPay struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// OrderID holds the value of the "order_id" field.
+	OrderID int `json:"order_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID int `json:"user_id,omitempty"`
 	// CreateID holds the value of the "create_id" field.
@@ -33,31 +35,30 @@ type OrderPay struct {
 	PayMode string `json:"pay_mode,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the OrderPayQuery when eager-loading is set.
-	Edges     OrderPayEdges `json:"edges"`
-	order_pay *int
+	Edges OrderPayEdges `json:"edges"`
 }
 
 // OrderPayEdges holds the relations/edges for other nodes in the graph.
 type OrderPayEdges struct {
-	// Owner holds the value of the owner edge.
-	Owner *Order `json:"owner,omitempty"`
+	// Order holds the value of the order edge.
+	Order *Order `json:"order,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// OwnerOrErr returns the Owner value or an error if the edge
+// OrderOrErr returns the Order value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e OrderPayEdges) OwnerOrErr() (*Order, error) {
+func (e OrderPayEdges) OrderOrErr() (*Order, error) {
 	if e.loadedTypes[0] {
-		if e.Owner == nil {
-			// The edge owner was loaded in eager-loading,
+		if e.Order == nil {
+			// The edge order was loaded in eager-loading,
 			// but was not found.
 			return nil, &NotFoundError{label: order.Label}
 		}
-		return e.Owner, nil
+		return e.Order, nil
 	}
-	return nil, &NotLoadedError{edge: "owner"}
+	return nil, &NotLoadedError{edge: "order"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -67,14 +68,12 @@ func (*OrderPay) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case orderpay.FieldPrice:
 			values[i] = new(sql.NullFloat64)
-		case orderpay.FieldID, orderpay.FieldUserID, orderpay.FieldCreateID:
+		case orderpay.FieldID, orderpay.FieldOrderID, orderpay.FieldUserID, orderpay.FieldCreateID:
 			values[i] = new(sql.NullInt64)
 		case orderpay.FieldSn, orderpay.FieldPayMode:
 			values[i] = new(sql.NullString)
 		case orderpay.FieldCreatedAt, orderpay.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case orderpay.ForeignKeys[0]: // order_pay
-			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type OrderPay", columns[i])
 		}
@@ -108,6 +107,12 @@ func (op *OrderPay) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				op.UpdatedAt = value.Time
 			}
+		case orderpay.FieldOrderID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field order_id", values[i])
+			} else if value.Valid {
+				op.OrderID = int(value.Int64)
+			}
 		case orderpay.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
@@ -138,21 +143,14 @@ func (op *OrderPay) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				op.PayMode = value.String
 			}
-		case orderpay.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field order_pay", value)
-			} else if value.Valid {
-				op.order_pay = new(int)
-				*op.order_pay = int(value.Int64)
-			}
 		}
 	}
 	return nil
 }
 
-// QueryOwner queries the "owner" edge of the OrderPay entity.
-func (op *OrderPay) QueryOwner() *OrderQuery {
-	return (&OrderPayClient{config: op.config}).QueryOwner(op)
+// QueryOrder queries the "order" edge of the OrderPay entity.
+func (op *OrderPay) QueryOrder() *OrderQuery {
+	return (&OrderPayClient{config: op.config}).QueryOrder(op)
 }
 
 // Update returns a builder for updating this OrderPay.
@@ -182,6 +180,8 @@ func (op *OrderPay) String() string {
 	builder.WriteString(op.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", updated_at=")
 	builder.WriteString(op.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", order_id=")
+	builder.WriteString(fmt.Sprintf("%v", op.OrderID))
 	builder.WriteString(", user_id=")
 	builder.WriteString(fmt.Sprintf("%v", op.UserID))
 	builder.WriteString(", create_id=")

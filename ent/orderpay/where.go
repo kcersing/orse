@@ -107,6 +107,13 @@ func UpdatedAt(v time.Time) predicate.OrderPay {
 	})
 }
 
+// OrderID applies equality check predicate on the "order_id" field. It's identical to OrderIDEQ.
+func OrderID(v int) predicate.OrderPay {
+	return predicate.OrderPay(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOrderID), v))
+	})
+}
+
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v int) predicate.OrderPay {
 	return predicate.OrderPay(func(s *sql.Selector) {
@@ -319,6 +326,68 @@ func UpdatedAtIsNil() predicate.OrderPay {
 func UpdatedAtNotNil() predicate.OrderPay {
 	return predicate.OrderPay(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldUpdatedAt)))
+	})
+}
+
+// OrderIDEQ applies the EQ predicate on the "order_id" field.
+func OrderIDEQ(v int) predicate.OrderPay {
+	return predicate.OrderPay(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOrderID), v))
+	})
+}
+
+// OrderIDNEQ applies the NEQ predicate on the "order_id" field.
+func OrderIDNEQ(v int) predicate.OrderPay {
+	return predicate.OrderPay(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldOrderID), v))
+	})
+}
+
+// OrderIDIn applies the In predicate on the "order_id" field.
+func OrderIDIn(vs ...int) predicate.OrderPay {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.OrderPay(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldOrderID), v...))
+	})
+}
+
+// OrderIDNotIn applies the NotIn predicate on the "order_id" field.
+func OrderIDNotIn(vs ...int) predicate.OrderPay {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.OrderPay(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldOrderID), v...))
+	})
+}
+
+// OrderIDIsNil applies the IsNil predicate on the "order_id" field.
+func OrderIDIsNil() predicate.OrderPay {
+	return predicate.OrderPay(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldOrderID)))
+	})
+}
+
+// OrderIDNotNil applies the NotNil predicate on the "order_id" field.
+func OrderIDNotNil() predicate.OrderPay {
+	return predicate.OrderPay(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldOrderID)))
 	})
 }
 
@@ -800,25 +869,25 @@ func PayModeContainsFold(v string) predicate.OrderPay {
 	})
 }
 
-// HasOwner applies the HasEdge predicate on the "owner" edge.
-func HasOwner() predicate.OrderPay {
+// HasOrder applies the HasEdge predicate on the "order" edge.
+func HasOrder() predicate.OrderPay {
 	return predicate.OrderPay(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(OwnerTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, OwnerTable, OwnerColumn),
+			sqlgraph.To(OrderTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, OrderTable, OrderColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
-func HasOwnerWith(preds ...predicate.Order) predicate.OrderPay {
+// HasOrderWith applies the HasEdge predicate on the "order" edge with a given conditions (other predicates).
+func HasOrderWith(preds ...predicate.Order) predicate.OrderPay {
 	return predicate.OrderPay(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(OwnerInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, OwnerTable, OwnerColumn),
+			sqlgraph.To(OrderInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, OrderTable, OrderColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

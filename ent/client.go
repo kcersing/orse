@@ -12,6 +12,12 @@ import (
 	"orse/ent/menu"
 	"orse/ent/order"
 	"orse/ent/orderpay"
+	"orse/ent/product"
+	"orse/ent/productattributekey"
+	"orse/ent/productattributevalue"
+	"orse/ent/productcate"
+	"orse/ent/productspecs"
+	"orse/ent/productspecsitem"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -29,6 +35,18 @@ type Client struct {
 	Order *OrderClient
 	// OrderPay is the client for interacting with the OrderPay builders.
 	OrderPay *OrderPayClient
+	// Product is the client for interacting with the Product builders.
+	Product *ProductClient
+	// ProductAttributeKey is the client for interacting with the ProductAttributeKey builders.
+	ProductAttributeKey *ProductAttributeKeyClient
+	// ProductAttributeValue is the client for interacting with the ProductAttributeValue builders.
+	ProductAttributeValue *ProductAttributeValueClient
+	// ProductCate is the client for interacting with the ProductCate builders.
+	ProductCate *ProductCateClient
+	// ProductSpecs is the client for interacting with the ProductSpecs builders.
+	ProductSpecs *ProductSpecsClient
+	// ProductSpecsItem is the client for interacting with the ProductSpecsItem builders.
+	ProductSpecsItem *ProductSpecsItemClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -45,6 +63,12 @@ func (c *Client) init() {
 	c.Menu = NewMenuClient(c.config)
 	c.Order = NewOrderClient(c.config)
 	c.OrderPay = NewOrderPayClient(c.config)
+	c.Product = NewProductClient(c.config)
+	c.ProductAttributeKey = NewProductAttributeKeyClient(c.config)
+	c.ProductAttributeValue = NewProductAttributeValueClient(c.config)
+	c.ProductCate = NewProductCateClient(c.config)
+	c.ProductSpecs = NewProductSpecsClient(c.config)
+	c.ProductSpecsItem = NewProductSpecsItemClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -76,11 +100,17 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		Menu:     NewMenuClient(cfg),
-		Order:    NewOrderClient(cfg),
-		OrderPay: NewOrderPayClient(cfg),
+		ctx:                   ctx,
+		config:                cfg,
+		Menu:                  NewMenuClient(cfg),
+		Order:                 NewOrderClient(cfg),
+		OrderPay:              NewOrderPayClient(cfg),
+		Product:               NewProductClient(cfg),
+		ProductAttributeKey:   NewProductAttributeKeyClient(cfg),
+		ProductAttributeValue: NewProductAttributeValueClient(cfg),
+		ProductCate:           NewProductCateClient(cfg),
+		ProductSpecs:          NewProductSpecsClient(cfg),
+		ProductSpecsItem:      NewProductSpecsItemClient(cfg),
 	}, nil
 }
 
@@ -98,10 +128,16 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		config:   cfg,
-		Menu:     NewMenuClient(cfg),
-		Order:    NewOrderClient(cfg),
-		OrderPay: NewOrderPayClient(cfg),
+		config:                cfg,
+		Menu:                  NewMenuClient(cfg),
+		Order:                 NewOrderClient(cfg),
+		OrderPay:              NewOrderPayClient(cfg),
+		Product:               NewProductClient(cfg),
+		ProductAttributeKey:   NewProductAttributeKeyClient(cfg),
+		ProductAttributeValue: NewProductAttributeValueClient(cfg),
+		ProductCate:           NewProductCateClient(cfg),
+		ProductSpecs:          NewProductSpecsClient(cfg),
+		ProductSpecsItem:      NewProductSpecsItemClient(cfg),
 	}, nil
 }
 
@@ -134,6 +170,12 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Menu.Use(hooks...)
 	c.Order.Use(hooks...)
 	c.OrderPay.Use(hooks...)
+	c.Product.Use(hooks...)
+	c.ProductAttributeKey.Use(hooks...)
+	c.ProductAttributeValue.Use(hooks...)
+	c.ProductCate.Use(hooks...)
+	c.ProductSpecs.Use(hooks...)
+	c.ProductSpecsItem.Use(hooks...)
 }
 
 // MenuClient is a client for the Menu schema.
@@ -221,15 +263,15 @@ func (c *MenuClient) GetX(ctx context.Context, id int) *Menu {
 	return obj
 }
 
-// QueryNext queries the next edge of a Menu.
-func (c *MenuClient) QueryNext(m *Menu) *MenuQuery {
+// QueryParent queries the parent edge of a Menu.
+func (c *MenuClient) QueryParent(m *Menu) *MenuQuery {
 	query := &MenuQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(menu.Table, menu.FieldID, id),
 			sqlgraph.To(menu.Table, menu.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, menu.NextTable, menu.NextColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, menu.ParentTable, menu.ParentColumn),
 		)
 		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
 		return fromV, nil
@@ -237,15 +279,15 @@ func (c *MenuClient) QueryNext(m *Menu) *MenuQuery {
 	return query
 }
 
-// QueryPrev queries the prev edge of a Menu.
-func (c *MenuClient) QueryPrev(m *Menu) *MenuQuery {
+// QueryChildren queries the children edge of a Menu.
+func (c *MenuClient) QueryChildren(m *Menu) *MenuQuery {
 	query := &MenuQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(menu.Table, menu.FieldID, id),
 			sqlgraph.To(menu.Table, menu.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, menu.PrevTable, menu.PrevColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, menu.ChildrenTable, menu.ChildrenColumn),
 		)
 		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
 		return fromV, nil
@@ -343,15 +385,15 @@ func (c *OrderClient) GetX(ctx context.Context, id int) *Order {
 	return obj
 }
 
-// QueryPay queries the pay edge of a Order.
-func (c *OrderClient) QueryPay(o *Order) *OrderPayQuery {
+// QueryPays queries the pays edge of a Order.
+func (c *OrderClient) QueryPays(o *Order) *OrderPayQuery {
 	query := &OrderPayQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := o.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(order.Table, order.FieldID, id),
 			sqlgraph.To(orderpay.Table, orderpay.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, order.PayTable, order.PayColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, order.PaysTable, order.PaysColumn),
 		)
 		fromV = sqlgraph.Neighbors(o.driver.Dialect(), step)
 		return fromV, nil
@@ -449,15 +491,15 @@ func (c *OrderPayClient) GetX(ctx context.Context, id int) *OrderPay {
 	return obj
 }
 
-// QueryOwner queries the owner edge of a OrderPay.
-func (c *OrderPayClient) QueryOwner(op *OrderPay) *OrderQuery {
+// QueryOrder queries the order edge of a OrderPay.
+func (c *OrderPayClient) QueryOrder(op *OrderPay) *OrderQuery {
 	query := &OrderQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := op.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(orderpay.Table, orderpay.FieldID, id),
 			sqlgraph.To(order.Table, order.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, orderpay.OwnerTable, orderpay.OwnerColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, orderpay.OrderTable, orderpay.OrderColumn),
 		)
 		fromV = sqlgraph.Neighbors(op.driver.Dialect(), step)
 		return fromV, nil
@@ -468,4 +510,704 @@ func (c *OrderPayClient) QueryOwner(op *OrderPay) *OrderQuery {
 // Hooks returns the client hooks.
 func (c *OrderPayClient) Hooks() []Hook {
 	return c.hooks.OrderPay
+}
+
+// ProductClient is a client for the Product schema.
+type ProductClient struct {
+	config
+}
+
+// NewProductClient returns a client for the Product from the given config.
+func NewProductClient(c config) *ProductClient {
+	return &ProductClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `product.Hooks(f(g(h())))`.
+func (c *ProductClient) Use(hooks ...Hook) {
+	c.hooks.Product = append(c.hooks.Product, hooks...)
+}
+
+// Create returns a create builder for Product.
+func (c *ProductClient) Create() *ProductCreate {
+	mutation := newProductMutation(c.config, OpCreate)
+	return &ProductCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Product entities.
+func (c *ProductClient) CreateBulk(builders ...*ProductCreate) *ProductCreateBulk {
+	return &ProductCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Product.
+func (c *ProductClient) Update() *ProductUpdate {
+	mutation := newProductMutation(c.config, OpUpdate)
+	return &ProductUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProductClient) UpdateOne(pr *Product) *ProductUpdateOne {
+	mutation := newProductMutation(c.config, OpUpdateOne, withProduct(pr))
+	return &ProductUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProductClient) UpdateOneID(id int) *ProductUpdateOne {
+	mutation := newProductMutation(c.config, OpUpdateOne, withProductID(id))
+	return &ProductUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Product.
+func (c *ProductClient) Delete() *ProductDelete {
+	mutation := newProductMutation(c.config, OpDelete)
+	return &ProductDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ProductClient) DeleteOne(pr *Product) *ProductDeleteOne {
+	return c.DeleteOneID(pr.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ProductClient) DeleteOneID(id int) *ProductDeleteOne {
+	builder := c.Delete().Where(product.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProductDeleteOne{builder}
+}
+
+// Query returns a query builder for Product.
+func (c *ProductClient) Query() *ProductQuery {
+	return &ProductQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Product entity by its id.
+func (c *ProductClient) Get(ctx context.Context, id int) (*Product, error) {
+	return c.Query().Where(product.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProductClient) GetX(ctx context.Context, id int) *Product {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCate queries the cate edge of a Product.
+func (c *ProductClient) QueryCate(pr *Product) *ProductCateQuery {
+	query := &ProductCateQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(product.Table, product.FieldID, id),
+			sqlgraph.To(productcate.Table, productcate.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, product.CateTable, product.CateColumn),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySpecs queries the specs edge of a Product.
+func (c *ProductClient) QuerySpecs(pr *Product) *ProductSpecsQuery {
+	query := &ProductSpecsQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(product.Table, product.FieldID, id),
+			sqlgraph.To(productspecs.Table, productspecs.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, product.SpecsTable, product.SpecsColumn),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ProductClient) Hooks() []Hook {
+	return c.hooks.Product
+}
+
+// ProductAttributeKeyClient is a client for the ProductAttributeKey schema.
+type ProductAttributeKeyClient struct {
+	config
+}
+
+// NewProductAttributeKeyClient returns a client for the ProductAttributeKey from the given config.
+func NewProductAttributeKeyClient(c config) *ProductAttributeKeyClient {
+	return &ProductAttributeKeyClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `productattributekey.Hooks(f(g(h())))`.
+func (c *ProductAttributeKeyClient) Use(hooks ...Hook) {
+	c.hooks.ProductAttributeKey = append(c.hooks.ProductAttributeKey, hooks...)
+}
+
+// Create returns a create builder for ProductAttributeKey.
+func (c *ProductAttributeKeyClient) Create() *ProductAttributeKeyCreate {
+	mutation := newProductAttributeKeyMutation(c.config, OpCreate)
+	return &ProductAttributeKeyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ProductAttributeKey entities.
+func (c *ProductAttributeKeyClient) CreateBulk(builders ...*ProductAttributeKeyCreate) *ProductAttributeKeyCreateBulk {
+	return &ProductAttributeKeyCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ProductAttributeKey.
+func (c *ProductAttributeKeyClient) Update() *ProductAttributeKeyUpdate {
+	mutation := newProductAttributeKeyMutation(c.config, OpUpdate)
+	return &ProductAttributeKeyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProductAttributeKeyClient) UpdateOne(pak *ProductAttributeKey) *ProductAttributeKeyUpdateOne {
+	mutation := newProductAttributeKeyMutation(c.config, OpUpdateOne, withProductAttributeKey(pak))
+	return &ProductAttributeKeyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProductAttributeKeyClient) UpdateOneID(id int) *ProductAttributeKeyUpdateOne {
+	mutation := newProductAttributeKeyMutation(c.config, OpUpdateOne, withProductAttributeKeyID(id))
+	return &ProductAttributeKeyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ProductAttributeKey.
+func (c *ProductAttributeKeyClient) Delete() *ProductAttributeKeyDelete {
+	mutation := newProductAttributeKeyMutation(c.config, OpDelete)
+	return &ProductAttributeKeyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ProductAttributeKeyClient) DeleteOne(pak *ProductAttributeKey) *ProductAttributeKeyDeleteOne {
+	return c.DeleteOneID(pak.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ProductAttributeKeyClient) DeleteOneID(id int) *ProductAttributeKeyDeleteOne {
+	builder := c.Delete().Where(productattributekey.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProductAttributeKeyDeleteOne{builder}
+}
+
+// Query returns a query builder for ProductAttributeKey.
+func (c *ProductAttributeKeyClient) Query() *ProductAttributeKeyQuery {
+	return &ProductAttributeKeyQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a ProductAttributeKey entity by its id.
+func (c *ProductAttributeKeyClient) Get(ctx context.Context, id int) (*ProductAttributeKey, error) {
+	return c.Query().Where(productattributekey.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProductAttributeKeyClient) GetX(ctx context.Context, id int) *ProductAttributeKey {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryValues queries the values edge of a ProductAttributeKey.
+func (c *ProductAttributeKeyClient) QueryValues(pak *ProductAttributeKey) *ProductAttributeValueQuery {
+	query := &ProductAttributeValueQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pak.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(productattributekey.Table, productattributekey.FieldID, id),
+			sqlgraph.To(productattributevalue.Table, productattributevalue.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, productattributekey.ValuesTable, productattributekey.ValuesColumn),
+		)
+		fromV = sqlgraph.Neighbors(pak.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ProductAttributeKeyClient) Hooks() []Hook {
+	return c.hooks.ProductAttributeKey
+}
+
+// ProductAttributeValueClient is a client for the ProductAttributeValue schema.
+type ProductAttributeValueClient struct {
+	config
+}
+
+// NewProductAttributeValueClient returns a client for the ProductAttributeValue from the given config.
+func NewProductAttributeValueClient(c config) *ProductAttributeValueClient {
+	return &ProductAttributeValueClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `productattributevalue.Hooks(f(g(h())))`.
+func (c *ProductAttributeValueClient) Use(hooks ...Hook) {
+	c.hooks.ProductAttributeValue = append(c.hooks.ProductAttributeValue, hooks...)
+}
+
+// Create returns a create builder for ProductAttributeValue.
+func (c *ProductAttributeValueClient) Create() *ProductAttributeValueCreate {
+	mutation := newProductAttributeValueMutation(c.config, OpCreate)
+	return &ProductAttributeValueCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ProductAttributeValue entities.
+func (c *ProductAttributeValueClient) CreateBulk(builders ...*ProductAttributeValueCreate) *ProductAttributeValueCreateBulk {
+	return &ProductAttributeValueCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ProductAttributeValue.
+func (c *ProductAttributeValueClient) Update() *ProductAttributeValueUpdate {
+	mutation := newProductAttributeValueMutation(c.config, OpUpdate)
+	return &ProductAttributeValueUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProductAttributeValueClient) UpdateOne(pav *ProductAttributeValue) *ProductAttributeValueUpdateOne {
+	mutation := newProductAttributeValueMutation(c.config, OpUpdateOne, withProductAttributeValue(pav))
+	return &ProductAttributeValueUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProductAttributeValueClient) UpdateOneID(id int) *ProductAttributeValueUpdateOne {
+	mutation := newProductAttributeValueMutation(c.config, OpUpdateOne, withProductAttributeValueID(id))
+	return &ProductAttributeValueUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ProductAttributeValue.
+func (c *ProductAttributeValueClient) Delete() *ProductAttributeValueDelete {
+	mutation := newProductAttributeValueMutation(c.config, OpDelete)
+	return &ProductAttributeValueDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ProductAttributeValueClient) DeleteOne(pav *ProductAttributeValue) *ProductAttributeValueDeleteOne {
+	return c.DeleteOneID(pav.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ProductAttributeValueClient) DeleteOneID(id int) *ProductAttributeValueDeleteOne {
+	builder := c.Delete().Where(productattributevalue.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProductAttributeValueDeleteOne{builder}
+}
+
+// Query returns a query builder for ProductAttributeValue.
+func (c *ProductAttributeValueClient) Query() *ProductAttributeValueQuery {
+	return &ProductAttributeValueQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a ProductAttributeValue entity by its id.
+func (c *ProductAttributeValueClient) Get(ctx context.Context, id int) (*ProductAttributeValue, error) {
+	return c.Query().Where(productattributevalue.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProductAttributeValueClient) GetX(ctx context.Context, id int) *ProductAttributeValue {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryKey queries the key edge of a ProductAttributeValue.
+func (c *ProductAttributeValueClient) QueryKey(pav *ProductAttributeValue) *ProductAttributeKeyQuery {
+	query := &ProductAttributeKeyQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pav.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(productattributevalue.Table, productattributevalue.FieldID, id),
+			sqlgraph.To(productattributekey.Table, productattributekey.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, productattributevalue.KeyTable, productattributevalue.KeyColumn),
+		)
+		fromV = sqlgraph.Neighbors(pav.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryItems queries the items edge of a ProductAttributeValue.
+func (c *ProductAttributeValueClient) QueryItems(pav *ProductAttributeValue) *ProductSpecsItemQuery {
+	query := &ProductSpecsItemQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pav.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(productattributevalue.Table, productattributevalue.FieldID, id),
+			sqlgraph.To(productspecsitem.Table, productspecsitem.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, productattributevalue.ItemsTable, productattributevalue.ItemsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(pav.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ProductAttributeValueClient) Hooks() []Hook {
+	return c.hooks.ProductAttributeValue
+}
+
+// ProductCateClient is a client for the ProductCate schema.
+type ProductCateClient struct {
+	config
+}
+
+// NewProductCateClient returns a client for the ProductCate from the given config.
+func NewProductCateClient(c config) *ProductCateClient {
+	return &ProductCateClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `productcate.Hooks(f(g(h())))`.
+func (c *ProductCateClient) Use(hooks ...Hook) {
+	c.hooks.ProductCate = append(c.hooks.ProductCate, hooks...)
+}
+
+// Create returns a create builder for ProductCate.
+func (c *ProductCateClient) Create() *ProductCateCreate {
+	mutation := newProductCateMutation(c.config, OpCreate)
+	return &ProductCateCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ProductCate entities.
+func (c *ProductCateClient) CreateBulk(builders ...*ProductCateCreate) *ProductCateCreateBulk {
+	return &ProductCateCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ProductCate.
+func (c *ProductCateClient) Update() *ProductCateUpdate {
+	mutation := newProductCateMutation(c.config, OpUpdate)
+	return &ProductCateUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProductCateClient) UpdateOne(pc *ProductCate) *ProductCateUpdateOne {
+	mutation := newProductCateMutation(c.config, OpUpdateOne, withProductCate(pc))
+	return &ProductCateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProductCateClient) UpdateOneID(id int) *ProductCateUpdateOne {
+	mutation := newProductCateMutation(c.config, OpUpdateOne, withProductCateID(id))
+	return &ProductCateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ProductCate.
+func (c *ProductCateClient) Delete() *ProductCateDelete {
+	mutation := newProductCateMutation(c.config, OpDelete)
+	return &ProductCateDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ProductCateClient) DeleteOne(pc *ProductCate) *ProductCateDeleteOne {
+	return c.DeleteOneID(pc.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ProductCateClient) DeleteOneID(id int) *ProductCateDeleteOne {
+	builder := c.Delete().Where(productcate.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProductCateDeleteOne{builder}
+}
+
+// Query returns a query builder for ProductCate.
+func (c *ProductCateClient) Query() *ProductCateQuery {
+	return &ProductCateQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a ProductCate entity by its id.
+func (c *ProductCateClient) Get(ctx context.Context, id int) (*ProductCate, error) {
+	return c.Query().Where(productcate.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProductCateClient) GetX(ctx context.Context, id int) *ProductCate {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryProducts queries the products edge of a ProductCate.
+func (c *ProductCateClient) QueryProducts(pc *ProductCate) *ProductQuery {
+	query := &ProductQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(productcate.Table, productcate.FieldID, id),
+			sqlgraph.To(product.Table, product.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, productcate.ProductsTable, productcate.ProductsColumn),
+		)
+		fromV = sqlgraph.Neighbors(pc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ProductCateClient) Hooks() []Hook {
+	return c.hooks.ProductCate
+}
+
+// ProductSpecsClient is a client for the ProductSpecs schema.
+type ProductSpecsClient struct {
+	config
+}
+
+// NewProductSpecsClient returns a client for the ProductSpecs from the given config.
+func NewProductSpecsClient(c config) *ProductSpecsClient {
+	return &ProductSpecsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `productspecs.Hooks(f(g(h())))`.
+func (c *ProductSpecsClient) Use(hooks ...Hook) {
+	c.hooks.ProductSpecs = append(c.hooks.ProductSpecs, hooks...)
+}
+
+// Create returns a create builder for ProductSpecs.
+func (c *ProductSpecsClient) Create() *ProductSpecsCreate {
+	mutation := newProductSpecsMutation(c.config, OpCreate)
+	return &ProductSpecsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ProductSpecs entities.
+func (c *ProductSpecsClient) CreateBulk(builders ...*ProductSpecsCreate) *ProductSpecsCreateBulk {
+	return &ProductSpecsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ProductSpecs.
+func (c *ProductSpecsClient) Update() *ProductSpecsUpdate {
+	mutation := newProductSpecsMutation(c.config, OpUpdate)
+	return &ProductSpecsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProductSpecsClient) UpdateOne(ps *ProductSpecs) *ProductSpecsUpdateOne {
+	mutation := newProductSpecsMutation(c.config, OpUpdateOne, withProductSpecs(ps))
+	return &ProductSpecsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProductSpecsClient) UpdateOneID(id int) *ProductSpecsUpdateOne {
+	mutation := newProductSpecsMutation(c.config, OpUpdateOne, withProductSpecsID(id))
+	return &ProductSpecsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ProductSpecs.
+func (c *ProductSpecsClient) Delete() *ProductSpecsDelete {
+	mutation := newProductSpecsMutation(c.config, OpDelete)
+	return &ProductSpecsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ProductSpecsClient) DeleteOne(ps *ProductSpecs) *ProductSpecsDeleteOne {
+	return c.DeleteOneID(ps.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ProductSpecsClient) DeleteOneID(id int) *ProductSpecsDeleteOne {
+	builder := c.Delete().Where(productspecs.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProductSpecsDeleteOne{builder}
+}
+
+// Query returns a query builder for ProductSpecs.
+func (c *ProductSpecsClient) Query() *ProductSpecsQuery {
+	return &ProductSpecsQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a ProductSpecs entity by its id.
+func (c *ProductSpecsClient) Get(ctx context.Context, id int) (*ProductSpecs, error) {
+	return c.Query().Where(productspecs.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProductSpecsClient) GetX(ctx context.Context, id int) *ProductSpecs {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryProduct queries the product edge of a ProductSpecs.
+func (c *ProductSpecsClient) QueryProduct(ps *ProductSpecs) *ProductQuery {
+	query := &ProductQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(productspecs.Table, productspecs.FieldID, id),
+			sqlgraph.To(product.Table, product.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, productspecs.ProductTable, productspecs.ProductColumn),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryItems queries the items edge of a ProductSpecs.
+func (c *ProductSpecsClient) QueryItems(ps *ProductSpecs) *ProductSpecsItemQuery {
+	query := &ProductSpecsItemQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(productspecs.Table, productspecs.FieldID, id),
+			sqlgraph.To(productspecsitem.Table, productspecsitem.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, productspecs.ItemsTable, productspecs.ItemsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ProductSpecsClient) Hooks() []Hook {
+	return c.hooks.ProductSpecs
+}
+
+// ProductSpecsItemClient is a client for the ProductSpecsItem schema.
+type ProductSpecsItemClient struct {
+	config
+}
+
+// NewProductSpecsItemClient returns a client for the ProductSpecsItem from the given config.
+func NewProductSpecsItemClient(c config) *ProductSpecsItemClient {
+	return &ProductSpecsItemClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `productspecsitem.Hooks(f(g(h())))`.
+func (c *ProductSpecsItemClient) Use(hooks ...Hook) {
+	c.hooks.ProductSpecsItem = append(c.hooks.ProductSpecsItem, hooks...)
+}
+
+// Create returns a create builder for ProductSpecsItem.
+func (c *ProductSpecsItemClient) Create() *ProductSpecsItemCreate {
+	mutation := newProductSpecsItemMutation(c.config, OpCreate)
+	return &ProductSpecsItemCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ProductSpecsItem entities.
+func (c *ProductSpecsItemClient) CreateBulk(builders ...*ProductSpecsItemCreate) *ProductSpecsItemCreateBulk {
+	return &ProductSpecsItemCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ProductSpecsItem.
+func (c *ProductSpecsItemClient) Update() *ProductSpecsItemUpdate {
+	mutation := newProductSpecsItemMutation(c.config, OpUpdate)
+	return &ProductSpecsItemUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProductSpecsItemClient) UpdateOne(psi *ProductSpecsItem) *ProductSpecsItemUpdateOne {
+	mutation := newProductSpecsItemMutation(c.config, OpUpdateOne, withProductSpecsItem(psi))
+	return &ProductSpecsItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProductSpecsItemClient) UpdateOneID(id int) *ProductSpecsItemUpdateOne {
+	mutation := newProductSpecsItemMutation(c.config, OpUpdateOne, withProductSpecsItemID(id))
+	return &ProductSpecsItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ProductSpecsItem.
+func (c *ProductSpecsItemClient) Delete() *ProductSpecsItemDelete {
+	mutation := newProductSpecsItemMutation(c.config, OpDelete)
+	return &ProductSpecsItemDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ProductSpecsItemClient) DeleteOne(psi *ProductSpecsItem) *ProductSpecsItemDeleteOne {
+	return c.DeleteOneID(psi.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ProductSpecsItemClient) DeleteOneID(id int) *ProductSpecsItemDeleteOne {
+	builder := c.Delete().Where(productspecsitem.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProductSpecsItemDeleteOne{builder}
+}
+
+// Query returns a query builder for ProductSpecsItem.
+func (c *ProductSpecsItemClient) Query() *ProductSpecsItemQuery {
+	return &ProductSpecsItemQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a ProductSpecsItem entity by its id.
+func (c *ProductSpecsItemClient) Get(ctx context.Context, id int) (*ProductSpecsItem, error) {
+	return c.Query().Where(productspecsitem.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProductSpecsItemClient) GetX(ctx context.Context, id int) *ProductSpecsItem {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QuerySpecs queries the specs edge of a ProductSpecsItem.
+func (c *ProductSpecsItemClient) QuerySpecs(psi *ProductSpecsItem) *ProductSpecsQuery {
+	query := &ProductSpecsQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := psi.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(productspecsitem.Table, productspecsitem.FieldID, id),
+			sqlgraph.To(productspecs.Table, productspecs.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, productspecsitem.SpecsTable, productspecsitem.SpecsColumn),
+		)
+		fromV = sqlgraph.Neighbors(psi.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryValues queries the values edge of a ProductSpecsItem.
+func (c *ProductSpecsItemClient) QueryValues(psi *ProductSpecsItem) *ProductAttributeValueQuery {
+	query := &ProductAttributeValueQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := psi.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(productspecsitem.Table, productspecsitem.FieldID, id),
+			sqlgraph.To(productattributevalue.Table, productattributevalue.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, productspecsitem.ValuesTable, productspecsitem.ValuesPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(psi.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ProductSpecsItemClient) Hooks() []Hook {
+	return c.hooks.ProductSpecsItem
 }

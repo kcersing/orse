@@ -18,6 +18,18 @@ type Tx struct {
 	Order *OrderClient
 	// OrderPay is the client for interacting with the OrderPay builders.
 	OrderPay *OrderPayClient
+	// Product is the client for interacting with the Product builders.
+	Product *ProductClient
+	// ProductAttributeKey is the client for interacting with the ProductAttributeKey builders.
+	ProductAttributeKey *ProductAttributeKeyClient
+	// ProductAttributeValue is the client for interacting with the ProductAttributeValue builders.
+	ProductAttributeValue *ProductAttributeValueClient
+	// ProductCate is the client for interacting with the ProductCate builders.
+	ProductCate *ProductCateClient
+	// ProductSpecs is the client for interacting with the ProductSpecs builders.
+	ProductSpecs *ProductSpecsClient
+	// ProductSpecsItem is the client for interacting with the ProductSpecsItem builders.
+	ProductSpecsItem *ProductSpecsItemClient
 
 	// lazily loaded.
 	client     *Client
@@ -156,6 +168,12 @@ func (tx *Tx) init() {
 	tx.Menu = NewMenuClient(tx.config)
 	tx.Order = NewOrderClient(tx.config)
 	tx.OrderPay = NewOrderPayClient(tx.config)
+	tx.Product = NewProductClient(tx.config)
+	tx.ProductAttributeKey = NewProductAttributeKeyClient(tx.config)
+	tx.ProductAttributeValue = NewProductAttributeValueClient(tx.config)
+	tx.ProductCate = NewProductCateClient(tx.config)
+	tx.ProductSpecs = NewProductSpecsClient(tx.config)
+	tx.ProductSpecsItem = NewProductSpecsItemClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

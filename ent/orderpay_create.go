@@ -49,6 +49,20 @@ func (opc *OrderPayCreate) SetNillableUpdatedAt(t *time.Time) *OrderPayCreate {
 	return opc
 }
 
+// SetOrderID sets the "order_id" field.
+func (opc *OrderPayCreate) SetOrderID(i int) *OrderPayCreate {
+	opc.mutation.SetOrderID(i)
+	return opc
+}
+
+// SetNillableOrderID sets the "order_id" field if the given value is not nil.
+func (opc *OrderPayCreate) SetNillableOrderID(i *int) *OrderPayCreate {
+	if i != nil {
+		opc.SetOrderID(*i)
+	}
+	return opc
+}
+
 // SetUserID sets the "user_id" field.
 func (opc *OrderPayCreate) SetUserID(i int) *OrderPayCreate {
 	opc.mutation.SetUserID(i)
@@ -103,15 +117,9 @@ func (opc *OrderPayCreate) SetNillablePayMode(s *string) *OrderPayCreate {
 	return opc
 }
 
-// SetOwnerID sets the "owner" edge to the Order entity by ID.
-func (opc *OrderPayCreate) SetOwnerID(id int) *OrderPayCreate {
-	opc.mutation.SetOwnerID(id)
-	return opc
-}
-
-// SetOwner sets the "owner" edge to the Order entity.
-func (opc *OrderPayCreate) SetOwner(o *Order) *OrderPayCreate {
-	return opc.SetOwnerID(o.ID)
+// SetOrder sets the "order" edge to the Order entity.
+func (opc *OrderPayCreate) SetOrder(o *Order) *OrderPayCreate {
+	return opc.SetOrderID(o.ID)
 }
 
 // Mutation returns the OrderPayMutation object of the builder.
@@ -214,9 +222,6 @@ func (opc *OrderPayCreate) check() error {
 	if _, ok := opc.mutation.Price(); !ok {
 		return &ValidationError{Name: "price", err: errors.New(`ent: missing required field "price"`)}
 	}
-	if _, ok := opc.mutation.OwnerID(); !ok {
-		return &ValidationError{Name: "owner", err: errors.New("ent: missing required edge \"owner\"")}
-	}
 	return nil
 }
 
@@ -300,12 +305,12 @@ func (opc *OrderPayCreate) createSpec() (*OrderPay, *sqlgraph.CreateSpec) {
 		})
 		_node.PayMode = value
 	}
-	if nodes := opc.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := opc.mutation.OrderIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   orderpay.OwnerTable,
-			Columns: []string{orderpay.OwnerColumn},
+			Table:   orderpay.OrderTable,
+			Columns: []string{orderpay.OrderColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -317,7 +322,7 @@ func (opc *OrderPayCreate) createSpec() (*OrderPay, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.order_pay = &nodes[0]
+		_node.OrderID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

@@ -42,8 +42,7 @@ func (Order) Fields() []ent.Field {
 
 func (Order) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("pays", Order.Type).
-			StorageKey(edge.Column("order_id")),
+		edge.To("pays", OrderPay.Type),
 	}
 }
 func (Order) Index() []ent.Index {

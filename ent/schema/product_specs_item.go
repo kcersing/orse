@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -23,14 +24,19 @@ func (ProductSpecsItem) Mixin() []ent.Mixin {
 
 func (ProductSpecsItem) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("product_id"),
-		field.Int("product_specs_id"),
-		field.Int("key_id"),
-		field.Int("value_id"),
+		field.Int("product_specs_id").
+			Optional(),
+		field.Int("value_id").Optional(),
 		field.Int("sort"),
 	}
 }
 
 func (ProductSpecsItem) Edges() []ent.Edge {
-	return []ent.Edge{}
+	return []ent.Edge{
+		edge.From("specs", ProductSpecs.Type).
+			Ref("items").
+			Unique().
+			Field("product_specs_id"),
+		edge.To("values", ProductAttributeValue.Type),
+	}
 }

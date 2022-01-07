@@ -94,10 +94,10 @@ func IDLTE(id int) predicate.Menu {
 	})
 }
 
-// Pid applies equality check predicate on the "pid" field. It's identical to PidEQ.
-func Pid(v int) predicate.Menu {
+// ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
+func ParentID(v int) predicate.Menu {
 	return predicate.Menu(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPid), v))
+		s.Where(sql.EQ(s.C(FieldParentID), v))
 	})
 }
 
@@ -171,22 +171,22 @@ func Desc(v string) predicate.Menu {
 	})
 }
 
-// PidEQ applies the EQ predicate on the "pid" field.
-func PidEQ(v int) predicate.Menu {
+// ParentIDEQ applies the EQ predicate on the "parent_id" field.
+func ParentIDEQ(v int) predicate.Menu {
 	return predicate.Menu(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPid), v))
+		s.Where(sql.EQ(s.C(FieldParentID), v))
 	})
 }
 
-// PidNEQ applies the NEQ predicate on the "pid" field.
-func PidNEQ(v int) predicate.Menu {
+// ParentIDNEQ applies the NEQ predicate on the "parent_id" field.
+func ParentIDNEQ(v int) predicate.Menu {
 	return predicate.Menu(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldPid), v))
+		s.Where(sql.NEQ(s.C(FieldParentID), v))
 	})
 }
 
-// PidIn applies the In predicate on the "pid" field.
-func PidIn(vs ...int) predicate.Menu {
+// ParentIDIn applies the In predicate on the "parent_id" field.
+func ParentIDIn(vs ...int) predicate.Menu {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -198,12 +198,12 @@ func PidIn(vs ...int) predicate.Menu {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldPid), v...))
+		s.Where(sql.In(s.C(FieldParentID), v...))
 	})
 }
 
-// PidNotIn applies the NotIn predicate on the "pid" field.
-func PidNotIn(vs ...int) predicate.Menu {
+// ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
+func ParentIDNotIn(vs ...int) predicate.Menu {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -215,49 +215,21 @@ func PidNotIn(vs ...int) predicate.Menu {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldPid), v...))
+		s.Where(sql.NotIn(s.C(FieldParentID), v...))
 	})
 }
 
-// PidGT applies the GT predicate on the "pid" field.
-func PidGT(v int) predicate.Menu {
+// ParentIDIsNil applies the IsNil predicate on the "parent_id" field.
+func ParentIDIsNil() predicate.Menu {
 	return predicate.Menu(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldPid), v))
+		s.Where(sql.IsNull(s.C(FieldParentID)))
 	})
 }
 
-// PidGTE applies the GTE predicate on the "pid" field.
-func PidGTE(v int) predicate.Menu {
+// ParentIDNotNil applies the NotNil predicate on the "parent_id" field.
+func ParentIDNotNil() predicate.Menu {
 	return predicate.Menu(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldPid), v))
-	})
-}
-
-// PidLT applies the LT predicate on the "pid" field.
-func PidLT(v int) predicate.Menu {
-	return predicate.Menu(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldPid), v))
-	})
-}
-
-// PidLTE applies the LTE predicate on the "pid" field.
-func PidLTE(v int) predicate.Menu {
-	return predicate.Menu(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldPid), v))
-	})
-}
-
-// PidIsNil applies the IsNil predicate on the "pid" field.
-func PidIsNil() predicate.Menu {
-	return predicate.Menu(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldPid)))
-	})
-}
-
-// PidNotNil applies the NotNil predicate on the "pid" field.
-func PidNotNil() predicate.Menu {
-	return predicate.Menu(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldPid)))
+		s.Where(sql.NotNull(s.C(FieldParentID)))
 	})
 }
 
@@ -1443,25 +1415,25 @@ func DescContainsFold(v string) predicate.Menu {
 	})
 }
 
-// HasNext applies the HasEdge predicate on the "next" edge.
-func HasNext() predicate.Menu {
+// HasParent applies the HasEdge predicate on the "parent" edge.
+func HasParent() predicate.Menu {
 	return predicate.Menu(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(NextTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, NextTable, NextColumn),
+			sqlgraph.To(ParentTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ParentTable, ParentColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasNextWith applies the HasEdge predicate on the "next" edge with a given conditions (other predicates).
-func HasNextWith(preds ...predicate.Menu) predicate.Menu {
+// HasParentWith applies the HasEdge predicate on the "parent" edge with a given conditions (other predicates).
+func HasParentWith(preds ...predicate.Menu) predicate.Menu {
 	return predicate.Menu(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, NextTable, NextColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, ParentTable, ParentColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -1471,25 +1443,25 @@ func HasNextWith(preds ...predicate.Menu) predicate.Menu {
 	})
 }
 
-// HasPrev applies the HasEdge predicate on the "prev" edge.
-func HasPrev() predicate.Menu {
+// HasChildren applies the HasEdge predicate on the "children" edge.
+func HasChildren() predicate.Menu {
 	return predicate.Menu(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PrevTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, PrevTable, PrevColumn),
+			sqlgraph.To(ChildrenTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ChildrenTable, ChildrenColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasPrevWith applies the HasEdge predicate on the "prev" edge with a given conditions (other predicates).
-func HasPrevWith(preds ...predicate.Menu) predicate.Menu {
+// HasChildrenWith applies the HasEdge predicate on the "children" edge with a given conditions (other predicates).
+func HasChildrenWith(preds ...predicate.Menu) predicate.Menu {
 	return predicate.Menu(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, PrevTable, PrevColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, ChildrenTable, ChildrenColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

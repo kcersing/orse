@@ -22,17 +22,17 @@ const (
 	FieldSn = "sn"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
-	// EdgePay holds the string denoting the pay edge name in mutations.
-	EdgePay = "pay"
+	// EdgePays holds the string denoting the pays edge name in mutations.
+	EdgePays = "pays"
 	// Table holds the table name of the order in the database.
 	Table = "order"
-	// PayTable is the table that holds the pay relation/edge.
-	PayTable = "order_pay"
-	// PayInverseTable is the table name for the OrderPay entity.
+	// PaysTable is the table that holds the pays relation/edge.
+	PaysTable = "order_pay"
+	// PaysInverseTable is the table name for the OrderPay entity.
 	// It exists in this package in order to avoid circular dependency with the "orderpay" package.
-	PayInverseTable = "order_pay"
-	// PayColumn is the table column denoting the pay relation/edge.
-	PayColumn = "order_pay"
+	PaysInverseTable = "order_pay"
+	// PaysColumn is the table column denoting the pays relation/edge.
+	PaysColumn = "order_id"
 )
 
 // Columns holds all SQL columns for order fields.

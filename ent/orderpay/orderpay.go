@@ -15,6 +15,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldOrderID holds the string denoting the order_id field in the database.
+	FieldOrderID = "order_id"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
 	// FieldCreateID holds the string denoting the create_id field in the database.
@@ -25,17 +27,17 @@ const (
 	FieldPrice = "price"
 	// FieldPayMode holds the string denoting the pay_mode field in the database.
 	FieldPayMode = "pay_mode"
-	// EdgeOwner holds the string denoting the owner edge name in mutations.
-	EdgeOwner = "owner"
+	// EdgeOrder holds the string denoting the order edge name in mutations.
+	EdgeOrder = "order"
 	// Table holds the table name of the orderpay in the database.
 	Table = "order_pay"
-	// OwnerTable is the table that holds the owner relation/edge.
-	OwnerTable = "order_pay"
-	// OwnerInverseTable is the table name for the Order entity.
+	// OrderTable is the table that holds the order relation/edge.
+	OrderTable = "order_pay"
+	// OrderInverseTable is the table name for the Order entity.
 	// It exists in this package in order to avoid circular dependency with the "order" package.
-	OwnerInverseTable = "order"
-	// OwnerColumn is the table column denoting the owner relation/edge.
-	OwnerColumn = "order_pay"
+	OrderInverseTable = "order"
+	// OrderColumn is the table column denoting the order relation/edge.
+	OrderColumn = "order_id"
 )
 
 // Columns holds all SQL columns for orderpay fields.
@@ -43,6 +45,7 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+	FieldOrderID,
 	FieldUserID,
 	FieldCreateID,
 	FieldSn,
@@ -50,21 +53,10 @@ var Columns = []string{
 	FieldPayMode,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "order_pay"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"order_pay",
-}
-
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
