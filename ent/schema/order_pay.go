@@ -10,11 +10,13 @@ import (
 type OrderPay struct {
 	ent.Schema
 }
+
 func (OrderPay) Config() ent.Config {
 	return ent.Config{
 		Table: "order_pay",
 	}
 }
+
 // Fields of the Order.
 func (OrderPay) Fields() []ent.Field {
 	return []ent.Field{
@@ -26,12 +28,11 @@ func (OrderPay) Fields() []ent.Field {
 		field.String("sn").
 			Unique(),
 		field.Float("price").
-		Default(0),
+			Default(0),
 		field.String("pay_mode").
 			Optional(),
 	}
 }
-
 
 // Edges of the OrderPay.
 func (OrderPay) Edges() []ent.Edge {
@@ -54,4 +55,3 @@ func (OrderPay) Index() []ent.Index {
 		index.Fields("sn").Unique(),
 	}
 }
-

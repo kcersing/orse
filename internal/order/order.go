@@ -47,7 +47,22 @@ func main() {
 
 
 func CreateOrder(ctx *context.Context){
-
+	//通过订单ID 或 其他的信息查询到订单状态
+	orderStatus := StatusDefault
+	orderMachine, err := NewFSM(orderStatus)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	//创建订单，订单创建成功后再给用户发短信
+	if _, err = orderMachine.Call(
+		EventCreate,
+		WithOrderId(1),
+		WithOrderName("测试订单"),
+		WithHandlerSendSMS(sendSMS),
+	); err != nil {
+		fmt.Println(err.Error())
+	}
 
 }
 

@@ -11,6 +11,7 @@ import (
 type Order struct {
 	ent.Schema
 }
+
 func (Order) Config() ent.Config {
 	return ent.Config{
 		Table: "order",
@@ -34,7 +35,6 @@ func (Order) Fields() []ent.Field {
 			Optional().
 			Default("0").
 			Comment("[0:待付款; 10:已付款; 20:卖家已发货; 30:交易成功; 40:待评价; 50:待退款; 60:售后维权; 70:; 80:; 90:; ]"),
-
 	}
 }
 
@@ -52,4 +52,3 @@ func (Order) Index() []ent.Index {
 		index.Fields("sn").Unique(),
 	}
 }
-

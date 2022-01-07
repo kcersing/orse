@@ -73,7 +73,6 @@ func (Menu) Fields() []ent.Field {
 	}
 }
 
-
 // Edges of the Node.
 func (Menu) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -82,7 +81,6 @@ func (Menu) Edges() []ent.Edge {
 			Field("pid").
 			From("next").
 			Unique(),
-
 	}
 }
 
