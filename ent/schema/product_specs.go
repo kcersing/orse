@@ -25,9 +25,16 @@ func (ProductSpecs) Mixin() []ent.Mixin {
 func (ProductSpecs) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("product_id"),
-		field.String("specs"),
-		field.Int("stock"),
-		field.Float("price"),
+		field.String("name"),
+		field.String("sn"),
+		field.Int("stock").
+			Comment("库存"),
+		field.Int("sales").
+			Comment("销量"),
+		field.Float("price").
+			Comment("原价"),
+		field.Float("sale_price").
+			Comment("售卖价"),
 		field.Int("create_id").
 			Optional().
 			Default(0),
