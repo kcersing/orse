@@ -22,9 +22,6 @@ func (OrderPay) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("order_id").Optional(),
 		field.Int("user_id"),
-		field.Int("create_id").
-			Optional().
-			Default(0),
 		field.String("sn").
 			Unique(),
 		field.Float("price").

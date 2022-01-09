@@ -27,14 +27,38 @@ func (Order) Mixin() []ent.Mixin {
 // Fields of the Order.
 func (Order) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int64("user_id"),
+		field.Int("user_id"),
 		field.String("sn").
 			Unique(),
-		field.Enum("status").
-			Values("0", "10", "20", "30", "40", "50", "60", "70", "80", "90").
+		field.Enum("source").
+			Values("0", "1").
 			Optional().
 			Default("0").
-			Comment("[0:待付款; 10:已付款; 20:卖家已发货; 30:交易成功; 40:待评价; 50:待退款; 60:售后维权; 70:; 80:; 90:; ]"),
+			Comment("[0:PC订单; 1:app订单;]"),
+		field.Enum("status").
+			Values("0", "10", "20", "30", "40").
+			Optional().
+			Default("0").
+			Comment("[0:待付款; 10:已付款; 20:已发货; 30:交易成功; 40:已关闭; ]"),
+
+		field.Int("integration").
+			Comment("可以获得的积分"),
+
+		field.Time("payment_time").
+			Optional().
+			Comment("支付时间"),
+
+		field.String("note").
+			Unique().
+			Comment("订单备注"),
+		field.Time("comment_time").
+			Optional().
+			Comment("评价时间"),
+		field.Enum("delete").
+			Values("0", "1").
+			Optional().
+			Default("0").
+			Comment("[0:未删除; 1:已删除;]"),
 	}
 }
 
@@ -42,7 +66,10 @@ func (Order) Fields() []ent.Field {
 
 func (Order) Edges() []ent.Edge {
 	return []ent.Edge{
+		edge.To("items", OrderItem.Type),
+		edge.To("amounts", OrderAmounts.Type),
 		edge.To("pays", OrderPay.Type),
+		edge.To("deliverys", OrderDelivery.Type),
 	}
 }
 func (Order) Index() []ent.Index {
