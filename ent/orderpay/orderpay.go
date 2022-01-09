@@ -19,8 +19,6 @@ const (
 	FieldOrderID = "order_id"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
-	// FieldCreateID holds the string denoting the create_id field in the database.
-	FieldCreateID = "create_id"
 	// FieldSn holds the string denoting the sn field in the database.
 	FieldSn = "sn"
 	// FieldPrice holds the string denoting the price field in the database.
@@ -47,7 +45,6 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldOrderID,
 	FieldUserID,
-	FieldCreateID,
 	FieldSn,
 	FieldPrice,
 	FieldPayMode,
@@ -70,8 +67,6 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
-	// DefaultCreateID holds the default value on creation for the "create_id" field.
-	DefaultCreateID int
 	// DefaultPrice holds the default value on creation for the "price" field.
 	DefaultPrice float64
 )

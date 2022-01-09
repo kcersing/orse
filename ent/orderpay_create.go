@@ -69,20 +69,6 @@ func (opc *OrderPayCreate) SetUserID(i int) *OrderPayCreate {
 	return opc
 }
 
-// SetCreateID sets the "create_id" field.
-func (opc *OrderPayCreate) SetCreateID(i int) *OrderPayCreate {
-	opc.mutation.SetCreateID(i)
-	return opc
-}
-
-// SetNillableCreateID sets the "create_id" field if the given value is not nil.
-func (opc *OrderPayCreate) SetNillableCreateID(i *int) *OrderPayCreate {
-	if i != nil {
-		opc.SetCreateID(*i)
-	}
-	return opc
-}
-
 // SetSn sets the "sn" field.
 func (opc *OrderPayCreate) SetSn(s string) *OrderPayCreate {
 	opc.mutation.SetSn(s)
@@ -201,10 +187,6 @@ func (opc *OrderPayCreate) defaults() {
 		v := orderpay.DefaultUpdatedAt()
 		opc.mutation.SetUpdatedAt(v)
 	}
-	if _, ok := opc.mutation.CreateID(); !ok {
-		v := orderpay.DefaultCreateID
-		opc.mutation.SetCreateID(v)
-	}
 	if _, ok := opc.mutation.Price(); !ok {
 		v := orderpay.DefaultPrice
 		opc.mutation.SetPrice(v)
@@ -272,14 +254,6 @@ func (opc *OrderPayCreate) createSpec() (*OrderPay, *sqlgraph.CreateSpec) {
 			Column: orderpay.FieldUserID,
 		})
 		_node.UserID = value
-	}
-	if value, ok := opc.mutation.CreateID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: orderpay.FieldCreateID,
-		})
-		_node.CreateID = value
 	}
 	if value, ok := opc.mutation.Sn(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

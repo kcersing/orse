@@ -34,6 +34,45 @@ func (f OrderFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 	return f(ctx, mv)
 }
 
+// The OrderAmountsFunc type is an adapter to allow the use of ordinary
+// function as OrderAmounts mutator.
+type OrderAmountsFunc func(context.Context, *ent.OrderAmountsMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f OrderAmountsFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.OrderAmountsMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OrderAmountsMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The OrderDeliveryFunc type is an adapter to allow the use of ordinary
+// function as OrderDelivery mutator.
+type OrderDeliveryFunc func(context.Context, *ent.OrderDeliveryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f OrderDeliveryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.OrderDeliveryMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OrderDeliveryMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The OrderItemFunc type is an adapter to allow the use of ordinary
+// function as OrderItem mutator.
+type OrderItemFunc func(context.Context, *ent.OrderItemMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f OrderItemFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.OrderItemMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OrderItemMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The OrderPayFunc type is an adapter to allow the use of ordinary
 // function as OrderPay mutator.
 type OrderPayFunc func(context.Context, *ent.OrderPayMutation) (ent.Value, error)
@@ -43,6 +82,19 @@ func (f OrderPayFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	mv, ok := m.(*ent.OrderPayMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OrderPayMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The OrderSettingFunc type is an adapter to allow the use of ordinary
+// function as OrderSetting mutator.
+type OrderSettingFunc func(context.Context, *ent.OrderSettingMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f OrderSettingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.OrderSettingMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OrderSettingMutation", m)
 	}
 	return f(ctx, mv)
 }

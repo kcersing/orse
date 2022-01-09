@@ -57,9 +57,15 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
-		{Name: "user_id", Type: field.TypeInt64},
+		{Name: "user_id", Type: field.TypeInt},
 		{Name: "sn", Type: field.TypeString, Unique: true},
-		{Name: "status", Type: field.TypeEnum, Nullable: true, Enums: []string{"0", "10", "20", "30", "40", "50", "60", "70", "80", "90"}, Default: "0"},
+		{Name: "source", Type: field.TypeEnum, Nullable: true, Enums: []string{"0", "1"}, Default: "0"},
+		{Name: "status", Type: field.TypeEnum, Nullable: true, Enums: []string{"0", "10", "20", "30", "40"}, Default: "0"},
+		{Name: "integration", Type: field.TypeInt},
+		{Name: "payment_time", Type: field.TypeTime, Nullable: true},
+		{Name: "note", Type: field.TypeString, Unique: true},
+		{Name: "comment_time", Type: field.TypeTime, Nullable: true},
+		{Name: "delete", Type: field.TypeEnum, Nullable: true, Enums: []string{"0", "1"}, Default: "0"},
 	}
 	// OrderTable holds the schema information for the "order" table.
 	OrderTable = &schema.Table{
@@ -67,13 +73,96 @@ var (
 		Columns:    OrderColumns,
 		PrimaryKey: []*schema.Column{OrderColumns[0]},
 	}
+	// OrderAmountsColumns holds the columns for the "order_amounts" table.
+	OrderAmountsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "total_amount", Type: field.TypeFloat64, Default: 0},
+		{Name: "pay_amount", Type: field.TypeFloat64, Default: 0},
+		{Name: "freight_amount", Type: field.TypeFloat64, Default: 0},
+		{Name: "promotion_amount", Type: field.TypeFloat64, Default: 0},
+		{Name: "integration_amount", Type: field.TypeFloat64, Default: 0},
+		{Name: "coupon_id", Type: field.TypeInt, Nullable: true},
+		{Name: "coupon_amount", Type: field.TypeFloat64, Default: 0},
+		{Name: "discount_amount", Type: field.TypeFloat64, Default: 0},
+		{Name: "order_id", Type: field.TypeInt, Nullable: true},
+	}
+	// OrderAmountsTable holds the schema information for the "order_amounts" table.
+	OrderAmountsTable = &schema.Table{
+		Name:       "order_amounts",
+		Columns:    OrderAmountsColumns,
+		PrimaryKey: []*schema.Column{OrderAmountsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "order_amounts_order_amounts",
+				Columns:    []*schema.Column{OrderAmountsColumns[11]},
+				RefColumns: []*schema.Column{OrderColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// OrderDeliveryColumns holds the columns for the "order_delivery" table.
+	OrderDeliveryColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "sn", Type: field.TypeString, Unique: true},
+		{Name: "delivery_company", Type: field.TypeString, Nullable: true},
+		{Name: "delivery_time", Type: field.TypeTime, Nullable: true},
+		{Name: "receiver_name", Type: field.TypeString, Nullable: true},
+		{Name: "receiver_phone", Type: field.TypeString, Nullable: true},
+		{Name: "receiver_post_code", Type: field.TypeString, Nullable: true},
+		{Name: "receiver_province", Type: field.TypeString, Nullable: true},
+		{Name: "receiver_city", Type: field.TypeString, Nullable: true},
+		{Name: "receiver_region", Type: field.TypeString, Nullable: true},
+		{Name: "receiver_detail_address", Type: field.TypeString, Nullable: true},
+		{Name: "receive_time", Type: field.TypeTime, Nullable: true},
+		{Name: "order_id", Type: field.TypeInt, Nullable: true},
+	}
+	// OrderDeliveryTable holds the schema information for the "order_delivery" table.
+	OrderDeliveryTable = &schema.Table{
+		Name:       "order_delivery",
+		Columns:    OrderDeliveryColumns,
+		PrimaryKey: []*schema.Column{OrderDeliveryColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "order_delivery_order_deliverys",
+				Columns:    []*schema.Column{OrderDeliveryColumns[14]},
+				RefColumns: []*schema.Column{OrderColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// OrderPayColumns holds the columns for the "order_pay" table.
+	OrderPayColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "sn", Type: field.TypeString, Unique: true},
+		{Name: "product_cate_id", Type: field.TypeInt},
+		{Name: "product_id", Type: field.TypeInt},
+		{Name: "product_pic", Type: field.TypeString},
+		{Name: "product_name", Type: field.TypeString},
+		{Name: "product_sn", Type: field.TypeInt},
+		{Name: "product_price", Type: field.TypeFloat64, Default: 0},
+		{Name: "quantity", Type: field.TypeInt},
+		{Name: "product_specs_id", Type: field.TypeInt},
+		{Name: "product_specs_sn", Type: field.TypeString},
+		{Name: "product_specs_attr", Type: field.TypeString},
+	}
+	// OrderPayTable holds the schema information for the "order_pay" table.
+	OrderPayTable = &schema.Table{
+		Name:       "order_pay",
+		Columns:    OrderPayColumns,
+		PrimaryKey: []*schema.Column{OrderPayColumns[0]},
+	}
 	// OrderPayColumns holds the columns for the "order_pay" table.
 	OrderPayColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
 		{Name: "user_id", Type: field.TypeInt},
-		{Name: "create_id", Type: field.TypeInt, Nullable: true, Default: 0},
 		{Name: "sn", Type: field.TypeString, Unique: true},
 		{Name: "price", Type: field.TypeFloat64, Default: 0},
 		{Name: "pay_mode", Type: field.TypeString, Nullable: true},
@@ -86,12 +175,34 @@ var (
 		PrimaryKey: []*schema.Column{OrderPayColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
+				Symbol:     "order_pay_order_items",
+				Columns:    []*schema.Column{OrderPayColumns[7]},
+				RefColumns: []*schema.Column{OrderColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
 				Symbol:     "order_pay_order_pays",
-				Columns:    []*schema.Column{OrderPayColumns[8]},
+				Columns:    []*schema.Column{OrderPayColumns[7]},
 				RefColumns: []*schema.Column{OrderColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
+	}
+	// OrderSettingColumns holds the columns for the "order_setting" table.
+	OrderSettingColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "order_overtime", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "confirm_overtime", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "finish_overtime", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "comment_overtime", Type: field.TypeInt, Nullable: true, Default: 0},
+	}
+	// OrderSettingTable holds the schema information for the "order_setting" table.
+	OrderSettingTable = &schema.Table{
+		Name:       "order_setting",
+		Columns:    OrderSettingColumns,
+		PrimaryKey: []*schema.Column{OrderSettingColumns[0]},
 	}
 	// ProductColumns holds the columns for the "product" table.
 	ProductColumns = []*schema.Column{
@@ -249,7 +360,11 @@ var (
 	Tables = []*schema.Table{
 		MenuTable,
 		OrderTable,
+		OrderAmountsTable,
+		OrderDeliveryTable,
 		OrderPayTable,
+		OrderPayTable,
+		OrderSettingTable,
 		ProductTable,
 		ProductAttributeKeyTable,
 		ProductAttributeValueTable,
@@ -265,7 +380,10 @@ func init() {
 	MenuTable.Annotation = &entsql.Annotation{
 		Table: "menu",
 	}
+	OrderAmountsTable.ForeignKeys[0].RefTable = OrderTable
+	OrderDeliveryTable.ForeignKeys[0].RefTable = OrderTable
 	OrderPayTable.ForeignKeys[0].RefTable = OrderTable
+	OrderPayTable.ForeignKeys[1].RefTable = OrderTable
 	ProductTable.ForeignKeys[0].RefTable = ProductCateTable
 	ProductAttributeValueTable.ForeignKeys[0].RefTable = ProductAttributeKeyTable
 	ProductSpecsTable.ForeignKeys[0].RefTable = ProductTable

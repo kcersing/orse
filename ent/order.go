@@ -21,12 +21,30 @@ type Order struct {
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// UserID holds the value of the "user_id" field.
-	UserID int64 `json:"user_id,omitempty"`
+	UserID int `json:"user_id,omitempty"`
 	// Sn holds the value of the "sn" field.
 	Sn string `json:"sn,omitempty"`
+	// Source holds the value of the "source" field.
+	// [0:PC订单; 1:app订单;]
+	Source order.Source `json:"source,omitempty"`
 	// Status holds the value of the "status" field.
-	// [0:待付款; 10:已付款; 20:卖家已发货; 30:交易成功; 40:待评价; 50:待退款; 60:售后维权; 70:; 80:; 90:; ]
+	// [0:待付款; 10:已付款; 20:已发货; 30:交易成功; 40:已关闭; ]
 	Status order.Status `json:"status,omitempty"`
+	// Integration holds the value of the "integration" field.
+	// 可以获得的积分
+	Integration int `json:"integration,omitempty"`
+	// PaymentTime holds the value of the "payment_time" field.
+	// 支付时间
+	PaymentTime time.Time `json:"payment_time,omitempty"`
+	// Note holds the value of the "note" field.
+	// 订单备注
+	Note string `json:"note,omitempty"`
+	// CommentTime holds the value of the "comment_time" field.
+	// 评价时间
+	CommentTime time.Time `json:"comment_time,omitempty"`
+	// Delete holds the value of the "delete" field.
+	// [0:未删除; 1:已删除;]
+	Delete order.Delete `json:"delete,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the OrderQuery when eager-loading is set.
 	Edges OrderEdges `json:"edges"`
@@ -34,20 +52,53 @@ type Order struct {
 
 // OrderEdges holds the relations/edges for other nodes in the graph.
 type OrderEdges struct {
+	// Items holds the value of the items edge.
+	Items []*OrderItem `json:"items,omitempty"`
+	// Amounts holds the value of the amounts edge.
+	Amounts []*OrderAmounts `json:"amounts,omitempty"`
 	// Pays holds the value of the pays edge.
 	Pays []*OrderPay `json:"pays,omitempty"`
+	// Deliverys holds the value of the deliverys edge.
+	Deliverys []*OrderDelivery `json:"deliverys,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [4]bool
+}
+
+// ItemsOrErr returns the Items value or an error if the edge
+// was not loaded in eager-loading.
+func (e OrderEdges) ItemsOrErr() ([]*OrderItem, error) {
+	if e.loadedTypes[0] {
+		return e.Items, nil
+	}
+	return nil, &NotLoadedError{edge: "items"}
+}
+
+// AmountsOrErr returns the Amounts value or an error if the edge
+// was not loaded in eager-loading.
+func (e OrderEdges) AmountsOrErr() ([]*OrderAmounts, error) {
+	if e.loadedTypes[1] {
+		return e.Amounts, nil
+	}
+	return nil, &NotLoadedError{edge: "amounts"}
 }
 
 // PaysOrErr returns the Pays value or an error if the edge
 // was not loaded in eager-loading.
 func (e OrderEdges) PaysOrErr() ([]*OrderPay, error) {
-	if e.loadedTypes[0] {
+	if e.loadedTypes[2] {
 		return e.Pays, nil
 	}
 	return nil, &NotLoadedError{edge: "pays"}
+}
+
+// DeliverysOrErr returns the Deliverys value or an error if the edge
+// was not loaded in eager-loading.
+func (e OrderEdges) DeliverysOrErr() ([]*OrderDelivery, error) {
+	if e.loadedTypes[3] {
+		return e.Deliverys, nil
+	}
+	return nil, &NotLoadedError{edge: "deliverys"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -55,11 +106,11 @@ func (*Order) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case order.FieldID, order.FieldUserID:
+		case order.FieldID, order.FieldUserID, order.FieldIntegration:
 			values[i] = new(sql.NullInt64)
-		case order.FieldSn, order.FieldStatus:
+		case order.FieldSn, order.FieldSource, order.FieldStatus, order.FieldNote, order.FieldDelete:
 			values[i] = new(sql.NullString)
-		case order.FieldCreatedAt, order.FieldUpdatedAt:
+		case order.FieldCreatedAt, order.FieldUpdatedAt, order.FieldPaymentTime, order.FieldCommentTime:
 			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Order", columns[i])
@@ -98,7 +149,7 @@ func (o *Order) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				o.UserID = value.Int64
+				o.UserID = int(value.Int64)
 			}
 		case order.FieldSn:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -106,20 +157,71 @@ func (o *Order) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				o.Sn = value.String
 			}
+		case order.FieldSource:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field source", values[i])
+			} else if value.Valid {
+				o.Source = order.Source(value.String)
+			}
 		case order.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				o.Status = order.Status(value.String)
 			}
+		case order.FieldIntegration:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field integration", values[i])
+			} else if value.Valid {
+				o.Integration = int(value.Int64)
+			}
+		case order.FieldPaymentTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field payment_time", values[i])
+			} else if value.Valid {
+				o.PaymentTime = value.Time
+			}
+		case order.FieldNote:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field note", values[i])
+			} else if value.Valid {
+				o.Note = value.String
+			}
+		case order.FieldCommentTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field comment_time", values[i])
+			} else if value.Valid {
+				o.CommentTime = value.Time
+			}
+		case order.FieldDelete:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field delete", values[i])
+			} else if value.Valid {
+				o.Delete = order.Delete(value.String)
+			}
 		}
 	}
 	return nil
 }
 
+// QueryItems queries the "items" edge of the Order entity.
+func (o *Order) QueryItems() *OrderItemQuery {
+	return (&OrderClient{config: o.config}).QueryItems(o)
+}
+
+// QueryAmounts queries the "amounts" edge of the Order entity.
+func (o *Order) QueryAmounts() *OrderAmountsQuery {
+	return (&OrderClient{config: o.config}).QueryAmounts(o)
+}
+
 // QueryPays queries the "pays" edge of the Order entity.
 func (o *Order) QueryPays() *OrderPayQuery {
 	return (&OrderClient{config: o.config}).QueryPays(o)
+}
+
+// QueryDeliverys queries the "deliverys" edge of the Order entity.
+func (o *Order) QueryDeliverys() *OrderDeliveryQuery {
+	return (&OrderClient{config: o.config}).QueryDeliverys(o)
 }
 
 // Update returns a builder for updating this Order.
@@ -153,8 +255,20 @@ func (o *Order) String() string {
 	builder.WriteString(fmt.Sprintf("%v", o.UserID))
 	builder.WriteString(", sn=")
 	builder.WriteString(o.Sn)
+	builder.WriteString(", source=")
+	builder.WriteString(fmt.Sprintf("%v", o.Source))
 	builder.WriteString(", status=")
 	builder.WriteString(fmt.Sprintf("%v", o.Status))
+	builder.WriteString(", integration=")
+	builder.WriteString(fmt.Sprintf("%v", o.Integration))
+	builder.WriteString(", payment_time=")
+	builder.WriteString(o.PaymentTime.Format(time.ANSIC))
+	builder.WriteString(", note=")
+	builder.WriteString(o.Note)
+	builder.WriteString(", comment_time=")
+	builder.WriteString(o.CommentTime.Format(time.ANSIC))
+	builder.WriteString(", delete=")
+	builder.WriteString(fmt.Sprintf("%v", o.Delete))
 	builder.WriteByte(')')
 	return builder.String()
 }

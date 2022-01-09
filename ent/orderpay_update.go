@@ -93,33 +93,6 @@ func (opu *OrderPayUpdate) AddUserID(i int) *OrderPayUpdate {
 	return opu
 }
 
-// SetCreateID sets the "create_id" field.
-func (opu *OrderPayUpdate) SetCreateID(i int) *OrderPayUpdate {
-	opu.mutation.ResetCreateID()
-	opu.mutation.SetCreateID(i)
-	return opu
-}
-
-// SetNillableCreateID sets the "create_id" field if the given value is not nil.
-func (opu *OrderPayUpdate) SetNillableCreateID(i *int) *OrderPayUpdate {
-	if i != nil {
-		opu.SetCreateID(*i)
-	}
-	return opu
-}
-
-// AddCreateID adds i to the "create_id" field.
-func (opu *OrderPayUpdate) AddCreateID(i int) *OrderPayUpdate {
-	opu.mutation.AddCreateID(i)
-	return opu
-}
-
-// ClearCreateID clears the value of the "create_id" field.
-func (opu *OrderPayUpdate) ClearCreateID() *OrderPayUpdate {
-	opu.mutation.ClearCreateID()
-	return opu
-}
-
 // SetSn sets the "sn" field.
 func (opu *OrderPayUpdate) SetSn(s string) *OrderPayUpdate {
 	opu.mutation.SetSn(s)
@@ -304,26 +277,6 @@ func (opu *OrderPayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: orderpay.FieldUserID,
 		})
 	}
-	if value, ok := opu.mutation.CreateID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: orderpay.FieldCreateID,
-		})
-	}
-	if value, ok := opu.mutation.AddedCreateID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: orderpay.FieldCreateID,
-		})
-	}
-	if opu.mutation.CreateIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: orderpay.FieldCreateID,
-		})
-	}
 	if value, ok := opu.mutation.Sn(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -474,33 +427,6 @@ func (opuo *OrderPayUpdateOne) SetUserID(i int) *OrderPayUpdateOne {
 // AddUserID adds i to the "user_id" field.
 func (opuo *OrderPayUpdateOne) AddUserID(i int) *OrderPayUpdateOne {
 	opuo.mutation.AddUserID(i)
-	return opuo
-}
-
-// SetCreateID sets the "create_id" field.
-func (opuo *OrderPayUpdateOne) SetCreateID(i int) *OrderPayUpdateOne {
-	opuo.mutation.ResetCreateID()
-	opuo.mutation.SetCreateID(i)
-	return opuo
-}
-
-// SetNillableCreateID sets the "create_id" field if the given value is not nil.
-func (opuo *OrderPayUpdateOne) SetNillableCreateID(i *int) *OrderPayUpdateOne {
-	if i != nil {
-		opuo.SetCreateID(*i)
-	}
-	return opuo
-}
-
-// AddCreateID adds i to the "create_id" field.
-func (opuo *OrderPayUpdateOne) AddCreateID(i int) *OrderPayUpdateOne {
-	opuo.mutation.AddCreateID(i)
-	return opuo
-}
-
-// ClearCreateID clears the value of the "create_id" field.
-func (opuo *OrderPayUpdateOne) ClearCreateID() *OrderPayUpdateOne {
-	opuo.mutation.ClearCreateID()
 	return opuo
 }
 
@@ -710,26 +636,6 @@ func (opuo *OrderPayUpdateOne) sqlSave(ctx context.Context) (_node *OrderPay, er
 			Type:   field.TypeInt,
 			Value:  value,
 			Column: orderpay.FieldUserID,
-		})
-	}
-	if value, ok := opuo.mutation.CreateID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: orderpay.FieldCreateID,
-		})
-	}
-	if value, ok := opuo.mutation.AddedCreateID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: orderpay.FieldCreateID,
-		})
-	}
-	if opuo.mutation.CreateIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: orderpay.FieldCreateID,
 		})
 	}
 	if value, ok := opuo.mutation.Sn(); ok {

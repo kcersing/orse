@@ -7,7 +7,11 @@ import (
 	"fmt"
 	"orse/ent/menu"
 	"orse/ent/order"
+	"orse/ent/orderamounts"
+	"orse/ent/orderdelivery"
+	"orse/ent/orderitem"
 	"orse/ent/orderpay"
+	"orse/ent/ordersetting"
 	"orse/ent/product"
 	"orse/ent/productattributekey"
 	"orse/ent/productattributevalue"
@@ -39,7 +43,11 @@ func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
 		menu.Table:                  menu.ValidColumn,
 		order.Table:                 order.ValidColumn,
+		orderamounts.Table:          orderamounts.ValidColumn,
+		orderdelivery.Table:         orderdelivery.ValidColumn,
+		orderitem.Table:             orderitem.ValidColumn,
 		orderpay.Table:              orderpay.ValidColumn,
+		ordersetting.Table:          ordersetting.ValidColumn,
 		product.Table:               product.ValidColumn,
 		productattributekey.Table:   productattributekey.ValidColumn,
 		productattributevalue.Table: productattributevalue.ValidColumn,

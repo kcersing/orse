@@ -9,6 +9,9 @@ import (
 	"fmt"
 	"math"
 	"orse/ent/order"
+	"orse/ent/orderamounts"
+	"orse/ent/orderdelivery"
+	"orse/ent/orderitem"
 	"orse/ent/orderpay"
 	"orse/ent/predicate"
 
@@ -27,7 +30,10 @@ type OrderQuery struct {
 	fields     []string
 	predicates []predicate.Order
 	// eager-loading edges.
-	withPays *OrderPayQuery
+	withItems     *OrderItemQuery
+	withAmounts   *OrderAmountsQuery
+	withPays      *OrderPayQuery
+	withDeliverys *OrderDeliveryQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -64,6 +70,50 @@ func (oq *OrderQuery) Order(o ...OrderFunc) *OrderQuery {
 	return oq
 }
 
+// QueryItems chains the current query on the "items" edge.
+func (oq *OrderQuery) QueryItems() *OrderItemQuery {
+	query := &OrderItemQuery{config: oq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := oq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := oq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(order.Table, order.FieldID, selector),
+			sqlgraph.To(orderitem.Table, orderitem.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, order.ItemsTable, order.ItemsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(oq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryAmounts chains the current query on the "amounts" edge.
+func (oq *OrderQuery) QueryAmounts() *OrderAmountsQuery {
+	query := &OrderAmountsQuery{config: oq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := oq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := oq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(order.Table, order.FieldID, selector),
+			sqlgraph.To(orderamounts.Table, orderamounts.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, order.AmountsTable, order.AmountsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(oq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryPays chains the current query on the "pays" edge.
 func (oq *OrderQuery) QueryPays() *OrderPayQuery {
 	query := &OrderPayQuery{config: oq.config}
@@ -79,6 +129,28 @@ func (oq *OrderQuery) QueryPays() *OrderPayQuery {
 			sqlgraph.From(order.Table, order.FieldID, selector),
 			sqlgraph.To(orderpay.Table, orderpay.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, order.PaysTable, order.PaysColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(oq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDeliverys chains the current query on the "deliverys" edge.
+func (oq *OrderQuery) QueryDeliverys() *OrderDeliveryQuery {
+	query := &OrderDeliveryQuery{config: oq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := oq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := oq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(order.Table, order.FieldID, selector),
+			sqlgraph.To(orderdelivery.Table, orderdelivery.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, order.DeliverysTable, order.DeliverysColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(oq.driver.Dialect(), step)
 		return fromU, nil
@@ -262,16 +334,41 @@ func (oq *OrderQuery) Clone() *OrderQuery {
 		return nil
 	}
 	return &OrderQuery{
-		config:     oq.config,
-		limit:      oq.limit,
-		offset:     oq.offset,
-		order:      append([]OrderFunc{}, oq.order...),
-		predicates: append([]predicate.Order{}, oq.predicates...),
-		withPays:   oq.withPays.Clone(),
+		config:        oq.config,
+		limit:         oq.limit,
+		offset:        oq.offset,
+		order:         append([]OrderFunc{}, oq.order...),
+		predicates:    append([]predicate.Order{}, oq.predicates...),
+		withItems:     oq.withItems.Clone(),
+		withAmounts:   oq.withAmounts.Clone(),
+		withPays:      oq.withPays.Clone(),
+		withDeliverys: oq.withDeliverys.Clone(),
 		// clone intermediate query.
 		sql:  oq.sql.Clone(),
 		path: oq.path,
 	}
+}
+
+// WithItems tells the query-builder to eager-load the nodes that are connected to
+// the "items" edge. The optional arguments are used to configure the query builder of the edge.
+func (oq *OrderQuery) WithItems(opts ...func(*OrderItemQuery)) *OrderQuery {
+	query := &OrderItemQuery{config: oq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	oq.withItems = query
+	return oq
+}
+
+// WithAmounts tells the query-builder to eager-load the nodes that are connected to
+// the "amounts" edge. The optional arguments are used to configure the query builder of the edge.
+func (oq *OrderQuery) WithAmounts(opts ...func(*OrderAmountsQuery)) *OrderQuery {
+	query := &OrderAmountsQuery{config: oq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	oq.withAmounts = query
+	return oq
 }
 
 // WithPays tells the query-builder to eager-load the nodes that are connected to
@@ -282,6 +379,17 @@ func (oq *OrderQuery) WithPays(opts ...func(*OrderPayQuery)) *OrderQuery {
 		opt(query)
 	}
 	oq.withPays = query
+	return oq
+}
+
+// WithDeliverys tells the query-builder to eager-load the nodes that are connected to
+// the "deliverys" edge. The optional arguments are used to configure the query builder of the edge.
+func (oq *OrderQuery) WithDeliverys(opts ...func(*OrderDeliveryQuery)) *OrderQuery {
+	query := &OrderDeliveryQuery{config: oq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	oq.withDeliverys = query
 	return oq
 }
 
@@ -350,8 +458,11 @@ func (oq *OrderQuery) sqlAll(ctx context.Context) ([]*Order, error) {
 	var (
 		nodes       = []*Order{}
 		_spec       = oq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [4]bool{
+			oq.withItems != nil,
+			oq.withAmounts != nil,
 			oq.withPays != nil,
+			oq.withDeliverys != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -372,6 +483,56 @@ func (oq *OrderQuery) sqlAll(ctx context.Context) ([]*Order, error) {
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
+	}
+
+	if query := oq.withItems; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Order)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Items = []*OrderItem{}
+		}
+		query.Where(predicate.OrderItem(func(s *sql.Selector) {
+			s.Where(sql.InValues(order.ItemsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.OrderID
+			node, ok := nodeids[fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "order_id" returned %v for node %v`, fk, n.ID)
+			}
+			node.Edges.Items = append(node.Edges.Items, n)
+		}
+	}
+
+	if query := oq.withAmounts; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Order)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Amounts = []*OrderAmounts{}
+		}
+		query.Where(predicate.OrderAmounts(func(s *sql.Selector) {
+			s.Where(sql.InValues(order.AmountsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.OrderID
+			node, ok := nodeids[fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "order_id" returned %v for node %v`, fk, n.ID)
+			}
+			node.Edges.Amounts = append(node.Edges.Amounts, n)
+		}
 	}
 
 	if query := oq.withPays; query != nil {
@@ -396,6 +557,31 @@ func (oq *OrderQuery) sqlAll(ctx context.Context) ([]*Order, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "order_id" returned %v for node %v`, fk, n.ID)
 			}
 			node.Edges.Pays = append(node.Edges.Pays, n)
+		}
+	}
+
+	if query := oq.withDeliverys; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Order)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Deliverys = []*OrderDelivery{}
+		}
+		query.Where(predicate.OrderDelivery(func(s *sql.Selector) {
+			s.Where(sql.InValues(order.DeliverysColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.OrderID
+			node, ok := nodeids[fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "order_id" returned %v for node %v`, fk, n.ID)
+			}
+			node.Edges.Deliverys = append(node.Edges.Deliverys, n)
 		}
 	}
 

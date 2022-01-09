@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 type OrderAmounts struct {
@@ -19,8 +20,8 @@ func (OrderAmounts) Config() ent.Config {
 // Fields of the Order.
 func (OrderAmounts) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("order_id").Optional(),
-
+		field.Int("order_id").
+			Optional(),
 		field.Float("total_amount").
 			Default(0).
 			Comment("订单总金额"),
@@ -68,6 +69,6 @@ func (OrderAmounts) Mixin() []ent.Mixin {
 }
 func (OrderAmounts) Index() []ent.Index {
 	return []ent.Index{
-
+		index.Fields("order_id"),
 	}
 }

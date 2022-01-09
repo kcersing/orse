@@ -20,7 +20,8 @@ func (OrderDelivery) Config() ent.Config {
 // Fields of the Order.
 func (OrderDelivery) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("order_id"),
+		field.Int("order_id").
+			Optional(),
 		field.String("sn").
 			Unique().
 			Comment("物流单号"),
@@ -77,7 +78,7 @@ func (OrderDelivery) Mixin() []ent.Mixin {
 }
 func (OrderDelivery) Index() []ent.Index {
 	return []ent.Index{
-		index.Fields("user_id"),
+		index.Fields("order_id"),
 		index.Fields("sn").Unique(),
 	}
 }

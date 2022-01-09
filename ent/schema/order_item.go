@@ -20,7 +20,8 @@ func (OrderItem) Config() ent.Config {
 // Fields of the Order.
 func (OrderItem) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("order_id").Optional(),
+		field.Int("order_id").
+			Optional(),
 		field.String("sn").
 			Unique(),
 		field.Int("product_cate_id").Comment("商品分类id"),
@@ -57,7 +58,7 @@ func (OrderItem) Mixin() []ent.Mixin {
 }
 func (OrderItem) Index() []ent.Index {
 	return []ent.Index{
-		index.Fields("user_id"),
+		index.Fields("order_id"),
 		index.Fields("sn").Unique(),
 	}
 }

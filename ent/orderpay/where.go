@@ -121,13 +121,6 @@ func UserID(v int) predicate.OrderPay {
 	})
 }
 
-// CreateID applies equality check predicate on the "create_id" field. It's identical to CreateIDEQ.
-func CreateID(v int) predicate.OrderPay {
-	return predicate.OrderPay(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateID), v))
-	})
-}
-
 // Sn applies equality check predicate on the "sn" field. It's identical to SnEQ.
 func Sn(v string) predicate.OrderPay {
 	return predicate.OrderPay(func(s *sql.Selector) {
@@ -464,96 +457,6 @@ func UserIDLT(v int) predicate.OrderPay {
 func UserIDLTE(v int) predicate.OrderPay {
 	return predicate.OrderPay(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldUserID), v))
-	})
-}
-
-// CreateIDEQ applies the EQ predicate on the "create_id" field.
-func CreateIDEQ(v int) predicate.OrderPay {
-	return predicate.OrderPay(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateID), v))
-	})
-}
-
-// CreateIDNEQ applies the NEQ predicate on the "create_id" field.
-func CreateIDNEQ(v int) predicate.OrderPay {
-	return predicate.OrderPay(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreateID), v))
-	})
-}
-
-// CreateIDIn applies the In predicate on the "create_id" field.
-func CreateIDIn(vs ...int) predicate.OrderPay {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.OrderPay(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldCreateID), v...))
-	})
-}
-
-// CreateIDNotIn applies the NotIn predicate on the "create_id" field.
-func CreateIDNotIn(vs ...int) predicate.OrderPay {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.OrderPay(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldCreateID), v...))
-	})
-}
-
-// CreateIDGT applies the GT predicate on the "create_id" field.
-func CreateIDGT(v int) predicate.OrderPay {
-	return predicate.OrderPay(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreateID), v))
-	})
-}
-
-// CreateIDGTE applies the GTE predicate on the "create_id" field.
-func CreateIDGTE(v int) predicate.OrderPay {
-	return predicate.OrderPay(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreateID), v))
-	})
-}
-
-// CreateIDLT applies the LT predicate on the "create_id" field.
-func CreateIDLT(v int) predicate.OrderPay {
-	return predicate.OrderPay(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreateID), v))
-	})
-}
-
-// CreateIDLTE applies the LTE predicate on the "create_id" field.
-func CreateIDLTE(v int) predicate.OrderPay {
-	return predicate.OrderPay(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreateID), v))
-	})
-}
-
-// CreateIDIsNil applies the IsNil predicate on the "create_id" field.
-func CreateIDIsNil() predicate.OrderPay {
-	return predicate.OrderPay(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldCreateID)))
-	})
-}
-
-// CreateIDNotNil applies the NotNil predicate on the "create_id" field.
-func CreateIDNotNil() predicate.OrderPay {
-	return predicate.OrderPay(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldCreateID)))
 	})
 }
 

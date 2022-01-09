@@ -11,7 +11,11 @@ import (
 
 	"orse/ent/menu"
 	"orse/ent/order"
+	"orse/ent/orderamounts"
+	"orse/ent/orderdelivery"
+	"orse/ent/orderitem"
 	"orse/ent/orderpay"
+	"orse/ent/ordersetting"
 	"orse/ent/product"
 	"orse/ent/productattributekey"
 	"orse/ent/productattributevalue"
@@ -33,8 +37,16 @@ type Client struct {
 	Menu *MenuClient
 	// Order is the client for interacting with the Order builders.
 	Order *OrderClient
+	// OrderAmounts is the client for interacting with the OrderAmounts builders.
+	OrderAmounts *OrderAmountsClient
+	// OrderDelivery is the client for interacting with the OrderDelivery builders.
+	OrderDelivery *OrderDeliveryClient
+	// OrderItem is the client for interacting with the OrderItem builders.
+	OrderItem *OrderItemClient
 	// OrderPay is the client for interacting with the OrderPay builders.
 	OrderPay *OrderPayClient
+	// OrderSetting is the client for interacting with the OrderSetting builders.
+	OrderSetting *OrderSettingClient
 	// Product is the client for interacting with the Product builders.
 	Product *ProductClient
 	// ProductAttributeKey is the client for interacting with the ProductAttributeKey builders.
@@ -62,7 +74,11 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Menu = NewMenuClient(c.config)
 	c.Order = NewOrderClient(c.config)
+	c.OrderAmounts = NewOrderAmountsClient(c.config)
+	c.OrderDelivery = NewOrderDeliveryClient(c.config)
+	c.OrderItem = NewOrderItemClient(c.config)
 	c.OrderPay = NewOrderPayClient(c.config)
+	c.OrderSetting = NewOrderSettingClient(c.config)
 	c.Product = NewProductClient(c.config)
 	c.ProductAttributeKey = NewProductAttributeKeyClient(c.config)
 	c.ProductAttributeValue = NewProductAttributeValueClient(c.config)
@@ -104,7 +120,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:                cfg,
 		Menu:                  NewMenuClient(cfg),
 		Order:                 NewOrderClient(cfg),
+		OrderAmounts:          NewOrderAmountsClient(cfg),
+		OrderDelivery:         NewOrderDeliveryClient(cfg),
+		OrderItem:             NewOrderItemClient(cfg),
 		OrderPay:              NewOrderPayClient(cfg),
+		OrderSetting:          NewOrderSettingClient(cfg),
 		Product:               NewProductClient(cfg),
 		ProductAttributeKey:   NewProductAttributeKeyClient(cfg),
 		ProductAttributeValue: NewProductAttributeValueClient(cfg),
@@ -131,7 +151,11 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:                cfg,
 		Menu:                  NewMenuClient(cfg),
 		Order:                 NewOrderClient(cfg),
+		OrderAmounts:          NewOrderAmountsClient(cfg),
+		OrderDelivery:         NewOrderDeliveryClient(cfg),
+		OrderItem:             NewOrderItemClient(cfg),
 		OrderPay:              NewOrderPayClient(cfg),
+		OrderSetting:          NewOrderSettingClient(cfg),
 		Product:               NewProductClient(cfg),
 		ProductAttributeKey:   NewProductAttributeKeyClient(cfg),
 		ProductAttributeValue: NewProductAttributeValueClient(cfg),
@@ -169,7 +193,11 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	c.Menu.Use(hooks...)
 	c.Order.Use(hooks...)
+	c.OrderAmounts.Use(hooks...)
+	c.OrderDelivery.Use(hooks...)
+	c.OrderItem.Use(hooks...)
 	c.OrderPay.Use(hooks...)
+	c.OrderSetting.Use(hooks...)
 	c.Product.Use(hooks...)
 	c.ProductAttributeKey.Use(hooks...)
 	c.ProductAttributeValue.Use(hooks...)
@@ -385,6 +413,38 @@ func (c *OrderClient) GetX(ctx context.Context, id int) *Order {
 	return obj
 }
 
+// QueryItems queries the items edge of a Order.
+func (c *OrderClient) QueryItems(o *Order) *OrderItemQuery {
+	query := &OrderItemQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := o.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(order.Table, order.FieldID, id),
+			sqlgraph.To(orderitem.Table, orderitem.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, order.ItemsTable, order.ItemsColumn),
+		)
+		fromV = sqlgraph.Neighbors(o.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAmounts queries the amounts edge of a Order.
+func (c *OrderClient) QueryAmounts(o *Order) *OrderAmountsQuery {
+	query := &OrderAmountsQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := o.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(order.Table, order.FieldID, id),
+			sqlgraph.To(orderamounts.Table, orderamounts.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, order.AmountsTable, order.AmountsColumn),
+		)
+		fromV = sqlgraph.Neighbors(o.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryPays queries the pays edge of a Order.
 func (c *OrderClient) QueryPays(o *Order) *OrderPayQuery {
 	query := &OrderPayQuery{config: c.config}
@@ -401,9 +461,343 @@ func (c *OrderClient) QueryPays(o *Order) *OrderPayQuery {
 	return query
 }
 
+// QueryDeliverys queries the deliverys edge of a Order.
+func (c *OrderClient) QueryDeliverys(o *Order) *OrderDeliveryQuery {
+	query := &OrderDeliveryQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := o.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(order.Table, order.FieldID, id),
+			sqlgraph.To(orderdelivery.Table, orderdelivery.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, order.DeliverysTable, order.DeliverysColumn),
+		)
+		fromV = sqlgraph.Neighbors(o.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *OrderClient) Hooks() []Hook {
 	return c.hooks.Order
+}
+
+// OrderAmountsClient is a client for the OrderAmounts schema.
+type OrderAmountsClient struct {
+	config
+}
+
+// NewOrderAmountsClient returns a client for the OrderAmounts from the given config.
+func NewOrderAmountsClient(c config) *OrderAmountsClient {
+	return &OrderAmountsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `orderamounts.Hooks(f(g(h())))`.
+func (c *OrderAmountsClient) Use(hooks ...Hook) {
+	c.hooks.OrderAmounts = append(c.hooks.OrderAmounts, hooks...)
+}
+
+// Create returns a create builder for OrderAmounts.
+func (c *OrderAmountsClient) Create() *OrderAmountsCreate {
+	mutation := newOrderAmountsMutation(c.config, OpCreate)
+	return &OrderAmountsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of OrderAmounts entities.
+func (c *OrderAmountsClient) CreateBulk(builders ...*OrderAmountsCreate) *OrderAmountsCreateBulk {
+	return &OrderAmountsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OrderAmounts.
+func (c *OrderAmountsClient) Update() *OrderAmountsUpdate {
+	mutation := newOrderAmountsMutation(c.config, OpUpdate)
+	return &OrderAmountsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OrderAmountsClient) UpdateOne(oa *OrderAmounts) *OrderAmountsUpdateOne {
+	mutation := newOrderAmountsMutation(c.config, OpUpdateOne, withOrderAmounts(oa))
+	return &OrderAmountsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OrderAmountsClient) UpdateOneID(id int) *OrderAmountsUpdateOne {
+	mutation := newOrderAmountsMutation(c.config, OpUpdateOne, withOrderAmountsID(id))
+	return &OrderAmountsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OrderAmounts.
+func (c *OrderAmountsClient) Delete() *OrderAmountsDelete {
+	mutation := newOrderAmountsMutation(c.config, OpDelete)
+	return &OrderAmountsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *OrderAmountsClient) DeleteOne(oa *OrderAmounts) *OrderAmountsDeleteOne {
+	return c.DeleteOneID(oa.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *OrderAmountsClient) DeleteOneID(id int) *OrderAmountsDeleteOne {
+	builder := c.Delete().Where(orderamounts.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OrderAmountsDeleteOne{builder}
+}
+
+// Query returns a query builder for OrderAmounts.
+func (c *OrderAmountsClient) Query() *OrderAmountsQuery {
+	return &OrderAmountsQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a OrderAmounts entity by its id.
+func (c *OrderAmountsClient) Get(ctx context.Context, id int) (*OrderAmounts, error) {
+	return c.Query().Where(orderamounts.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OrderAmountsClient) GetX(ctx context.Context, id int) *OrderAmounts {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryOrder queries the order edge of a OrderAmounts.
+func (c *OrderAmountsClient) QueryOrder(oa *OrderAmounts) *OrderQuery {
+	query := &OrderQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := oa.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(orderamounts.Table, orderamounts.FieldID, id),
+			sqlgraph.To(order.Table, order.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, orderamounts.OrderTable, orderamounts.OrderColumn),
+		)
+		fromV = sqlgraph.Neighbors(oa.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *OrderAmountsClient) Hooks() []Hook {
+	return c.hooks.OrderAmounts
+}
+
+// OrderDeliveryClient is a client for the OrderDelivery schema.
+type OrderDeliveryClient struct {
+	config
+}
+
+// NewOrderDeliveryClient returns a client for the OrderDelivery from the given config.
+func NewOrderDeliveryClient(c config) *OrderDeliveryClient {
+	return &OrderDeliveryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `orderdelivery.Hooks(f(g(h())))`.
+func (c *OrderDeliveryClient) Use(hooks ...Hook) {
+	c.hooks.OrderDelivery = append(c.hooks.OrderDelivery, hooks...)
+}
+
+// Create returns a create builder for OrderDelivery.
+func (c *OrderDeliveryClient) Create() *OrderDeliveryCreate {
+	mutation := newOrderDeliveryMutation(c.config, OpCreate)
+	return &OrderDeliveryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of OrderDelivery entities.
+func (c *OrderDeliveryClient) CreateBulk(builders ...*OrderDeliveryCreate) *OrderDeliveryCreateBulk {
+	return &OrderDeliveryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OrderDelivery.
+func (c *OrderDeliveryClient) Update() *OrderDeliveryUpdate {
+	mutation := newOrderDeliveryMutation(c.config, OpUpdate)
+	return &OrderDeliveryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OrderDeliveryClient) UpdateOne(od *OrderDelivery) *OrderDeliveryUpdateOne {
+	mutation := newOrderDeliveryMutation(c.config, OpUpdateOne, withOrderDelivery(od))
+	return &OrderDeliveryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OrderDeliveryClient) UpdateOneID(id int) *OrderDeliveryUpdateOne {
+	mutation := newOrderDeliveryMutation(c.config, OpUpdateOne, withOrderDeliveryID(id))
+	return &OrderDeliveryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OrderDelivery.
+func (c *OrderDeliveryClient) Delete() *OrderDeliveryDelete {
+	mutation := newOrderDeliveryMutation(c.config, OpDelete)
+	return &OrderDeliveryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *OrderDeliveryClient) DeleteOne(od *OrderDelivery) *OrderDeliveryDeleteOne {
+	return c.DeleteOneID(od.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *OrderDeliveryClient) DeleteOneID(id int) *OrderDeliveryDeleteOne {
+	builder := c.Delete().Where(orderdelivery.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OrderDeliveryDeleteOne{builder}
+}
+
+// Query returns a query builder for OrderDelivery.
+func (c *OrderDeliveryClient) Query() *OrderDeliveryQuery {
+	return &OrderDeliveryQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a OrderDelivery entity by its id.
+func (c *OrderDeliveryClient) Get(ctx context.Context, id int) (*OrderDelivery, error) {
+	return c.Query().Where(orderdelivery.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OrderDeliveryClient) GetX(ctx context.Context, id int) *OrderDelivery {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryOrder queries the order edge of a OrderDelivery.
+func (c *OrderDeliveryClient) QueryOrder(od *OrderDelivery) *OrderQuery {
+	query := &OrderQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := od.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(orderdelivery.Table, orderdelivery.FieldID, id),
+			sqlgraph.To(order.Table, order.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, orderdelivery.OrderTable, orderdelivery.OrderColumn),
+		)
+		fromV = sqlgraph.Neighbors(od.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *OrderDeliveryClient) Hooks() []Hook {
+	return c.hooks.OrderDelivery
+}
+
+// OrderItemClient is a client for the OrderItem schema.
+type OrderItemClient struct {
+	config
+}
+
+// NewOrderItemClient returns a client for the OrderItem from the given config.
+func NewOrderItemClient(c config) *OrderItemClient {
+	return &OrderItemClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `orderitem.Hooks(f(g(h())))`.
+func (c *OrderItemClient) Use(hooks ...Hook) {
+	c.hooks.OrderItem = append(c.hooks.OrderItem, hooks...)
+}
+
+// Create returns a create builder for OrderItem.
+func (c *OrderItemClient) Create() *OrderItemCreate {
+	mutation := newOrderItemMutation(c.config, OpCreate)
+	return &OrderItemCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of OrderItem entities.
+func (c *OrderItemClient) CreateBulk(builders ...*OrderItemCreate) *OrderItemCreateBulk {
+	return &OrderItemCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OrderItem.
+func (c *OrderItemClient) Update() *OrderItemUpdate {
+	mutation := newOrderItemMutation(c.config, OpUpdate)
+	return &OrderItemUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OrderItemClient) UpdateOne(oi *OrderItem) *OrderItemUpdateOne {
+	mutation := newOrderItemMutation(c.config, OpUpdateOne, withOrderItem(oi))
+	return &OrderItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OrderItemClient) UpdateOneID(id int) *OrderItemUpdateOne {
+	mutation := newOrderItemMutation(c.config, OpUpdateOne, withOrderItemID(id))
+	return &OrderItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OrderItem.
+func (c *OrderItemClient) Delete() *OrderItemDelete {
+	mutation := newOrderItemMutation(c.config, OpDelete)
+	return &OrderItemDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *OrderItemClient) DeleteOne(oi *OrderItem) *OrderItemDeleteOne {
+	return c.DeleteOneID(oi.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *OrderItemClient) DeleteOneID(id int) *OrderItemDeleteOne {
+	builder := c.Delete().Where(orderitem.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OrderItemDeleteOne{builder}
+}
+
+// Query returns a query builder for OrderItem.
+func (c *OrderItemClient) Query() *OrderItemQuery {
+	return &OrderItemQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a OrderItem entity by its id.
+func (c *OrderItemClient) Get(ctx context.Context, id int) (*OrderItem, error) {
+	return c.Query().Where(orderitem.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OrderItemClient) GetX(ctx context.Context, id int) *OrderItem {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryOrder queries the order edge of a OrderItem.
+func (c *OrderItemClient) QueryOrder(oi *OrderItem) *OrderQuery {
+	query := &OrderQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := oi.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(orderitem.Table, orderitem.FieldID, id),
+			sqlgraph.To(order.Table, order.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, orderitem.OrderTable, orderitem.OrderColumn),
+		)
+		fromV = sqlgraph.Neighbors(oi.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *OrderItemClient) Hooks() []Hook {
+	return c.hooks.OrderItem
 }
 
 // OrderPayClient is a client for the OrderPay schema.
@@ -510,6 +904,96 @@ func (c *OrderPayClient) QueryOrder(op *OrderPay) *OrderQuery {
 // Hooks returns the client hooks.
 func (c *OrderPayClient) Hooks() []Hook {
 	return c.hooks.OrderPay
+}
+
+// OrderSettingClient is a client for the OrderSetting schema.
+type OrderSettingClient struct {
+	config
+}
+
+// NewOrderSettingClient returns a client for the OrderSetting from the given config.
+func NewOrderSettingClient(c config) *OrderSettingClient {
+	return &OrderSettingClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `ordersetting.Hooks(f(g(h())))`.
+func (c *OrderSettingClient) Use(hooks ...Hook) {
+	c.hooks.OrderSetting = append(c.hooks.OrderSetting, hooks...)
+}
+
+// Create returns a create builder for OrderSetting.
+func (c *OrderSettingClient) Create() *OrderSettingCreate {
+	mutation := newOrderSettingMutation(c.config, OpCreate)
+	return &OrderSettingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of OrderSetting entities.
+func (c *OrderSettingClient) CreateBulk(builders ...*OrderSettingCreate) *OrderSettingCreateBulk {
+	return &OrderSettingCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OrderSetting.
+func (c *OrderSettingClient) Update() *OrderSettingUpdate {
+	mutation := newOrderSettingMutation(c.config, OpUpdate)
+	return &OrderSettingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OrderSettingClient) UpdateOne(os *OrderSetting) *OrderSettingUpdateOne {
+	mutation := newOrderSettingMutation(c.config, OpUpdateOne, withOrderSetting(os))
+	return &OrderSettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OrderSettingClient) UpdateOneID(id int) *OrderSettingUpdateOne {
+	mutation := newOrderSettingMutation(c.config, OpUpdateOne, withOrderSettingID(id))
+	return &OrderSettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OrderSetting.
+func (c *OrderSettingClient) Delete() *OrderSettingDelete {
+	mutation := newOrderSettingMutation(c.config, OpDelete)
+	return &OrderSettingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *OrderSettingClient) DeleteOne(os *OrderSetting) *OrderSettingDeleteOne {
+	return c.DeleteOneID(os.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *OrderSettingClient) DeleteOneID(id int) *OrderSettingDeleteOne {
+	builder := c.Delete().Where(ordersetting.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OrderSettingDeleteOne{builder}
+}
+
+// Query returns a query builder for OrderSetting.
+func (c *OrderSettingClient) Query() *OrderSettingQuery {
+	return &OrderSettingQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a OrderSetting entity by its id.
+func (c *OrderSettingClient) Get(ctx context.Context, id int) (*OrderSetting, error) {
+	return c.Query().Where(ordersetting.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OrderSettingClient) GetX(ctx context.Context, id int) *OrderSetting {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *OrderSettingClient) Hooks() []Hook {
+	return c.hooks.OrderSetting
 }
 
 // ProductClient is a client for the Product schema.

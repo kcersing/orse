@@ -20,12 +20,44 @@ const (
 	FieldUserID = "user_id"
 	// FieldSn holds the string denoting the sn field in the database.
 	FieldSn = "sn"
+	// FieldSource holds the string denoting the source field in the database.
+	FieldSource = "source"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldIntegration holds the string denoting the integration field in the database.
+	FieldIntegration = "integration"
+	// FieldPaymentTime holds the string denoting the payment_time field in the database.
+	FieldPaymentTime = "payment_time"
+	// FieldNote holds the string denoting the note field in the database.
+	FieldNote = "note"
+	// FieldCommentTime holds the string denoting the comment_time field in the database.
+	FieldCommentTime = "comment_time"
+	// FieldDelete holds the string denoting the delete field in the database.
+	FieldDelete = "delete"
+	// EdgeItems holds the string denoting the items edge name in mutations.
+	EdgeItems = "items"
+	// EdgeAmounts holds the string denoting the amounts edge name in mutations.
+	EdgeAmounts = "amounts"
 	// EdgePays holds the string denoting the pays edge name in mutations.
 	EdgePays = "pays"
+	// EdgeDeliverys holds the string denoting the deliverys edge name in mutations.
+	EdgeDeliverys = "deliverys"
 	// Table holds the table name of the order in the database.
 	Table = "order"
+	// ItemsTable is the table that holds the items relation/edge.
+	ItemsTable = "order_pay"
+	// ItemsInverseTable is the table name for the OrderItem entity.
+	// It exists in this package in order to avoid circular dependency with the "orderitem" package.
+	ItemsInverseTable = "order_pay"
+	// ItemsColumn is the table column denoting the items relation/edge.
+	ItemsColumn = "order_id"
+	// AmountsTable is the table that holds the amounts relation/edge.
+	AmountsTable = "order_amounts"
+	// AmountsInverseTable is the table name for the OrderAmounts entity.
+	// It exists in this package in order to avoid circular dependency with the "orderamounts" package.
+	AmountsInverseTable = "order_amounts"
+	// AmountsColumn is the table column denoting the amounts relation/edge.
+	AmountsColumn = "order_id"
 	// PaysTable is the table that holds the pays relation/edge.
 	PaysTable = "order_pay"
 	// PaysInverseTable is the table name for the OrderPay entity.
@@ -33,6 +65,13 @@ const (
 	PaysInverseTable = "order_pay"
 	// PaysColumn is the table column denoting the pays relation/edge.
 	PaysColumn = "order_id"
+	// DeliverysTable is the table that holds the deliverys relation/edge.
+	DeliverysTable = "order_delivery"
+	// DeliverysInverseTable is the table name for the OrderDelivery entity.
+	// It exists in this package in order to avoid circular dependency with the "orderdelivery" package.
+	DeliverysInverseTable = "order_delivery"
+	// DeliverysColumn is the table column denoting the deliverys relation/edge.
+	DeliverysColumn = "order_id"
 )
 
 // Columns holds all SQL columns for order fields.
@@ -42,7 +81,13 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldUserID,
 	FieldSn,
+	FieldSource,
 	FieldStatus,
+	FieldIntegration,
+	FieldPaymentTime,
+	FieldNote,
+	FieldCommentTime,
+	FieldDelete,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -64,6 +109,32 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 )
 
+// Source defines the type for the "source" enum field.
+type Source string
+
+// Source0 is the default value of the Source enum.
+const DefaultSource = Source0
+
+// Source values.
+const (
+	Source0 Source = "0"
+	Source1 Source = "1"
+)
+
+func (s Source) String() string {
+	return string(s)
+}
+
+// SourceValidator is a validator for the "source" field enum values. It is called by the builders before save.
+func SourceValidator(s Source) error {
+	switch s {
+	case Source0, Source1:
+		return nil
+	default:
+		return fmt.Errorf("order: invalid enum value for source field: %q", s)
+	}
+}
+
 // Status defines the type for the "status" enum field.
 type Status string
 
@@ -77,11 +148,6 @@ const (
 	Status20 Status = "20"
 	Status30 Status = "30"
 	Status40 Status = "40"
-	Status50 Status = "50"
-	Status60 Status = "60"
-	Status70 Status = "70"
-	Status80 Status = "80"
-	Status90 Status = "90"
 )
 
 func (s Status) String() string {
@@ -91,9 +157,35 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case Status0, Status10, Status20, Status30, Status40, Status50, Status60, Status70, Status80, Status90:
+	case Status0, Status10, Status20, Status30, Status40:
 		return nil
 	default:
 		return fmt.Errorf("order: invalid enum value for status field: %q", s)
+	}
+}
+
+// Delete defines the type for the "delete" enum field.
+type Delete string
+
+// Delete0 is the default value of the Delete enum.
+const DefaultDelete = Delete0
+
+// Delete values.
+const (
+	Delete0 Delete = "0"
+	Delete1 Delete = "1"
+)
+
+func (d Delete) String() string {
+	return string(d)
+}
+
+// DeleteValidator is a validator for the "delete" field enum values. It is called by the builders before save.
+func DeleteValidator(d Delete) error {
+	switch d {
+	case Delete0, Delete1:
+		return nil
+	default:
+		return fmt.Errorf("order: invalid enum value for delete field: %q", d)
 	}
 }

@@ -12,8 +12,20 @@ type Menu func(*sql.Selector)
 // Order is the predicate function for order builders.
 type Order func(*sql.Selector)
 
+// OrderAmounts is the predicate function for orderamounts builders.
+type OrderAmounts func(*sql.Selector)
+
+// OrderDelivery is the predicate function for orderdelivery builders.
+type OrderDelivery func(*sql.Selector)
+
+// OrderItem is the predicate function for orderitem builders.
+type OrderItem func(*sql.Selector)
+
 // OrderPay is the predicate function for orderpay builders.
 type OrderPay func(*sql.Selector)
+
+// OrderSetting is the predicate function for ordersetting builders.
+type OrderSetting func(*sql.Selector)
 
 // Product is the predicate function for product builders.
 type Product func(*sql.Selector)

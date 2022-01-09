@@ -26,7 +26,11 @@ type config struct {
 type hooks struct {
 	Menu                  []ent.Hook
 	Order                 []ent.Hook
+	OrderAmounts          []ent.Hook
+	OrderDelivery         []ent.Hook
+	OrderItem             []ent.Hook
 	OrderPay              []ent.Hook
+	OrderSetting          []ent.Hook
 	Product               []ent.Hook
 	ProductAttributeKey   []ent.Hook
 	ProductAttributeValue []ent.Hook

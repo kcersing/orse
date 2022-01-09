@@ -20,7 +20,8 @@ func (OrderPay) Config() ent.Config {
 // Fields of the Order.
 func (OrderPay) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("order_id").Optional(),
+		field.Int("order_id").
+			Optional(),
 		field.Int("user_id"),
 		field.String("sn").
 			Unique(),
@@ -48,7 +49,7 @@ func (OrderPay) Mixin() []ent.Mixin {
 }
 func (OrderPay) Index() []ent.Index {
 	return []ent.Index{
-		index.Fields("user_id"),
+		index.Fields("order_id"),
 		index.Fields("sn").Unique(),
 	}
 }

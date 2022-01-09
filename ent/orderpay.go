@@ -25,8 +25,6 @@ type OrderPay struct {
 	OrderID int `json:"order_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID int `json:"user_id,omitempty"`
-	// CreateID holds the value of the "create_id" field.
-	CreateID int `json:"create_id,omitempty"`
 	// Sn holds the value of the "sn" field.
 	Sn string `json:"sn,omitempty"`
 	// Price holds the value of the "price" field.
@@ -68,7 +66,7 @@ func (*OrderPay) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case orderpay.FieldPrice:
 			values[i] = new(sql.NullFloat64)
-		case orderpay.FieldID, orderpay.FieldOrderID, orderpay.FieldUserID, orderpay.FieldCreateID:
+		case orderpay.FieldID, orderpay.FieldOrderID, orderpay.FieldUserID:
 			values[i] = new(sql.NullInt64)
 		case orderpay.FieldSn, orderpay.FieldPayMode:
 			values[i] = new(sql.NullString)
@@ -118,12 +116,6 @@ func (op *OrderPay) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
 				op.UserID = int(value.Int64)
-			}
-		case orderpay.FieldCreateID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field create_id", values[i])
-			} else if value.Valid {
-				op.CreateID = int(value.Int64)
 			}
 		case orderpay.FieldSn:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -184,8 +176,6 @@ func (op *OrderPay) String() string {
 	builder.WriteString(fmt.Sprintf("%v", op.OrderID))
 	builder.WriteString(", user_id=")
 	builder.WriteString(fmt.Sprintf("%v", op.UserID))
-	builder.WriteString(", create_id=")
-	builder.WriteString(fmt.Sprintf("%v", op.CreateID))
 	builder.WriteString(", sn=")
 	builder.WriteString(op.Sn)
 	builder.WriteString(", price=")

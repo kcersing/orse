@@ -5,7 +5,11 @@ package ent
 import (
 	"orse/ent/menu"
 	"orse/ent/order"
+	"orse/ent/orderamounts"
+	"orse/ent/orderdelivery"
+	"orse/ent/orderitem"
 	"orse/ent/orderpay"
+	"orse/ent/ordersetting"
 	"orse/ent/product"
 	"orse/ent/productattributekey"
 	"orse/ent/productattributevalue"
@@ -58,6 +62,83 @@ func init() {
 	order.DefaultUpdatedAt = orderDescUpdatedAt.Default.(func() time.Time)
 	// order.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	order.UpdateDefaultUpdatedAt = orderDescUpdatedAt.UpdateDefault.(func() time.Time)
+	orderamountsMixin := schema.OrderAmounts{}.Mixin()
+	orderamountsMixinFields0 := orderamountsMixin[0].Fields()
+	_ = orderamountsMixinFields0
+	orderamountsFields := schema.OrderAmounts{}.Fields()
+	_ = orderamountsFields
+	// orderamountsDescCreatedAt is the schema descriptor for created_at field.
+	orderamountsDescCreatedAt := orderamountsMixinFields0[0].Descriptor()
+	// orderamounts.DefaultCreatedAt holds the default value on creation for the created_at field.
+	orderamounts.DefaultCreatedAt = orderamountsDescCreatedAt.Default.(func() time.Time)
+	// orderamountsDescUpdatedAt is the schema descriptor for updated_at field.
+	orderamountsDescUpdatedAt := orderamountsMixinFields0[1].Descriptor()
+	// orderamounts.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	orderamounts.DefaultUpdatedAt = orderamountsDescUpdatedAt.Default.(func() time.Time)
+	// orderamounts.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	orderamounts.UpdateDefaultUpdatedAt = orderamountsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// orderamountsDescTotalAmount is the schema descriptor for total_amount field.
+	orderamountsDescTotalAmount := orderamountsFields[1].Descriptor()
+	// orderamounts.DefaultTotalAmount holds the default value on creation for the total_amount field.
+	orderamounts.DefaultTotalAmount = orderamountsDescTotalAmount.Default.(float64)
+	// orderamountsDescPayAmount is the schema descriptor for pay_amount field.
+	orderamountsDescPayAmount := orderamountsFields[2].Descriptor()
+	// orderamounts.DefaultPayAmount holds the default value on creation for the pay_amount field.
+	orderamounts.DefaultPayAmount = orderamountsDescPayAmount.Default.(float64)
+	// orderamountsDescFreightAmount is the schema descriptor for freight_amount field.
+	orderamountsDescFreightAmount := orderamountsFields[3].Descriptor()
+	// orderamounts.DefaultFreightAmount holds the default value on creation for the freight_amount field.
+	orderamounts.DefaultFreightAmount = orderamountsDescFreightAmount.Default.(float64)
+	// orderamountsDescPromotionAmount is the schema descriptor for promotion_amount field.
+	orderamountsDescPromotionAmount := orderamountsFields[4].Descriptor()
+	// orderamounts.DefaultPromotionAmount holds the default value on creation for the promotion_amount field.
+	orderamounts.DefaultPromotionAmount = orderamountsDescPromotionAmount.Default.(float64)
+	// orderamountsDescIntegrationAmount is the schema descriptor for integration_amount field.
+	orderamountsDescIntegrationAmount := orderamountsFields[5].Descriptor()
+	// orderamounts.DefaultIntegrationAmount holds the default value on creation for the integration_amount field.
+	orderamounts.DefaultIntegrationAmount = orderamountsDescIntegrationAmount.Default.(float64)
+	// orderamountsDescCouponAmount is the schema descriptor for coupon_amount field.
+	orderamountsDescCouponAmount := orderamountsFields[7].Descriptor()
+	// orderamounts.DefaultCouponAmount holds the default value on creation for the coupon_amount field.
+	orderamounts.DefaultCouponAmount = orderamountsDescCouponAmount.Default.(float64)
+	// orderamountsDescDiscountAmount is the schema descriptor for discount_amount field.
+	orderamountsDescDiscountAmount := orderamountsFields[8].Descriptor()
+	// orderamounts.DefaultDiscountAmount holds the default value on creation for the discount_amount field.
+	orderamounts.DefaultDiscountAmount = orderamountsDescDiscountAmount.Default.(float64)
+	orderdeliveryMixin := schema.OrderDelivery{}.Mixin()
+	orderdeliveryMixinFields0 := orderdeliveryMixin[0].Fields()
+	_ = orderdeliveryMixinFields0
+	orderdeliveryFields := schema.OrderDelivery{}.Fields()
+	_ = orderdeliveryFields
+	// orderdeliveryDescCreatedAt is the schema descriptor for created_at field.
+	orderdeliveryDescCreatedAt := orderdeliveryMixinFields0[0].Descriptor()
+	// orderdelivery.DefaultCreatedAt holds the default value on creation for the created_at field.
+	orderdelivery.DefaultCreatedAt = orderdeliveryDescCreatedAt.Default.(func() time.Time)
+	// orderdeliveryDescUpdatedAt is the schema descriptor for updated_at field.
+	orderdeliveryDescUpdatedAt := orderdeliveryMixinFields0[1].Descriptor()
+	// orderdelivery.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	orderdelivery.DefaultUpdatedAt = orderdeliveryDescUpdatedAt.Default.(func() time.Time)
+	// orderdelivery.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	orderdelivery.UpdateDefaultUpdatedAt = orderdeliveryDescUpdatedAt.UpdateDefault.(func() time.Time)
+	orderitemMixin := schema.OrderItem{}.Mixin()
+	orderitemMixinFields0 := orderitemMixin[0].Fields()
+	_ = orderitemMixinFields0
+	orderitemFields := schema.OrderItem{}.Fields()
+	_ = orderitemFields
+	// orderitemDescCreatedAt is the schema descriptor for created_at field.
+	orderitemDescCreatedAt := orderitemMixinFields0[0].Descriptor()
+	// orderitem.DefaultCreatedAt holds the default value on creation for the created_at field.
+	orderitem.DefaultCreatedAt = orderitemDescCreatedAt.Default.(func() time.Time)
+	// orderitemDescUpdatedAt is the schema descriptor for updated_at field.
+	orderitemDescUpdatedAt := orderitemMixinFields0[1].Descriptor()
+	// orderitem.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	orderitem.DefaultUpdatedAt = orderitemDescUpdatedAt.Default.(func() time.Time)
+	// orderitem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	orderitem.UpdateDefaultUpdatedAt = orderitemDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// orderitemDescProductPrice is the schema descriptor for product_price field.
+	orderitemDescProductPrice := orderitemFields[7].Descriptor()
+	// orderitem.DefaultProductPrice holds the default value on creation for the product_price field.
+	orderitem.DefaultProductPrice = orderitemDescProductPrice.Default.(float64)
 	orderpayMixin := schema.OrderPay{}.Mixin()
 	orderpayMixinFields0 := orderpayMixin[0].Fields()
 	_ = orderpayMixinFields0
@@ -73,14 +154,41 @@ func init() {
 	orderpay.DefaultUpdatedAt = orderpayDescUpdatedAt.Default.(func() time.Time)
 	// orderpay.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	orderpay.UpdateDefaultUpdatedAt = orderpayDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// orderpayDescCreateID is the schema descriptor for create_id field.
-	orderpayDescCreateID := orderpayFields[2].Descriptor()
-	// orderpay.DefaultCreateID holds the default value on creation for the create_id field.
-	orderpay.DefaultCreateID = orderpayDescCreateID.Default.(int)
 	// orderpayDescPrice is the schema descriptor for price field.
-	orderpayDescPrice := orderpayFields[4].Descriptor()
+	orderpayDescPrice := orderpayFields[3].Descriptor()
 	// orderpay.DefaultPrice holds the default value on creation for the price field.
 	orderpay.DefaultPrice = orderpayDescPrice.Default.(float64)
+	ordersettingMixin := schema.OrderSetting{}.Mixin()
+	ordersettingMixinFields0 := ordersettingMixin[0].Fields()
+	_ = ordersettingMixinFields0
+	ordersettingFields := schema.OrderSetting{}.Fields()
+	_ = ordersettingFields
+	// ordersettingDescCreatedAt is the schema descriptor for created_at field.
+	ordersettingDescCreatedAt := ordersettingMixinFields0[0].Descriptor()
+	// ordersetting.DefaultCreatedAt holds the default value on creation for the created_at field.
+	ordersetting.DefaultCreatedAt = ordersettingDescCreatedAt.Default.(func() time.Time)
+	// ordersettingDescUpdatedAt is the schema descriptor for updated_at field.
+	ordersettingDescUpdatedAt := ordersettingMixinFields0[1].Descriptor()
+	// ordersetting.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	ordersetting.DefaultUpdatedAt = ordersettingDescUpdatedAt.Default.(func() time.Time)
+	// ordersetting.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	ordersetting.UpdateDefaultUpdatedAt = ordersettingDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// ordersettingDescOrderOvertime is the schema descriptor for order_overtime field.
+	ordersettingDescOrderOvertime := ordersettingFields[0].Descriptor()
+	// ordersetting.DefaultOrderOvertime holds the default value on creation for the order_overtime field.
+	ordersetting.DefaultOrderOvertime = ordersettingDescOrderOvertime.Default.(int)
+	// ordersettingDescConfirmOvertime is the schema descriptor for confirm_overtime field.
+	ordersettingDescConfirmOvertime := ordersettingFields[1].Descriptor()
+	// ordersetting.DefaultConfirmOvertime holds the default value on creation for the confirm_overtime field.
+	ordersetting.DefaultConfirmOvertime = ordersettingDescConfirmOvertime.Default.(int)
+	// ordersettingDescFinishOvertime is the schema descriptor for finish_overtime field.
+	ordersettingDescFinishOvertime := ordersettingFields[2].Descriptor()
+	// ordersetting.DefaultFinishOvertime holds the default value on creation for the finish_overtime field.
+	ordersetting.DefaultFinishOvertime = ordersettingDescFinishOvertime.Default.(int)
+	// ordersettingDescCommentOvertime is the schema descriptor for comment_overtime field.
+	ordersettingDescCommentOvertime := ordersettingFields[3].Descriptor()
+	// ordersetting.DefaultCommentOvertime holds the default value on creation for the comment_overtime field.
+	ordersetting.DefaultCommentOvertime = ordersettingDescCommentOvertime.Default.(int)
 	productMixin := schema.Product{}.Mixin()
 	productMixinFields0 := productMixin[0].Fields()
 	_ = productMixinFields0

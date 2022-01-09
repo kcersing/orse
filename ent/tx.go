@@ -16,8 +16,16 @@ type Tx struct {
 	Menu *MenuClient
 	// Order is the client for interacting with the Order builders.
 	Order *OrderClient
+	// OrderAmounts is the client for interacting with the OrderAmounts builders.
+	OrderAmounts *OrderAmountsClient
+	// OrderDelivery is the client for interacting with the OrderDelivery builders.
+	OrderDelivery *OrderDeliveryClient
+	// OrderItem is the client for interacting with the OrderItem builders.
+	OrderItem *OrderItemClient
 	// OrderPay is the client for interacting with the OrderPay builders.
 	OrderPay *OrderPayClient
+	// OrderSetting is the client for interacting with the OrderSetting builders.
+	OrderSetting *OrderSettingClient
 	// Product is the client for interacting with the Product builders.
 	Product *ProductClient
 	// ProductAttributeKey is the client for interacting with the ProductAttributeKey builders.
@@ -167,7 +175,11 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Menu = NewMenuClient(tx.config)
 	tx.Order = NewOrderClient(tx.config)
+	tx.OrderAmounts = NewOrderAmountsClient(tx.config)
+	tx.OrderDelivery = NewOrderDeliveryClient(tx.config)
+	tx.OrderItem = NewOrderItemClient(tx.config)
 	tx.OrderPay = NewOrderPayClient(tx.config)
+	tx.OrderSetting = NewOrderSettingClient(tx.config)
 	tx.Product = NewProductClient(tx.config)
 	tx.ProductAttributeKey = NewProductAttributeKeyClient(tx.config)
 	tx.ProductAttributeValue = NewProductAttributeValueClient(tx.config)

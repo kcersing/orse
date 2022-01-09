@@ -7,6 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"orse/ent/order"
+	"orse/ent/orderamounts"
+	"orse/ent/orderdelivery"
+	"orse/ent/orderitem"
 	"orse/ent/orderpay"
 	"time"
 
@@ -50,7 +53,7 @@ func (oc *OrderCreate) SetNillableUpdatedAt(t *time.Time) *OrderCreate {
 }
 
 // SetUserID sets the "user_id" field.
-func (oc *OrderCreate) SetUserID(i int64) *OrderCreate {
+func (oc *OrderCreate) SetUserID(i int) *OrderCreate {
 	oc.mutation.SetUserID(i)
 	return oc
 }
@@ -58,6 +61,20 @@ func (oc *OrderCreate) SetUserID(i int64) *OrderCreate {
 // SetSn sets the "sn" field.
 func (oc *OrderCreate) SetSn(s string) *OrderCreate {
 	oc.mutation.SetSn(s)
+	return oc
+}
+
+// SetSource sets the "source" field.
+func (oc *OrderCreate) SetSource(o order.Source) *OrderCreate {
+	oc.mutation.SetSource(o)
+	return oc
+}
+
+// SetNillableSource sets the "source" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableSource(o *order.Source) *OrderCreate {
+	if o != nil {
+		oc.SetSource(*o)
+	}
 	return oc
 }
 
@@ -75,6 +92,90 @@ func (oc *OrderCreate) SetNillableStatus(o *order.Status) *OrderCreate {
 	return oc
 }
 
+// SetIntegration sets the "integration" field.
+func (oc *OrderCreate) SetIntegration(i int) *OrderCreate {
+	oc.mutation.SetIntegration(i)
+	return oc
+}
+
+// SetPaymentTime sets the "payment_time" field.
+func (oc *OrderCreate) SetPaymentTime(t time.Time) *OrderCreate {
+	oc.mutation.SetPaymentTime(t)
+	return oc
+}
+
+// SetNillablePaymentTime sets the "payment_time" field if the given value is not nil.
+func (oc *OrderCreate) SetNillablePaymentTime(t *time.Time) *OrderCreate {
+	if t != nil {
+		oc.SetPaymentTime(*t)
+	}
+	return oc
+}
+
+// SetNote sets the "note" field.
+func (oc *OrderCreate) SetNote(s string) *OrderCreate {
+	oc.mutation.SetNote(s)
+	return oc
+}
+
+// SetCommentTime sets the "comment_time" field.
+func (oc *OrderCreate) SetCommentTime(t time.Time) *OrderCreate {
+	oc.mutation.SetCommentTime(t)
+	return oc
+}
+
+// SetNillableCommentTime sets the "comment_time" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableCommentTime(t *time.Time) *OrderCreate {
+	if t != nil {
+		oc.SetCommentTime(*t)
+	}
+	return oc
+}
+
+// SetDelete sets the "delete" field.
+func (oc *OrderCreate) SetDelete(o order.Delete) *OrderCreate {
+	oc.mutation.SetDelete(o)
+	return oc
+}
+
+// SetNillableDelete sets the "delete" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableDelete(o *order.Delete) *OrderCreate {
+	if o != nil {
+		oc.SetDelete(*o)
+	}
+	return oc
+}
+
+// AddItemIDs adds the "items" edge to the OrderItem entity by IDs.
+func (oc *OrderCreate) AddItemIDs(ids ...int) *OrderCreate {
+	oc.mutation.AddItemIDs(ids...)
+	return oc
+}
+
+// AddItems adds the "items" edges to the OrderItem entity.
+func (oc *OrderCreate) AddItems(o ...*OrderItem) *OrderCreate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return oc.AddItemIDs(ids...)
+}
+
+// AddAmountIDs adds the "amounts" edge to the OrderAmounts entity by IDs.
+func (oc *OrderCreate) AddAmountIDs(ids ...int) *OrderCreate {
+	oc.mutation.AddAmountIDs(ids...)
+	return oc
+}
+
+// AddAmounts adds the "amounts" edges to the OrderAmounts entity.
+func (oc *OrderCreate) AddAmounts(o ...*OrderAmounts) *OrderCreate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return oc.AddAmountIDs(ids...)
+}
+
 // AddPayIDs adds the "pays" edge to the OrderPay entity by IDs.
 func (oc *OrderCreate) AddPayIDs(ids ...int) *OrderCreate {
 	oc.mutation.AddPayIDs(ids...)
@@ -88,6 +189,21 @@ func (oc *OrderCreate) AddPays(o ...*OrderPay) *OrderCreate {
 		ids[i] = o[i].ID
 	}
 	return oc.AddPayIDs(ids...)
+}
+
+// AddDeliveryIDs adds the "deliverys" edge to the OrderDelivery entity by IDs.
+func (oc *OrderCreate) AddDeliveryIDs(ids ...int) *OrderCreate {
+	oc.mutation.AddDeliveryIDs(ids...)
+	return oc
+}
+
+// AddDeliverys adds the "deliverys" edges to the OrderDelivery entity.
+func (oc *OrderCreate) AddDeliverys(o ...*OrderDelivery) *OrderCreate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return oc.AddDeliveryIDs(ids...)
 }
 
 // Mutation returns the OrderMutation object of the builder.
@@ -169,9 +285,17 @@ func (oc *OrderCreate) defaults() {
 		v := order.DefaultUpdatedAt()
 		oc.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := oc.mutation.Source(); !ok {
+		v := order.DefaultSource
+		oc.mutation.SetSource(v)
+	}
 	if _, ok := oc.mutation.Status(); !ok {
 		v := order.DefaultStatus
 		oc.mutation.SetStatus(v)
+	}
+	if _, ok := oc.mutation.Delete(); !ok {
+		v := order.DefaultDelete
+		oc.mutation.SetDelete(v)
 	}
 }
 
@@ -183,9 +307,25 @@ func (oc *OrderCreate) check() error {
 	if _, ok := oc.mutation.Sn(); !ok {
 		return &ValidationError{Name: "sn", err: errors.New(`ent: missing required field "sn"`)}
 	}
+	if v, ok := oc.mutation.Source(); ok {
+		if err := order.SourceValidator(v); err != nil {
+			return &ValidationError{Name: "source", err: fmt.Errorf(`ent: validator failed for field "source": %w`, err)}
+		}
+	}
 	if v, ok := oc.mutation.Status(); ok {
 		if err := order.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "status": %w`, err)}
+		}
+	}
+	if _, ok := oc.mutation.Integration(); !ok {
+		return &ValidationError{Name: "integration", err: errors.New(`ent: missing required field "integration"`)}
+	}
+	if _, ok := oc.mutation.Note(); !ok {
+		return &ValidationError{Name: "note", err: errors.New(`ent: missing required field "note"`)}
+	}
+	if v, ok := oc.mutation.Delete(); ok {
+		if err := order.DeleteValidator(v); err != nil {
+			return &ValidationError{Name: "delete", err: fmt.Errorf(`ent: validator failed for field "delete": %w`, err)}
 		}
 	}
 	return nil
@@ -233,7 +373,7 @@ func (oc *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := oc.mutation.UserID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeInt,
 			Value:  value,
 			Column: order.FieldUserID,
 		})
@@ -247,6 +387,14 @@ func (oc *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 		})
 		_node.Sn = value
 	}
+	if value, ok := oc.mutation.Source(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: order.FieldSource,
+		})
+		_node.Source = value
+	}
 	if value, ok := oc.mutation.Status(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
@@ -254,6 +402,84 @@ func (oc *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 			Column: order.FieldStatus,
 		})
 		_node.Status = value
+	}
+	if value, ok := oc.mutation.Integration(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: order.FieldIntegration,
+		})
+		_node.Integration = value
+	}
+	if value, ok := oc.mutation.PaymentTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: order.FieldPaymentTime,
+		})
+		_node.PaymentTime = value
+	}
+	if value, ok := oc.mutation.Note(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: order.FieldNote,
+		})
+		_node.Note = value
+	}
+	if value, ok := oc.mutation.CommentTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: order.FieldCommentTime,
+		})
+		_node.CommentTime = value
+	}
+	if value, ok := oc.mutation.Delete(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: order.FieldDelete,
+		})
+		_node.Delete = value
+	}
+	if nodes := oc.mutation.ItemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.ItemsTable,
+			Columns: []string{order.ItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderitem.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := oc.mutation.AmountsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.AmountsTable,
+			Columns: []string{order.AmountsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderamounts.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := oc.mutation.PaysIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -266,6 +492,25 @@ func (oc *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: orderpay.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := oc.mutation.DeliverysIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.DeliverysTable,
+			Columns: []string{order.DeliverysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderdelivery.FieldID,
 				},
 			},
 		}

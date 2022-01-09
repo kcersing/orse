@@ -6,6 +6,9 @@ import (
 	"context"
 	"fmt"
 	"orse/ent/order"
+	"orse/ent/orderamounts"
+	"orse/ent/orderdelivery"
+	"orse/ent/orderitem"
 	"orse/ent/orderpay"
 	"orse/ent/predicate"
 	"time"
@@ -61,14 +64,14 @@ func (ou *OrderUpdate) ClearUpdatedAt() *OrderUpdate {
 }
 
 // SetUserID sets the "user_id" field.
-func (ou *OrderUpdate) SetUserID(i int64) *OrderUpdate {
+func (ou *OrderUpdate) SetUserID(i int) *OrderUpdate {
 	ou.mutation.ResetUserID()
 	ou.mutation.SetUserID(i)
 	return ou
 }
 
 // AddUserID adds i to the "user_id" field.
-func (ou *OrderUpdate) AddUserID(i int64) *OrderUpdate {
+func (ou *OrderUpdate) AddUserID(i int) *OrderUpdate {
 	ou.mutation.AddUserID(i)
 	return ou
 }
@@ -76,6 +79,26 @@ func (ou *OrderUpdate) AddUserID(i int64) *OrderUpdate {
 // SetSn sets the "sn" field.
 func (ou *OrderUpdate) SetSn(s string) *OrderUpdate {
 	ou.mutation.SetSn(s)
+	return ou
+}
+
+// SetSource sets the "source" field.
+func (ou *OrderUpdate) SetSource(o order.Source) *OrderUpdate {
+	ou.mutation.SetSource(o)
+	return ou
+}
+
+// SetNillableSource sets the "source" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableSource(o *order.Source) *OrderUpdate {
+	if o != nil {
+		ou.SetSource(*o)
+	}
+	return ou
+}
+
+// ClearSource clears the value of the "source" field.
+func (ou *OrderUpdate) ClearSource() *OrderUpdate {
+	ou.mutation.ClearSource()
 	return ou
 }
 
@@ -99,6 +122,115 @@ func (ou *OrderUpdate) ClearStatus() *OrderUpdate {
 	return ou
 }
 
+// SetIntegration sets the "integration" field.
+func (ou *OrderUpdate) SetIntegration(i int) *OrderUpdate {
+	ou.mutation.ResetIntegration()
+	ou.mutation.SetIntegration(i)
+	return ou
+}
+
+// AddIntegration adds i to the "integration" field.
+func (ou *OrderUpdate) AddIntegration(i int) *OrderUpdate {
+	ou.mutation.AddIntegration(i)
+	return ou
+}
+
+// SetPaymentTime sets the "payment_time" field.
+func (ou *OrderUpdate) SetPaymentTime(t time.Time) *OrderUpdate {
+	ou.mutation.SetPaymentTime(t)
+	return ou
+}
+
+// SetNillablePaymentTime sets the "payment_time" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillablePaymentTime(t *time.Time) *OrderUpdate {
+	if t != nil {
+		ou.SetPaymentTime(*t)
+	}
+	return ou
+}
+
+// ClearPaymentTime clears the value of the "payment_time" field.
+func (ou *OrderUpdate) ClearPaymentTime() *OrderUpdate {
+	ou.mutation.ClearPaymentTime()
+	return ou
+}
+
+// SetNote sets the "note" field.
+func (ou *OrderUpdate) SetNote(s string) *OrderUpdate {
+	ou.mutation.SetNote(s)
+	return ou
+}
+
+// SetCommentTime sets the "comment_time" field.
+func (ou *OrderUpdate) SetCommentTime(t time.Time) *OrderUpdate {
+	ou.mutation.SetCommentTime(t)
+	return ou
+}
+
+// SetNillableCommentTime sets the "comment_time" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableCommentTime(t *time.Time) *OrderUpdate {
+	if t != nil {
+		ou.SetCommentTime(*t)
+	}
+	return ou
+}
+
+// ClearCommentTime clears the value of the "comment_time" field.
+func (ou *OrderUpdate) ClearCommentTime() *OrderUpdate {
+	ou.mutation.ClearCommentTime()
+	return ou
+}
+
+// SetDelete sets the "delete" field.
+func (ou *OrderUpdate) SetDelete(o order.Delete) *OrderUpdate {
+	ou.mutation.SetDelete(o)
+	return ou
+}
+
+// SetNillableDelete sets the "delete" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableDelete(o *order.Delete) *OrderUpdate {
+	if o != nil {
+		ou.SetDelete(*o)
+	}
+	return ou
+}
+
+// ClearDelete clears the value of the "delete" field.
+func (ou *OrderUpdate) ClearDelete() *OrderUpdate {
+	ou.mutation.ClearDelete()
+	return ou
+}
+
+// AddItemIDs adds the "items" edge to the OrderItem entity by IDs.
+func (ou *OrderUpdate) AddItemIDs(ids ...int) *OrderUpdate {
+	ou.mutation.AddItemIDs(ids...)
+	return ou
+}
+
+// AddItems adds the "items" edges to the OrderItem entity.
+func (ou *OrderUpdate) AddItems(o ...*OrderItem) *OrderUpdate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return ou.AddItemIDs(ids...)
+}
+
+// AddAmountIDs adds the "amounts" edge to the OrderAmounts entity by IDs.
+func (ou *OrderUpdate) AddAmountIDs(ids ...int) *OrderUpdate {
+	ou.mutation.AddAmountIDs(ids...)
+	return ou
+}
+
+// AddAmounts adds the "amounts" edges to the OrderAmounts entity.
+func (ou *OrderUpdate) AddAmounts(o ...*OrderAmounts) *OrderUpdate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return ou.AddAmountIDs(ids...)
+}
+
 // AddPayIDs adds the "pays" edge to the OrderPay entity by IDs.
 func (ou *OrderUpdate) AddPayIDs(ids ...int) *OrderUpdate {
 	ou.mutation.AddPayIDs(ids...)
@@ -114,9 +246,66 @@ func (ou *OrderUpdate) AddPays(o ...*OrderPay) *OrderUpdate {
 	return ou.AddPayIDs(ids...)
 }
 
+// AddDeliveryIDs adds the "deliverys" edge to the OrderDelivery entity by IDs.
+func (ou *OrderUpdate) AddDeliveryIDs(ids ...int) *OrderUpdate {
+	ou.mutation.AddDeliveryIDs(ids...)
+	return ou
+}
+
+// AddDeliverys adds the "deliverys" edges to the OrderDelivery entity.
+func (ou *OrderUpdate) AddDeliverys(o ...*OrderDelivery) *OrderUpdate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return ou.AddDeliveryIDs(ids...)
+}
+
 // Mutation returns the OrderMutation object of the builder.
 func (ou *OrderUpdate) Mutation() *OrderMutation {
 	return ou.mutation
+}
+
+// ClearItems clears all "items" edges to the OrderItem entity.
+func (ou *OrderUpdate) ClearItems() *OrderUpdate {
+	ou.mutation.ClearItems()
+	return ou
+}
+
+// RemoveItemIDs removes the "items" edge to OrderItem entities by IDs.
+func (ou *OrderUpdate) RemoveItemIDs(ids ...int) *OrderUpdate {
+	ou.mutation.RemoveItemIDs(ids...)
+	return ou
+}
+
+// RemoveItems removes "items" edges to OrderItem entities.
+func (ou *OrderUpdate) RemoveItems(o ...*OrderItem) *OrderUpdate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return ou.RemoveItemIDs(ids...)
+}
+
+// ClearAmounts clears all "amounts" edges to the OrderAmounts entity.
+func (ou *OrderUpdate) ClearAmounts() *OrderUpdate {
+	ou.mutation.ClearAmounts()
+	return ou
+}
+
+// RemoveAmountIDs removes the "amounts" edge to OrderAmounts entities by IDs.
+func (ou *OrderUpdate) RemoveAmountIDs(ids ...int) *OrderUpdate {
+	ou.mutation.RemoveAmountIDs(ids...)
+	return ou
+}
+
+// RemoveAmounts removes "amounts" edges to OrderAmounts entities.
+func (ou *OrderUpdate) RemoveAmounts(o ...*OrderAmounts) *OrderUpdate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return ou.RemoveAmountIDs(ids...)
 }
 
 // ClearPays clears all "pays" edges to the OrderPay entity.
@@ -138,6 +327,27 @@ func (ou *OrderUpdate) RemovePays(o ...*OrderPay) *OrderUpdate {
 		ids[i] = o[i].ID
 	}
 	return ou.RemovePayIDs(ids...)
+}
+
+// ClearDeliverys clears all "deliverys" edges to the OrderDelivery entity.
+func (ou *OrderUpdate) ClearDeliverys() *OrderUpdate {
+	ou.mutation.ClearDeliverys()
+	return ou
+}
+
+// RemoveDeliveryIDs removes the "deliverys" edge to OrderDelivery entities by IDs.
+func (ou *OrderUpdate) RemoveDeliveryIDs(ids ...int) *OrderUpdate {
+	ou.mutation.RemoveDeliveryIDs(ids...)
+	return ou
+}
+
+// RemoveDeliverys removes "deliverys" edges to OrderDelivery entities.
+func (ou *OrderUpdate) RemoveDeliverys(o ...*OrderDelivery) *OrderUpdate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return ou.RemoveDeliveryIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -211,9 +421,19 @@ func (ou *OrderUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (ou *OrderUpdate) check() error {
+	if v, ok := ou.mutation.Source(); ok {
+		if err := order.SourceValidator(v); err != nil {
+			return &ValidationError{Name: "source", err: fmt.Errorf("ent: validator failed for field \"source\": %w", err)}
+		}
+	}
 	if v, ok := ou.mutation.Status(); ok {
 		if err := order.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+		}
+	}
+	if v, ok := ou.mutation.Delete(); ok {
+		if err := order.DeleteValidator(v); err != nil {
+			return &ValidationError{Name: "delete", err: fmt.Errorf("ent: validator failed for field \"delete\": %w", err)}
 		}
 	}
 	return nil
@@ -265,14 +485,14 @@ func (ou *OrderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := ou.mutation.UserID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeInt,
 			Value:  value,
 			Column: order.FieldUserID,
 		})
 	}
 	if value, ok := ou.mutation.AddedUserID(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeInt,
 			Value:  value,
 			Column: order.FieldUserID,
 		})
@@ -282,6 +502,19 @@ func (ou *OrderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeString,
 			Value:  value,
 			Column: order.FieldSn,
+		})
+	}
+	if value, ok := ou.mutation.Source(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: order.FieldSource,
+		})
+	}
+	if ou.mutation.SourceCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Column: order.FieldSource,
 		})
 	}
 	if value, ok := ou.mutation.Status(); ok {
@@ -296,6 +529,174 @@ func (ou *OrderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeEnum,
 			Column: order.FieldStatus,
 		})
+	}
+	if value, ok := ou.mutation.Integration(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: order.FieldIntegration,
+		})
+	}
+	if value, ok := ou.mutation.AddedIntegration(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: order.FieldIntegration,
+		})
+	}
+	if value, ok := ou.mutation.PaymentTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: order.FieldPaymentTime,
+		})
+	}
+	if ou.mutation.PaymentTimeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: order.FieldPaymentTime,
+		})
+	}
+	if value, ok := ou.mutation.Note(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: order.FieldNote,
+		})
+	}
+	if value, ok := ou.mutation.CommentTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: order.FieldCommentTime,
+		})
+	}
+	if ou.mutation.CommentTimeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: order.FieldCommentTime,
+		})
+	}
+	if value, ok := ou.mutation.Delete(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: order.FieldDelete,
+		})
+	}
+	if ou.mutation.DeleteCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Column: order.FieldDelete,
+		})
+	}
+	if ou.mutation.ItemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.ItemsTable,
+			Columns: []string{order.ItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderitem.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ou.mutation.RemovedItemsIDs(); len(nodes) > 0 && !ou.mutation.ItemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.ItemsTable,
+			Columns: []string{order.ItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderitem.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ou.mutation.ItemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.ItemsTable,
+			Columns: []string{order.ItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderitem.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ou.mutation.AmountsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.AmountsTable,
+			Columns: []string{order.AmountsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderamounts.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ou.mutation.RemovedAmountsIDs(); len(nodes) > 0 && !ou.mutation.AmountsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.AmountsTable,
+			Columns: []string{order.AmountsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderamounts.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ou.mutation.AmountsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.AmountsTable,
+			Columns: []string{order.AmountsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderamounts.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if ou.mutation.PaysCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -343,6 +744,60 @@ func (ou *OrderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: orderpay.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ou.mutation.DeliverysCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.DeliverysTable,
+			Columns: []string{order.DeliverysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderdelivery.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ou.mutation.RemovedDeliverysIDs(); len(nodes) > 0 && !ou.mutation.DeliverysCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.DeliverysTable,
+			Columns: []string{order.DeliverysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderdelivery.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ou.mutation.DeliverysIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.DeliverysTable,
+			Columns: []string{order.DeliverysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderdelivery.FieldID,
 				},
 			},
 		}
@@ -403,14 +858,14 @@ func (ouo *OrderUpdateOne) ClearUpdatedAt() *OrderUpdateOne {
 }
 
 // SetUserID sets the "user_id" field.
-func (ouo *OrderUpdateOne) SetUserID(i int64) *OrderUpdateOne {
+func (ouo *OrderUpdateOne) SetUserID(i int) *OrderUpdateOne {
 	ouo.mutation.ResetUserID()
 	ouo.mutation.SetUserID(i)
 	return ouo
 }
 
 // AddUserID adds i to the "user_id" field.
-func (ouo *OrderUpdateOne) AddUserID(i int64) *OrderUpdateOne {
+func (ouo *OrderUpdateOne) AddUserID(i int) *OrderUpdateOne {
 	ouo.mutation.AddUserID(i)
 	return ouo
 }
@@ -418,6 +873,26 @@ func (ouo *OrderUpdateOne) AddUserID(i int64) *OrderUpdateOne {
 // SetSn sets the "sn" field.
 func (ouo *OrderUpdateOne) SetSn(s string) *OrderUpdateOne {
 	ouo.mutation.SetSn(s)
+	return ouo
+}
+
+// SetSource sets the "source" field.
+func (ouo *OrderUpdateOne) SetSource(o order.Source) *OrderUpdateOne {
+	ouo.mutation.SetSource(o)
+	return ouo
+}
+
+// SetNillableSource sets the "source" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableSource(o *order.Source) *OrderUpdateOne {
+	if o != nil {
+		ouo.SetSource(*o)
+	}
+	return ouo
+}
+
+// ClearSource clears the value of the "source" field.
+func (ouo *OrderUpdateOne) ClearSource() *OrderUpdateOne {
+	ouo.mutation.ClearSource()
 	return ouo
 }
 
@@ -441,6 +916,115 @@ func (ouo *OrderUpdateOne) ClearStatus() *OrderUpdateOne {
 	return ouo
 }
 
+// SetIntegration sets the "integration" field.
+func (ouo *OrderUpdateOne) SetIntegration(i int) *OrderUpdateOne {
+	ouo.mutation.ResetIntegration()
+	ouo.mutation.SetIntegration(i)
+	return ouo
+}
+
+// AddIntegration adds i to the "integration" field.
+func (ouo *OrderUpdateOne) AddIntegration(i int) *OrderUpdateOne {
+	ouo.mutation.AddIntegration(i)
+	return ouo
+}
+
+// SetPaymentTime sets the "payment_time" field.
+func (ouo *OrderUpdateOne) SetPaymentTime(t time.Time) *OrderUpdateOne {
+	ouo.mutation.SetPaymentTime(t)
+	return ouo
+}
+
+// SetNillablePaymentTime sets the "payment_time" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillablePaymentTime(t *time.Time) *OrderUpdateOne {
+	if t != nil {
+		ouo.SetPaymentTime(*t)
+	}
+	return ouo
+}
+
+// ClearPaymentTime clears the value of the "payment_time" field.
+func (ouo *OrderUpdateOne) ClearPaymentTime() *OrderUpdateOne {
+	ouo.mutation.ClearPaymentTime()
+	return ouo
+}
+
+// SetNote sets the "note" field.
+func (ouo *OrderUpdateOne) SetNote(s string) *OrderUpdateOne {
+	ouo.mutation.SetNote(s)
+	return ouo
+}
+
+// SetCommentTime sets the "comment_time" field.
+func (ouo *OrderUpdateOne) SetCommentTime(t time.Time) *OrderUpdateOne {
+	ouo.mutation.SetCommentTime(t)
+	return ouo
+}
+
+// SetNillableCommentTime sets the "comment_time" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableCommentTime(t *time.Time) *OrderUpdateOne {
+	if t != nil {
+		ouo.SetCommentTime(*t)
+	}
+	return ouo
+}
+
+// ClearCommentTime clears the value of the "comment_time" field.
+func (ouo *OrderUpdateOne) ClearCommentTime() *OrderUpdateOne {
+	ouo.mutation.ClearCommentTime()
+	return ouo
+}
+
+// SetDelete sets the "delete" field.
+func (ouo *OrderUpdateOne) SetDelete(o order.Delete) *OrderUpdateOne {
+	ouo.mutation.SetDelete(o)
+	return ouo
+}
+
+// SetNillableDelete sets the "delete" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableDelete(o *order.Delete) *OrderUpdateOne {
+	if o != nil {
+		ouo.SetDelete(*o)
+	}
+	return ouo
+}
+
+// ClearDelete clears the value of the "delete" field.
+func (ouo *OrderUpdateOne) ClearDelete() *OrderUpdateOne {
+	ouo.mutation.ClearDelete()
+	return ouo
+}
+
+// AddItemIDs adds the "items" edge to the OrderItem entity by IDs.
+func (ouo *OrderUpdateOne) AddItemIDs(ids ...int) *OrderUpdateOne {
+	ouo.mutation.AddItemIDs(ids...)
+	return ouo
+}
+
+// AddItems adds the "items" edges to the OrderItem entity.
+func (ouo *OrderUpdateOne) AddItems(o ...*OrderItem) *OrderUpdateOne {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return ouo.AddItemIDs(ids...)
+}
+
+// AddAmountIDs adds the "amounts" edge to the OrderAmounts entity by IDs.
+func (ouo *OrderUpdateOne) AddAmountIDs(ids ...int) *OrderUpdateOne {
+	ouo.mutation.AddAmountIDs(ids...)
+	return ouo
+}
+
+// AddAmounts adds the "amounts" edges to the OrderAmounts entity.
+func (ouo *OrderUpdateOne) AddAmounts(o ...*OrderAmounts) *OrderUpdateOne {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return ouo.AddAmountIDs(ids...)
+}
+
 // AddPayIDs adds the "pays" edge to the OrderPay entity by IDs.
 func (ouo *OrderUpdateOne) AddPayIDs(ids ...int) *OrderUpdateOne {
 	ouo.mutation.AddPayIDs(ids...)
@@ -456,9 +1040,66 @@ func (ouo *OrderUpdateOne) AddPays(o ...*OrderPay) *OrderUpdateOne {
 	return ouo.AddPayIDs(ids...)
 }
 
+// AddDeliveryIDs adds the "deliverys" edge to the OrderDelivery entity by IDs.
+func (ouo *OrderUpdateOne) AddDeliveryIDs(ids ...int) *OrderUpdateOne {
+	ouo.mutation.AddDeliveryIDs(ids...)
+	return ouo
+}
+
+// AddDeliverys adds the "deliverys" edges to the OrderDelivery entity.
+func (ouo *OrderUpdateOne) AddDeliverys(o ...*OrderDelivery) *OrderUpdateOne {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return ouo.AddDeliveryIDs(ids...)
+}
+
 // Mutation returns the OrderMutation object of the builder.
 func (ouo *OrderUpdateOne) Mutation() *OrderMutation {
 	return ouo.mutation
+}
+
+// ClearItems clears all "items" edges to the OrderItem entity.
+func (ouo *OrderUpdateOne) ClearItems() *OrderUpdateOne {
+	ouo.mutation.ClearItems()
+	return ouo
+}
+
+// RemoveItemIDs removes the "items" edge to OrderItem entities by IDs.
+func (ouo *OrderUpdateOne) RemoveItemIDs(ids ...int) *OrderUpdateOne {
+	ouo.mutation.RemoveItemIDs(ids...)
+	return ouo
+}
+
+// RemoveItems removes "items" edges to OrderItem entities.
+func (ouo *OrderUpdateOne) RemoveItems(o ...*OrderItem) *OrderUpdateOne {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return ouo.RemoveItemIDs(ids...)
+}
+
+// ClearAmounts clears all "amounts" edges to the OrderAmounts entity.
+func (ouo *OrderUpdateOne) ClearAmounts() *OrderUpdateOne {
+	ouo.mutation.ClearAmounts()
+	return ouo
+}
+
+// RemoveAmountIDs removes the "amounts" edge to OrderAmounts entities by IDs.
+func (ouo *OrderUpdateOne) RemoveAmountIDs(ids ...int) *OrderUpdateOne {
+	ouo.mutation.RemoveAmountIDs(ids...)
+	return ouo
+}
+
+// RemoveAmounts removes "amounts" edges to OrderAmounts entities.
+func (ouo *OrderUpdateOne) RemoveAmounts(o ...*OrderAmounts) *OrderUpdateOne {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return ouo.RemoveAmountIDs(ids...)
 }
 
 // ClearPays clears all "pays" edges to the OrderPay entity.
@@ -480,6 +1121,27 @@ func (ouo *OrderUpdateOne) RemovePays(o ...*OrderPay) *OrderUpdateOne {
 		ids[i] = o[i].ID
 	}
 	return ouo.RemovePayIDs(ids...)
+}
+
+// ClearDeliverys clears all "deliverys" edges to the OrderDelivery entity.
+func (ouo *OrderUpdateOne) ClearDeliverys() *OrderUpdateOne {
+	ouo.mutation.ClearDeliverys()
+	return ouo
+}
+
+// RemoveDeliveryIDs removes the "deliverys" edge to OrderDelivery entities by IDs.
+func (ouo *OrderUpdateOne) RemoveDeliveryIDs(ids ...int) *OrderUpdateOne {
+	ouo.mutation.RemoveDeliveryIDs(ids...)
+	return ouo
+}
+
+// RemoveDeliverys removes "deliverys" edges to OrderDelivery entities.
+func (ouo *OrderUpdateOne) RemoveDeliverys(o ...*OrderDelivery) *OrderUpdateOne {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return ouo.RemoveDeliveryIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -560,9 +1222,19 @@ func (ouo *OrderUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (ouo *OrderUpdateOne) check() error {
+	if v, ok := ouo.mutation.Source(); ok {
+		if err := order.SourceValidator(v); err != nil {
+			return &ValidationError{Name: "source", err: fmt.Errorf("ent: validator failed for field \"source\": %w", err)}
+		}
+	}
 	if v, ok := ouo.mutation.Status(); ok {
 		if err := order.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+		}
+	}
+	if v, ok := ouo.mutation.Delete(); ok {
+		if err := order.DeleteValidator(v); err != nil {
+			return &ValidationError{Name: "delete", err: fmt.Errorf("ent: validator failed for field \"delete\": %w", err)}
 		}
 	}
 	return nil
@@ -631,14 +1303,14 @@ func (ouo *OrderUpdateOne) sqlSave(ctx context.Context) (_node *Order, err error
 	}
 	if value, ok := ouo.mutation.UserID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeInt,
 			Value:  value,
 			Column: order.FieldUserID,
 		})
 	}
 	if value, ok := ouo.mutation.AddedUserID(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeInt,
 			Value:  value,
 			Column: order.FieldUserID,
 		})
@@ -648,6 +1320,19 @@ func (ouo *OrderUpdateOne) sqlSave(ctx context.Context) (_node *Order, err error
 			Type:   field.TypeString,
 			Value:  value,
 			Column: order.FieldSn,
+		})
+	}
+	if value, ok := ouo.mutation.Source(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: order.FieldSource,
+		})
+	}
+	if ouo.mutation.SourceCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Column: order.FieldSource,
 		})
 	}
 	if value, ok := ouo.mutation.Status(); ok {
@@ -662,6 +1347,174 @@ func (ouo *OrderUpdateOne) sqlSave(ctx context.Context) (_node *Order, err error
 			Type:   field.TypeEnum,
 			Column: order.FieldStatus,
 		})
+	}
+	if value, ok := ouo.mutation.Integration(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: order.FieldIntegration,
+		})
+	}
+	if value, ok := ouo.mutation.AddedIntegration(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: order.FieldIntegration,
+		})
+	}
+	if value, ok := ouo.mutation.PaymentTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: order.FieldPaymentTime,
+		})
+	}
+	if ouo.mutation.PaymentTimeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: order.FieldPaymentTime,
+		})
+	}
+	if value, ok := ouo.mutation.Note(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: order.FieldNote,
+		})
+	}
+	if value, ok := ouo.mutation.CommentTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: order.FieldCommentTime,
+		})
+	}
+	if ouo.mutation.CommentTimeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: order.FieldCommentTime,
+		})
+	}
+	if value, ok := ouo.mutation.Delete(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: order.FieldDelete,
+		})
+	}
+	if ouo.mutation.DeleteCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Column: order.FieldDelete,
+		})
+	}
+	if ouo.mutation.ItemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.ItemsTable,
+			Columns: []string{order.ItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderitem.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ouo.mutation.RemovedItemsIDs(); len(nodes) > 0 && !ouo.mutation.ItemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.ItemsTable,
+			Columns: []string{order.ItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderitem.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ouo.mutation.ItemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.ItemsTable,
+			Columns: []string{order.ItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderitem.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ouo.mutation.AmountsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.AmountsTable,
+			Columns: []string{order.AmountsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderamounts.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ouo.mutation.RemovedAmountsIDs(); len(nodes) > 0 && !ouo.mutation.AmountsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.AmountsTable,
+			Columns: []string{order.AmountsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderamounts.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ouo.mutation.AmountsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.AmountsTable,
+			Columns: []string{order.AmountsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderamounts.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if ouo.mutation.PaysCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -709,6 +1562,60 @@ func (ouo *OrderUpdateOne) sqlSave(ctx context.Context) (_node *Order, err error
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: orderpay.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ouo.mutation.DeliverysCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.DeliverysTable,
+			Columns: []string{order.DeliverysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderdelivery.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ouo.mutation.RemovedDeliverysIDs(); len(nodes) > 0 && !ouo.mutation.DeliverysCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.DeliverysTable,
+			Columns: []string{order.DeliverysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderdelivery.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ouo.mutation.DeliverysIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.DeliverysTable,
+			Columns: []string{order.DeliverysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: orderdelivery.FieldID,
 				},
 			},
 		}
