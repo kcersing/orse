@@ -239,16 +239,16 @@ func init() {
 	// productattributevalue.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	productattributevalue.UpdateDefaultUpdatedAt = productattributevalueDescUpdatedAt.UpdateDefault.(func() time.Time)
 	productcateMixin := schema.ProductCate{}.Mixin()
-	productcateMixinFields0 := productcateMixin[0].Fields()
-	_ = productcateMixinFields0
+	productcateMixinFields1 := productcateMixin[1].Fields()
+	_ = productcateMixinFields1
 	productcateFields := schema.ProductCate{}.Fields()
 	_ = productcateFields
 	// productcateDescCreatedAt is the schema descriptor for created_at field.
-	productcateDescCreatedAt := productcateMixinFields0[0].Descriptor()
+	productcateDescCreatedAt := productcateMixinFields1[0].Descriptor()
 	// productcate.DefaultCreatedAt holds the default value on creation for the created_at field.
 	productcate.DefaultCreatedAt = productcateDescCreatedAt.Default.(func() time.Time)
 	// productcateDescUpdatedAt is the schema descriptor for updated_at field.
-	productcateDescUpdatedAt := productcateMixinFields0[1].Descriptor()
+	productcateDescUpdatedAt := productcateMixinFields1[1].Descriptor()
 	// productcate.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	productcate.DefaultUpdatedAt = productcateDescUpdatedAt.Default.(func() time.Time)
 	// productcate.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

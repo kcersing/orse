@@ -20,9 +20,6 @@ type Menu struct {
 	// ParentID holds the value of the "parent_id" field.
 	// 上级id
 	ParentID int `json:"parent_id,omitempty"`
-	// Tree holds the value of the "tree" field.
-	// 树
-	Tree string `json:"tree,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -99,7 +96,7 @@ func (*Menu) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case menu.FieldID, menu.FieldParentID, menu.FieldLevel, menu.FieldSort:
 			values[i] = new(sql.NullInt64)
-		case menu.FieldTree, menu.FieldTitle, menu.FieldName, menu.FieldURL, menu.FieldStatus, menu.FieldIcon, menu.FieldHidden, menu.FieldDesc:
+		case menu.FieldTitle, menu.FieldName, menu.FieldURL, menu.FieldStatus, menu.FieldIcon, menu.FieldHidden, menu.FieldDesc:
 			values[i] = new(sql.NullString)
 		case menu.FieldCreatedAt, menu.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -129,12 +126,6 @@ func (m *Menu) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
 			} else if value.Valid {
 				m.ParentID = int(value.Int64)
-			}
-		case menu.FieldTree:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field tree", values[i])
-			} else if value.Valid {
-				m.Tree = value.String
 			}
 		case menu.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -242,8 +233,6 @@ func (m *Menu) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
 	builder.WriteString(", parent_id=")
 	builder.WriteString(fmt.Sprintf("%v", m.ParentID))
-	builder.WriteString(", tree=")
-	builder.WriteString(m.Tree)
 	builder.WriteString(", created_at=")
 	builder.WriteString(m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", updated_at=")

@@ -27,13 +27,6 @@ func (Menu) Annotations() []schema.Annotation {
 	}
 }
 
-func (Menu) Mixin() []ent.Mixin {
-	return []ent.Mixin{
-		PidMixin{},
-		TimeMixin{},
-	}
-}
-
 // Fields of the Menu.
 func (Menu) Fields() []ent.Field {
 	return []ent.Field{
@@ -92,5 +85,12 @@ func (Menu) Indexes() []ent.Index {
 		// 唯一约束索引
 		index.Fields("id").
 			Unique(),
+	}
+}
+
+func (Menu) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		PidMixin{},
+		TimeMixin{},
 	}
 }

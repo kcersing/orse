@@ -15,8 +15,6 @@ const (
 	FieldID = "id"
 	// FieldParentID holds the string denoting the parent_id field in the database.
 	FieldParentID = "parent_id"
-	// FieldTree holds the string denoting the tree field in the database.
-	FieldTree = "tree"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -59,7 +57,6 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldParentID,
-	FieldTree,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldTitle,

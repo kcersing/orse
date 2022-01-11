@@ -41,13 +41,6 @@ func AddMenu(c *gin.Context) {
 		SetTitle(menu.Title).
 		SetName(menu.Name).
 		SetURL(menu.Url).
-		SetPid(menu.Pid).
-		SetLevel(1).
-		SetSort(1).
-		SetTree("1").
-		SetIcon("111").
-		SetStatus("1").
-		SetDesc("1").
 		Save(c)
 
 	if err != nil {
@@ -91,13 +84,6 @@ func editMenu(c *gin.Context) {
 		SetTitle(menu.Title).
 		SetName(menu.Name).
 		SetURL(menu.Url).
-		SetPid(menu.Pid).
-		SetLevel(1).
-		SetSort(1).
-		SetTree("1").
-		SetIcon("111").
-		SetStatus("1").
-		SetDesc("1").
 		Save(c)
 
 	//tr_0 tr_5

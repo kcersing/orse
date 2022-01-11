@@ -13,7 +13,7 @@ type OrderItem struct {
 
 func (OrderItem) Config() ent.Config {
 	return ent.Config{
-		Table: "order_pay",
+		Table: "order_item",
 	}
 }
 
@@ -41,7 +41,6 @@ func (OrderItem) Fields() []ent.Field {
 	}
 }
 
-// Edges of the OrderPay.
 func (OrderItem) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("order", Order.Type).
@@ -51,14 +50,15 @@ func (OrderItem) Edges() []ent.Edge {
 	}
 }
 
-func (OrderItem) Mixin() []ent.Mixin {
-	return []ent.Mixin{
-		TimeMixin{},
-	}
-}
 func (OrderItem) Index() []ent.Index {
 	return []ent.Index{
 		index.Fields("order_id"),
 		index.Fields("sn").Unique(),
+	}
+}
+
+func (OrderItem) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		TimeMixin{},
 	}
 }

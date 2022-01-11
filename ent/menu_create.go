@@ -35,20 +35,6 @@ func (mc *MenuCreate) SetNillableParentID(i *int) *MenuCreate {
 	return mc
 }
 
-// SetTree sets the "tree" field.
-func (mc *MenuCreate) SetTree(s string) *MenuCreate {
-	mc.mutation.SetTree(s)
-	return mc
-}
-
-// SetNillableTree sets the "tree" field if the given value is not nil.
-func (mc *MenuCreate) SetNillableTree(s *string) *MenuCreate {
-	if s != nil {
-		mc.SetTree(*s)
-	}
-	return mc
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (mc *MenuCreate) SetCreatedAt(t time.Time) *MenuCreate {
 	mc.mutation.SetCreatedAt(t)
@@ -347,14 +333,6 @@ func (mc *MenuCreate) createSpec() (*Menu, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
-	if value, ok := mc.mutation.Tree(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: menu.FieldTree,
-		})
-		_node.Tree = value
-	}
 	if value, ok := mc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,

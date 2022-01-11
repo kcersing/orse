@@ -45,10 +45,10 @@ const (
 	// Table holds the table name of the order in the database.
 	Table = "order"
 	// ItemsTable is the table that holds the items relation/edge.
-	ItemsTable = "order_pay"
+	ItemsTable = "order_item"
 	// ItemsInverseTable is the table name for the OrderItem entity.
 	// It exists in this package in order to avoid circular dependency with the "orderitem" package.
-	ItemsInverseTable = "order_pay"
+	ItemsInverseTable = "order_item"
 	// ItemsColumn is the table column denoting the items relation/edge.
 	ItemsColumn = "order_id"
 	// AmountsTable is the table that holds the amounts relation/edge.

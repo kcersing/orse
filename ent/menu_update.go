@@ -48,26 +48,6 @@ func (mu *MenuUpdate) ClearParentID() *MenuUpdate {
 	return mu
 }
 
-// SetTree sets the "tree" field.
-func (mu *MenuUpdate) SetTree(s string) *MenuUpdate {
-	mu.mutation.SetTree(s)
-	return mu
-}
-
-// SetNillableTree sets the "tree" field if the given value is not nil.
-func (mu *MenuUpdate) SetNillableTree(s *string) *MenuUpdate {
-	if s != nil {
-		mu.SetTree(*s)
-	}
-	return mu
-}
-
-// ClearTree clears the value of the "tree" field.
-func (mu *MenuUpdate) ClearTree() *MenuUpdate {
-	mu.mutation.ClearTree()
-	return mu
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (mu *MenuUpdate) SetCreatedAt(t time.Time) *MenuUpdate {
 	mu.mutation.SetCreatedAt(t)
@@ -408,19 +388,6 @@ func (mu *MenuUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := mu.mutation.Tree(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: menu.FieldTree,
-		})
-	}
-	if mu.mutation.TreeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: menu.FieldTree,
-		})
-	}
 	if value, ok := mu.mutation.CreatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -679,26 +646,6 @@ func (muo *MenuUpdateOne) SetNillableParentID(i *int) *MenuUpdateOne {
 // ClearParentID clears the value of the "parent_id" field.
 func (muo *MenuUpdateOne) ClearParentID() *MenuUpdateOne {
 	muo.mutation.ClearParentID()
-	return muo
-}
-
-// SetTree sets the "tree" field.
-func (muo *MenuUpdateOne) SetTree(s string) *MenuUpdateOne {
-	muo.mutation.SetTree(s)
-	return muo
-}
-
-// SetNillableTree sets the "tree" field if the given value is not nil.
-func (muo *MenuUpdateOne) SetNillableTree(s *string) *MenuUpdateOne {
-	if s != nil {
-		muo.SetTree(*s)
-	}
-	return muo
-}
-
-// ClearTree clears the value of the "tree" field.
-func (muo *MenuUpdateOne) ClearTree() *MenuUpdateOne {
-	muo.mutation.ClearTree()
 	return muo
 }
 
@@ -1065,19 +1012,6 @@ func (muo *MenuUpdateOne) sqlSave(ctx context.Context) (_node *Menu, err error) 
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := muo.mutation.Tree(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: menu.FieldTree,
-		})
-	}
-	if muo.mutation.TreeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: menu.FieldTree,
-		})
 	}
 	if value, ok := muo.mutation.CreatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{

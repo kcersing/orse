@@ -21,6 +21,20 @@ type ProductCateCreate struct {
 	hooks    []Hook
 }
 
+// SetParentID sets the "parent_id" field.
+func (pcc *ProductCateCreate) SetParentID(i int) *ProductCateCreate {
+	pcc.mutation.SetParentID(i)
+	return pcc
+}
+
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (pcc *ProductCateCreate) SetNillableParentID(i *int) *ProductCateCreate {
+	if i != nil {
+		pcc.SetParentID(*i)
+	}
+	return pcc
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (pcc *ProductCateCreate) SetCreatedAt(t time.Time) *ProductCateCreate {
 	pcc.mutation.SetCreatedAt(t)
@@ -192,6 +206,14 @@ func (pcc *ProductCateCreate) createSpec() (*ProductCate, *sqlgraph.CreateSpec) 
 			},
 		}
 	)
+	if value, ok := pcc.mutation.ParentID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: productcate.FieldParentID,
+		})
+		_node.ParentID = value
+	}
 	if value, ok := pcc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,

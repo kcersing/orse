@@ -17,12 +17,6 @@ func (ProductSpecs) Config() ent.Config {
 	}
 }
 
-func (ProductSpecs) Mixin() []ent.Mixin {
-	return []ent.Mixin{
-		TimeMixin{},
-	}
-}
-
 func (ProductSpecs) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("product_id").
@@ -50,5 +44,11 @@ func (ProductSpecs) Edges() []ent.Edge {
 			Unique().
 			Field("product_id"),
 		edge.To("items", ProductSpecsItem.Type),
+	}
+}
+
+func (ProductSpecs) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		TimeMixin{},
 	}
 }

@@ -291,12 +291,12 @@ func (pcq *ProductCateQuery) WithProducts(opts ...func(*ProductQuery)) *ProductC
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		ParentID int `json:"parent_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.ProductCate.Query().
-//		GroupBy(productcate.FieldCreatedAt).
+//		GroupBy(productcate.FieldParentID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -318,11 +318,11 @@ func (pcq *ProductCateQuery) GroupBy(field string, fields ...string) *ProductCat
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		ParentID int `json:"parent_id,omitempty"`
 //	}
 //
 //	client.ProductCate.Query().
-//		Select(productcate.FieldCreatedAt).
+//		Select(productcate.FieldParentID).
 //		Scan(ctx, &v)
 //
 func (pcq *ProductCateQuery) Select(fields ...string) *ProductCateSelect {

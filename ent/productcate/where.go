@@ -93,6 +93,13 @@ func IDLTE(id int) predicate.ProductCate {
 	})
 }
 
+// ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
+func ParentID(v int) predicate.ProductCate {
+	return predicate.ProductCate(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldParentID), v))
+	})
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.ProductCate {
 	return predicate.ProductCate(func(s *sql.Selector) {
@@ -118,6 +125,96 @@ func Name(v string) predicate.ProductCate {
 func Sort(v int) predicate.ProductCate {
 	return predicate.ProductCate(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldSort), v))
+	})
+}
+
+// ParentIDEQ applies the EQ predicate on the "parent_id" field.
+func ParentIDEQ(v int) predicate.ProductCate {
+	return predicate.ProductCate(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldParentID), v))
+	})
+}
+
+// ParentIDNEQ applies the NEQ predicate on the "parent_id" field.
+func ParentIDNEQ(v int) predicate.ProductCate {
+	return predicate.ProductCate(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldParentID), v))
+	})
+}
+
+// ParentIDIn applies the In predicate on the "parent_id" field.
+func ParentIDIn(vs ...int) predicate.ProductCate {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.ProductCate(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldParentID), v...))
+	})
+}
+
+// ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
+func ParentIDNotIn(vs ...int) predicate.ProductCate {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.ProductCate(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldParentID), v...))
+	})
+}
+
+// ParentIDGT applies the GT predicate on the "parent_id" field.
+func ParentIDGT(v int) predicate.ProductCate {
+	return predicate.ProductCate(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldParentID), v))
+	})
+}
+
+// ParentIDGTE applies the GTE predicate on the "parent_id" field.
+func ParentIDGTE(v int) predicate.ProductCate {
+	return predicate.ProductCate(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldParentID), v))
+	})
+}
+
+// ParentIDLT applies the LT predicate on the "parent_id" field.
+func ParentIDLT(v int) predicate.ProductCate {
+	return predicate.ProductCate(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldParentID), v))
+	})
+}
+
+// ParentIDLTE applies the LTE predicate on the "parent_id" field.
+func ParentIDLTE(v int) predicate.ProductCate {
+	return predicate.ProductCate(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldParentID), v))
+	})
+}
+
+// ParentIDIsNil applies the IsNil predicate on the "parent_id" field.
+func ParentIDIsNil() predicate.ProductCate {
+	return predicate.ProductCate(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldParentID)))
+	})
+}
+
+// ParentIDNotNil applies the NotNil predicate on the "parent_id" field.
+func ParentIDNotNil() predicate.ProductCate {
+	return predicate.ProductCate(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldParentID)))
 	})
 }
 

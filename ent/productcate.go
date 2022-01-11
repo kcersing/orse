@@ -16,6 +16,9 @@ type ProductCate struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// ParentID holds the value of the "parent_id" field.
+	// 上级id
+	ParentID int `json:"parent_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -52,7 +55,7 @@ func (*ProductCate) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case productcate.FieldID, productcate.FieldSort:
+		case productcate.FieldID, productcate.FieldParentID, productcate.FieldSort:
 			values[i] = new(sql.NullInt64)
 		case productcate.FieldName:
 			values[i] = new(sql.NullString)
@@ -79,6 +82,12 @@ func (pc *ProductCate) assignValues(columns []string, values []interface{}) erro
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			pc.ID = int(value.Int64)
+		case productcate.FieldParentID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
+			} else if value.Valid {
+				pc.ParentID = int(value.Int64)
+			}
 		case productcate.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -136,6 +145,8 @@ func (pc *ProductCate) String() string {
 	var builder strings.Builder
 	builder.WriteString("ProductCate(")
 	builder.WriteString(fmt.Sprintf("id=%v", pc.ID))
+	builder.WriteString(", parent_id=")
+	builder.WriteString(fmt.Sprintf("%v", pc.ParentID))
 	builder.WriteString(", created_at=")
 	builder.WriteString(pc.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", updated_at=")

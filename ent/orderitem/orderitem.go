@@ -42,9 +42,9 @@ const (
 	// EdgeOrder holds the string denoting the order edge name in mutations.
 	EdgeOrder = "order"
 	// Table holds the table name of the orderitem in the database.
-	Table = "order_pay"
+	Table = "order_item"
 	// OrderTable is the table that holds the order relation/edge.
-	OrderTable = "order_pay"
+	OrderTable = "order_item"
 	// OrderInverseTable is the table name for the Order entity.
 	// It exists in this package in order to avoid circular dependency with the "order" package.
 	OrderInverseTable = "order"

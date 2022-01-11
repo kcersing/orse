@@ -56,7 +56,6 @@ type MenuMutation struct {
 	op              Op
 	typ             string
 	id              *int
-	tree            *string
 	created_at      *time.Time
 	updated_at      *time.Time
 	title           *string
@@ -207,55 +206,6 @@ func (m *MenuMutation) ParentIDCleared() bool {
 func (m *MenuMutation) ResetParentID() {
 	m.parent = nil
 	delete(m.clearedFields, menu.FieldParentID)
-}
-
-// SetTree sets the "tree" field.
-func (m *MenuMutation) SetTree(s string) {
-	m.tree = &s
-}
-
-// Tree returns the value of the "tree" field in the mutation.
-func (m *MenuMutation) Tree() (r string, exists bool) {
-	v := m.tree
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTree returns the old "tree" field's value of the Menu entity.
-// If the Menu object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldTree(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldTree is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldTree requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTree: %w", err)
-	}
-	return oldValue.Tree, nil
-}
-
-// ClearTree clears the value of the "tree" field.
-func (m *MenuMutation) ClearTree() {
-	m.tree = nil
-	m.clearedFields[menu.FieldTree] = struct{}{}
-}
-
-// TreeCleared returns if the "tree" field was cleared in this mutation.
-func (m *MenuMutation) TreeCleared() bool {
-	_, ok := m.clearedFields[menu.FieldTree]
-	return ok
-}
-
-// ResetTree resets all changes to the "tree" field.
-func (m *MenuMutation) ResetTree() {
-	m.tree = nil
-	delete(m.clearedFields, menu.FieldTree)
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -884,12 +834,9 @@ func (m *MenuMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MenuMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 12)
 	if m.parent != nil {
 		fields = append(fields, menu.FieldParentID)
-	}
-	if m.tree != nil {
-		fields = append(fields, menu.FieldTree)
 	}
 	if m.created_at != nil {
 		fields = append(fields, menu.FieldCreatedAt)
@@ -934,8 +881,6 @@ func (m *MenuMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case menu.FieldParentID:
 		return m.ParentID()
-	case menu.FieldTree:
-		return m.Tree()
 	case menu.FieldCreatedAt:
 		return m.CreatedAt()
 	case menu.FieldUpdatedAt:
@@ -969,8 +914,6 @@ func (m *MenuMutation) OldField(ctx context.Context, name string) (ent.Value, er
 	switch name {
 	case menu.FieldParentID:
 		return m.OldParentID(ctx)
-	case menu.FieldTree:
-		return m.OldTree(ctx)
 	case menu.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case menu.FieldUpdatedAt:
@@ -1008,13 +951,6 @@ func (m *MenuMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetParentID(v)
-		return nil
-	case menu.FieldTree:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTree(v)
 		return nil
 	case menu.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -1153,9 +1089,6 @@ func (m *MenuMutation) ClearedFields() []string {
 	if m.FieldCleared(menu.FieldParentID) {
 		fields = append(fields, menu.FieldParentID)
 	}
-	if m.FieldCleared(menu.FieldTree) {
-		fields = append(fields, menu.FieldTree)
-	}
 	if m.FieldCleared(menu.FieldCreatedAt) {
 		fields = append(fields, menu.FieldCreatedAt)
 	}
@@ -1194,9 +1127,6 @@ func (m *MenuMutation) ClearField(name string) error {
 	case menu.FieldParentID:
 		m.ClearParentID()
 		return nil
-	case menu.FieldTree:
-		m.ClearTree()
-		return nil
 	case menu.FieldCreatedAt:
 		m.ClearCreatedAt()
 		return nil
@@ -1228,9 +1158,6 @@ func (m *MenuMutation) ResetField(name string) error {
 	switch name {
 	case menu.FieldParentID:
 		m.ResetParentID()
-		return nil
-	case menu.FieldTree:
-		m.ResetTree()
 		return nil
 	case menu.FieldCreatedAt:
 		m.ResetCreatedAt()
@@ -10585,6 +10512,8 @@ type ProductCateMutation struct {
 	op              Op
 	typ             string
 	id              *int
+	parent_id       *int
+	addparent_id    *int
 	created_at      *time.Time
 	updated_at      *time.Time
 	name            *string
@@ -10676,6 +10605,76 @@ func (m *ProductCateMutation) ID() (id int, exists bool) {
 		return
 	}
 	return *m.id, true
+}
+
+// SetParentID sets the "parent_id" field.
+func (m *ProductCateMutation) SetParentID(i int) {
+	m.parent_id = &i
+	m.addparent_id = nil
+}
+
+// ParentID returns the value of the "parent_id" field in the mutation.
+func (m *ProductCateMutation) ParentID() (r int, exists bool) {
+	v := m.parent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldParentID returns the old "parent_id" field's value of the ProductCate entity.
+// If the ProductCate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProductCateMutation) OldParentID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldParentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldParentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldParentID: %w", err)
+	}
+	return oldValue.ParentID, nil
+}
+
+// AddParentID adds i to the "parent_id" field.
+func (m *ProductCateMutation) AddParentID(i int) {
+	if m.addparent_id != nil {
+		*m.addparent_id += i
+	} else {
+		m.addparent_id = &i
+	}
+}
+
+// AddedParentID returns the value that was added to the "parent_id" field in this mutation.
+func (m *ProductCateMutation) AddedParentID() (r int, exists bool) {
+	v := m.addparent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (m *ProductCateMutation) ClearParentID() {
+	m.parent_id = nil
+	m.addparent_id = nil
+	m.clearedFields[productcate.FieldParentID] = struct{}{}
+}
+
+// ParentIDCleared returns if the "parent_id" field was cleared in this mutation.
+func (m *ProductCateMutation) ParentIDCleared() bool {
+	_, ok := m.clearedFields[productcate.FieldParentID]
+	return ok
+}
+
+// ResetParentID resets all changes to the "parent_id" field.
+func (m *ProductCateMutation) ResetParentID() {
+	m.parent_id = nil
+	m.addparent_id = nil
+	delete(m.clearedFields, productcate.FieldParentID)
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -10941,7 +10940,10 @@ func (m *ProductCateMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProductCateMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
+	if m.parent_id != nil {
+		fields = append(fields, productcate.FieldParentID)
+	}
 	if m.created_at != nil {
 		fields = append(fields, productcate.FieldCreatedAt)
 	}
@@ -10962,6 +10964,8 @@ func (m *ProductCateMutation) Fields() []string {
 // schema.
 func (m *ProductCateMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case productcate.FieldParentID:
+		return m.ParentID()
 	case productcate.FieldCreatedAt:
 		return m.CreatedAt()
 	case productcate.FieldUpdatedAt:
@@ -10979,6 +10983,8 @@ func (m *ProductCateMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *ProductCateMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case productcate.FieldParentID:
+		return m.OldParentID(ctx)
 	case productcate.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case productcate.FieldUpdatedAt:
@@ -10996,6 +11002,13 @@ func (m *ProductCateMutation) OldField(ctx context.Context, name string) (ent.Va
 // type.
 func (m *ProductCateMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case productcate.FieldParentID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetParentID(v)
+		return nil
 	case productcate.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -11032,6 +11045,9 @@ func (m *ProductCateMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *ProductCateMutation) AddedFields() []string {
 	var fields []string
+	if m.addparent_id != nil {
+		fields = append(fields, productcate.FieldParentID)
+	}
 	if m.addsort != nil {
 		fields = append(fields, productcate.FieldSort)
 	}
@@ -11043,6 +11059,8 @@ func (m *ProductCateMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *ProductCateMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case productcate.FieldParentID:
+		return m.AddedParentID()
 	case productcate.FieldSort:
 		return m.AddedSort()
 	}
@@ -11054,6 +11072,13 @@ func (m *ProductCateMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *ProductCateMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case productcate.FieldParentID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddParentID(v)
+		return nil
 	case productcate.FieldSort:
 		v, ok := value.(int)
 		if !ok {
@@ -11069,6 +11094,9 @@ func (m *ProductCateMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *ProductCateMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(productcate.FieldParentID) {
+		fields = append(fields, productcate.FieldParentID)
+	}
 	if m.FieldCleared(productcate.FieldCreatedAt) {
 		fields = append(fields, productcate.FieldCreatedAt)
 	}
@@ -11089,6 +11117,9 @@ func (m *ProductCateMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *ProductCateMutation) ClearField(name string) error {
 	switch name {
+	case productcate.FieldParentID:
+		m.ClearParentID()
+		return nil
 	case productcate.FieldCreatedAt:
 		m.ClearCreatedAt()
 		return nil
@@ -11103,6 +11134,9 @@ func (m *ProductCateMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *ProductCateMutation) ResetField(name string) error {
 	switch name {
+	case productcate.FieldParentID:
+		m.ResetParentID()
+		return nil
 	case productcate.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil

@@ -28,6 +28,33 @@ func (pcu *ProductCateUpdate) Where(ps ...predicate.ProductCate) *ProductCateUpd
 	return pcu
 }
 
+// SetParentID sets the "parent_id" field.
+func (pcu *ProductCateUpdate) SetParentID(i int) *ProductCateUpdate {
+	pcu.mutation.ResetParentID()
+	pcu.mutation.SetParentID(i)
+	return pcu
+}
+
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (pcu *ProductCateUpdate) SetNillableParentID(i *int) *ProductCateUpdate {
+	if i != nil {
+		pcu.SetParentID(*i)
+	}
+	return pcu
+}
+
+// AddParentID adds i to the "parent_id" field.
+func (pcu *ProductCateUpdate) AddParentID(i int) *ProductCateUpdate {
+	pcu.mutation.AddParentID(i)
+	return pcu
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (pcu *ProductCateUpdate) ClearParentID() *ProductCateUpdate {
+	pcu.mutation.ClearParentID()
+	return pcu
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (pcu *ProductCateUpdate) SetCreatedAt(t time.Time) *ProductCateUpdate {
 	pcu.mutation.SetCreatedAt(t)
@@ -201,6 +228,26 @@ func (pcu *ProductCateUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := pcu.mutation.ParentID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: productcate.FieldParentID,
+		})
+	}
+	if value, ok := pcu.mutation.AddedParentID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: productcate.FieldParentID,
+		})
+	}
+	if pcu.mutation.ParentIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: productcate.FieldParentID,
+		})
+	}
 	if value, ok := pcu.mutation.CreatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -319,6 +366,33 @@ type ProductCateUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ProductCateMutation
+}
+
+// SetParentID sets the "parent_id" field.
+func (pcuo *ProductCateUpdateOne) SetParentID(i int) *ProductCateUpdateOne {
+	pcuo.mutation.ResetParentID()
+	pcuo.mutation.SetParentID(i)
+	return pcuo
+}
+
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (pcuo *ProductCateUpdateOne) SetNillableParentID(i *int) *ProductCateUpdateOne {
+	if i != nil {
+		pcuo.SetParentID(*i)
+	}
+	return pcuo
+}
+
+// AddParentID adds i to the "parent_id" field.
+func (pcuo *ProductCateUpdateOne) AddParentID(i int) *ProductCateUpdateOne {
+	pcuo.mutation.AddParentID(i)
+	return pcuo
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (pcuo *ProductCateUpdateOne) ClearParentID() *ProductCateUpdateOne {
+	pcuo.mutation.ClearParentID()
+	return pcuo
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -517,6 +591,26 @@ func (pcuo *ProductCateUpdateOne) sqlSave(ctx context.Context) (_node *ProductCa
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := pcuo.mutation.ParentID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: productcate.FieldParentID,
+		})
+	}
+	if value, ok := pcuo.mutation.AddedParentID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: productcate.FieldParentID,
+		})
+	}
+	if pcuo.mutation.ParentIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: productcate.FieldParentID,
+		})
 	}
 	if value, ok := pcuo.mutation.CreatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{

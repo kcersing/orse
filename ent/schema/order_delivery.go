@@ -61,7 +61,6 @@ func (OrderDelivery) Fields() []ent.Field {
 	}
 }
 
-// Edges of the OrderPay.
 func (OrderDelivery) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("order", Order.Type).
@@ -71,14 +70,15 @@ func (OrderDelivery) Edges() []ent.Edge {
 	}
 }
 
-func (OrderDelivery) Mixin() []ent.Mixin {
-	return []ent.Mixin{
-		TimeMixin{},
-	}
-}
 func (OrderDelivery) Index() []ent.Index {
 	return []ent.Index{
 		index.Fields("order_id"),
 		index.Fields("sn").Unique(),
+	}
+}
+
+func (OrderDelivery) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		TimeMixin{},
 	}
 }

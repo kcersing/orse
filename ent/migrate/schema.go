@@ -12,7 +12,6 @@ var (
 	// MenuColumns holds the columns for the "menu" table.
 	MenuColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "tree", Type: field.TypeString, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
 		{Name: "title", Type: field.TypeString},
@@ -34,7 +33,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "menu_menu_children",
-				Columns:    []*schema.Column{MenuColumns[13]},
+				Columns:    []*schema.Column{MenuColumns[12]},
 				RefColumns: []*schema.Column{MenuColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -43,7 +42,7 @@ var (
 			{
 				Name:    "menu_url",
 				Unique:  false,
-				Columns: []*schema.Column{MenuColumns[6]},
+				Columns: []*schema.Column{MenuColumns[5]},
 			},
 			{
 				Name:    "menu_id",
@@ -134,8 +133,8 @@ var (
 			},
 		},
 	}
-	// OrderPayColumns holds the columns for the "order_pay" table.
-	OrderPayColumns = []*schema.Column{
+	// OrderItemColumns holds the columns for the "order_item" table.
+	OrderItemColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
@@ -150,12 +149,21 @@ var (
 		{Name: "product_specs_id", Type: field.TypeInt},
 		{Name: "product_specs_sn", Type: field.TypeString},
 		{Name: "product_specs_attr", Type: field.TypeString},
+		{Name: "order_id", Type: field.TypeInt, Nullable: true},
 	}
-	// OrderPayTable holds the schema information for the "order_pay" table.
-	OrderPayTable = &schema.Table{
-		Name:       "order_pay",
-		Columns:    OrderPayColumns,
-		PrimaryKey: []*schema.Column{OrderPayColumns[0]},
+	// OrderItemTable holds the schema information for the "order_item" table.
+	OrderItemTable = &schema.Table{
+		Name:       "order_item",
+		Columns:    OrderItemColumns,
+		PrimaryKey: []*schema.Column{OrderItemColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "order_item_order_items",
+				Columns:    []*schema.Column{OrderItemColumns[14]},
+				RefColumns: []*schema.Column{OrderColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// OrderPayColumns holds the columns for the "order_pay" table.
 	OrderPayColumns = []*schema.Column{
@@ -174,12 +182,6 @@ var (
 		Columns:    OrderPayColumns,
 		PrimaryKey: []*schema.Column{OrderPayColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "order_pay_order_items",
-				Columns:    []*schema.Column{OrderPayColumns[7]},
-				RefColumns: []*schema.Column{OrderColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
 			{
 				Symbol:     "order_pay_order_pays",
 				Columns:    []*schema.Column{OrderPayColumns[7]},
@@ -269,6 +271,7 @@ var (
 	// ProductCateColumns holds the columns for the "product_cate" table.
 	ProductCateColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "parent_id", Type: field.TypeInt, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString},
@@ -362,7 +365,7 @@ var (
 		OrderTable,
 		OrderAmountsTable,
 		OrderDeliveryTable,
-		OrderPayTable,
+		OrderItemTable,
 		OrderPayTable,
 		OrderSettingTable,
 		ProductTable,
@@ -382,8 +385,8 @@ func init() {
 	}
 	OrderAmountsTable.ForeignKeys[0].RefTable = OrderTable
 	OrderDeliveryTable.ForeignKeys[0].RefTable = OrderTable
+	OrderItemTable.ForeignKeys[0].RefTable = OrderTable
 	OrderPayTable.ForeignKeys[0].RefTable = OrderTable
-	OrderPayTable.ForeignKeys[1].RefTable = OrderTable
 	ProductTable.ForeignKeys[0].RefTable = ProductCateTable
 	ProductAttributeValueTable.ForeignKeys[0].RefTable = ProductAttributeKeyTable
 	ProductSpecsTable.ForeignKeys[0].RefTable = ProductTable
