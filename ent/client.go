@@ -22,6 +22,8 @@ import (
 	"orse/ent/productcate"
 	"orse/ent/productspecs"
 	"orse/ent/productspecsitem"
+	"orse/ent/user"
+	"orse/ent/userdetail"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -59,6 +61,10 @@ type Client struct {
 	ProductSpecs *ProductSpecsClient
 	// ProductSpecsItem is the client for interacting with the ProductSpecsItem builders.
 	ProductSpecsItem *ProductSpecsItemClient
+	// User is the client for interacting with the User builders.
+	User *UserClient
+	// UserDetail is the client for interacting with the UserDetail builders.
+	UserDetail *UserDetailClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -85,6 +91,8 @@ func (c *Client) init() {
 	c.ProductCate = NewProductCateClient(c.config)
 	c.ProductSpecs = NewProductSpecsClient(c.config)
 	c.ProductSpecsItem = NewProductSpecsItemClient(c.config)
+	c.User = NewUserClient(c.config)
+	c.UserDetail = NewUserDetailClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -131,6 +139,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ProductCate:           NewProductCateClient(cfg),
 		ProductSpecs:          NewProductSpecsClient(cfg),
 		ProductSpecsItem:      NewProductSpecsItemClient(cfg),
+		User:                  NewUserClient(cfg),
+		UserDetail:            NewUserDetailClient(cfg),
 	}, nil
 }
 
@@ -162,6 +172,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ProductCate:           NewProductCateClient(cfg),
 		ProductSpecs:          NewProductSpecsClient(cfg),
 		ProductSpecsItem:      NewProductSpecsItemClient(cfg),
+		User:                  NewUserClient(cfg),
+		UserDetail:            NewUserDetailClient(cfg),
 	}, nil
 }
 
@@ -204,6 +216,8 @@ func (c *Client) Use(hooks ...Hook) {
 	c.ProductCate.Use(hooks...)
 	c.ProductSpecs.Use(hooks...)
 	c.ProductSpecsItem.Use(hooks...)
+	c.User.Use(hooks...)
+	c.UserDetail.Use(hooks...)
 }
 
 // MenuClient is a client for the Menu schema.
@@ -1694,4 +1708,216 @@ func (c *ProductSpecsItemClient) QueryValues(psi *ProductSpecsItem) *ProductAttr
 // Hooks returns the client hooks.
 func (c *ProductSpecsItemClient) Hooks() []Hook {
 	return c.hooks.ProductSpecsItem
+}
+
+// UserClient is a client for the User schema.
+type UserClient struct {
+	config
+}
+
+// NewUserClient returns a client for the User from the given config.
+func NewUserClient(c config) *UserClient {
+	return &UserClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
+func (c *UserClient) Use(hooks ...Hook) {
+	c.hooks.User = append(c.hooks.User, hooks...)
+}
+
+// Create returns a create builder for User.
+func (c *UserClient) Create() *UserCreate {
+	mutation := newUserMutation(c.config, OpCreate)
+	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of User entities.
+func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
+	return &UserCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for User.
+func (c *UserClient) Update() *UserUpdate {
+	mutation := newUserMutation(c.config, OpUpdate)
+	return &UserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
+	mutation := newUserMutation(c.config, OpUpdateOne, withUser(u))
+	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
+	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
+	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for User.
+func (c *UserClient) Delete() *UserDelete {
+	mutation := newUserMutation(c.config, OpDelete)
+	return &UserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
+	return c.DeleteOneID(u.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
+	builder := c.Delete().Where(user.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserDeleteOne{builder}
+}
+
+// Query returns a query builder for User.
+func (c *UserClient) Query() *UserQuery {
+	return &UserQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a User entity by its id.
+func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
+	return c.Query().Where(user.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserClient) GetX(ctx context.Context, id int) *User {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryDetail queries the detail edge of a User.
+func (c *UserClient) QueryDetail(u *User) *UserDetailQuery {
+	query := &UserDetailQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(userdetail.Table, userdetail.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.DetailTable, user.DetailColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *UserClient) Hooks() []Hook {
+	return c.hooks.User
+}
+
+// UserDetailClient is a client for the UserDetail schema.
+type UserDetailClient struct {
+	config
+}
+
+// NewUserDetailClient returns a client for the UserDetail from the given config.
+func NewUserDetailClient(c config) *UserDetailClient {
+	return &UserDetailClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `userdetail.Hooks(f(g(h())))`.
+func (c *UserDetailClient) Use(hooks ...Hook) {
+	c.hooks.UserDetail = append(c.hooks.UserDetail, hooks...)
+}
+
+// Create returns a create builder for UserDetail.
+func (c *UserDetailClient) Create() *UserDetailCreate {
+	mutation := newUserDetailMutation(c.config, OpCreate)
+	return &UserDetailCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UserDetail entities.
+func (c *UserDetailClient) CreateBulk(builders ...*UserDetailCreate) *UserDetailCreateBulk {
+	return &UserDetailCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UserDetail.
+func (c *UserDetailClient) Update() *UserDetailUpdate {
+	mutation := newUserDetailMutation(c.config, OpUpdate)
+	return &UserDetailUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserDetailClient) UpdateOne(ud *UserDetail) *UserDetailUpdateOne {
+	mutation := newUserDetailMutation(c.config, OpUpdateOne, withUserDetail(ud))
+	return &UserDetailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserDetailClient) UpdateOneID(id int) *UserDetailUpdateOne {
+	mutation := newUserDetailMutation(c.config, OpUpdateOne, withUserDetailID(id))
+	return &UserDetailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UserDetail.
+func (c *UserDetailClient) Delete() *UserDetailDelete {
+	mutation := newUserDetailMutation(c.config, OpDelete)
+	return &UserDetailDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *UserDetailClient) DeleteOne(ud *UserDetail) *UserDetailDeleteOne {
+	return c.DeleteOneID(ud.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *UserDetailClient) DeleteOneID(id int) *UserDetailDeleteOne {
+	builder := c.Delete().Where(userdetail.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserDetailDeleteOne{builder}
+}
+
+// Query returns a query builder for UserDetail.
+func (c *UserDetailClient) Query() *UserDetailQuery {
+	return &UserDetailQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a UserDetail entity by its id.
+func (c *UserDetailClient) Get(ctx context.Context, id int) (*UserDetail, error) {
+	return c.Query().Where(userdetail.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserDetailClient) GetX(ctx context.Context, id int) *UserDetail {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a UserDetail.
+func (c *UserDetailClient) QueryUser(ud *UserDetail) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ud.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(userdetail.Table, userdetail.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, userdetail.UserTable, userdetail.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(ud.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *UserDetailClient) Hooks() []Hook {
+	return c.hooks.UserDetail
 }

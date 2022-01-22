@@ -44,3 +44,9 @@ type ProductSpecs func(*sql.Selector)
 
 // ProductSpecsItem is the predicate function for productspecsitem builders.
 type ProductSpecsItem func(*sql.Selector)
+
+// User is the predicate function for user builders.
+type User func(*sql.Selector)
+
+// UserDetail is the predicate function for userdetail builders.
+type UserDetail func(*sql.Selector)

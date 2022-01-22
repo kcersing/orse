@@ -334,6 +334,62 @@ var (
 			},
 		},
 	}
+	// UserColumns holds the columns for the "user" table.
+	UserColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "username", Type: field.TypeString, Unique: true},
+		{Name: "mobile", Type: field.TypeString, Unique: true},
+		{Name: "pass", Type: field.TypeString, Nullable: true},
+		{Name: "uuid", Type: field.TypeUUID},
+		{Name: "active", Type: field.TypeBool, Default: false},
+		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"on", "off"}},
+		{Name: "login", Type: field.TypeTime},
+	}
+	// UserTable holds the schema information for the "user" table.
+	UserTable = &schema.Table{
+		Name:       "user",
+		Columns:    UserColumns,
+		PrimaryKey: []*schema.Column{UserColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "user_id",
+				Unique:  true,
+				Columns: []*schema.Column{UserColumns[0]},
+			},
+		},
+	}
+	// UserDetailColumns holds the columns for the "user_detail" table.
+	UserDetailColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString, Nullable: true},
+		{Name: "age", Type: field.TypeInt, Nullable: true},
+		{Name: "rank", Type: field.TypeFloat64, Nullable: true},
+		{Name: "pic", Type: field.TypeString, Nullable: true},
+		{Name: "user_id", Type: field.TypeInt, Nullable: true},
+	}
+	// UserDetailTable holds the schema information for the "user_detail" table.
+	UserDetailTable = &schema.Table{
+		Name:       "user_detail",
+		Columns:    UserDetailColumns,
+		PrimaryKey: []*schema.Column{UserDetailColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_detail_user_detail",
+				Columns:    []*schema.Column{UserDetailColumns[5]},
+				RefColumns: []*schema.Column{UserColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "userdetail_id",
+				Unique:  true,
+				Columns: []*schema.Column{UserDetailColumns[0]},
+			},
+		},
+	}
 	// ProductSpecsItemValuesColumns holds the columns for the "product_specs_item_values" table.
 	ProductSpecsItemValuesColumns = []*schema.Column{
 		{Name: "product_specs_item_id", Type: field.TypeInt},
@@ -374,6 +430,8 @@ var (
 		ProductCateTable,
 		ProductSpecsTable,
 		ProductSpecsItemTable,
+		UserTable,
+		UserDetailTable,
 		ProductSpecsItemValuesTable,
 	}
 )
@@ -391,6 +449,13 @@ func init() {
 	ProductAttributeValueTable.ForeignKeys[0].RefTable = ProductAttributeKeyTable
 	ProductSpecsTable.ForeignKeys[0].RefTable = ProductTable
 	ProductSpecsItemTable.ForeignKeys[0].RefTable = ProductSpecsTable
+	UserTable.Annotation = &entsql.Annotation{
+		Table: "user",
+	}
+	UserDetailTable.ForeignKeys[0].RefTable = UserTable
+	UserDetailTable.Annotation = &entsql.Annotation{
+		Table: "user_detail",
+	}
 	ProductSpecsItemValuesTable.ForeignKeys[0].RefTable = ProductSpecsItemTable
 	ProductSpecsItemValuesTable.ForeignKeys[1].RefTable = ProductAttributeValueTable
 }

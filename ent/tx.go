@@ -38,6 +38,10 @@ type Tx struct {
 	ProductSpecs *ProductSpecsClient
 	// ProductSpecsItem is the client for interacting with the ProductSpecsItem builders.
 	ProductSpecsItem *ProductSpecsItemClient
+	// User is the client for interacting with the User builders.
+	User *UserClient
+	// UserDetail is the client for interacting with the UserDetail builders.
+	UserDetail *UserDetailClient
 
 	// lazily loaded.
 	client     *Client
@@ -186,6 +190,8 @@ func (tx *Tx) init() {
 	tx.ProductCate = NewProductCateClient(tx.config)
 	tx.ProductSpecs = NewProductSpecsClient(tx.config)
 	tx.ProductSpecsItem = NewProductSpecsItemClient(tx.config)
+	tx.User = NewUserClient(tx.config)
+	tx.UserDetail = NewUserDetailClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

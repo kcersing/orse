@@ -17,7 +17,11 @@ import (
 	"orse/ent/productspecs"
 	"orse/ent/productspecsitem"
 	"orse/ent/schema"
+	"orse/ent/user"
+	"orse/ent/userdetail"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -287,4 +291,37 @@ func init() {
 	productspecsitem.DefaultUpdatedAt = productspecsitemDescUpdatedAt.Default.(func() time.Time)
 	// productspecsitem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	productspecsitem.UpdateDefaultUpdatedAt = productspecsitemDescUpdatedAt.UpdateDefault.(func() time.Time)
+	userMixin := schema.User{}.Mixin()
+	userMixinFields0 := userMixin[0].Fields()
+	_ = userMixinFields0
+	userFields := schema.User{}.Fields()
+	_ = userFields
+	// userDescCreatedAt is the schema descriptor for created_at field.
+	userDescCreatedAt := userMixinFields0[0].Descriptor()
+	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
+	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
+	// userDescUpdatedAt is the schema descriptor for updated_at field.
+	userDescUpdatedAt := userMixinFields0[1].Descriptor()
+	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
+	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// userDescUUID is the schema descriptor for uuid field.
+	userDescUUID := userFields[3].Descriptor()
+	// user.DefaultUUID holds the default value on creation for the uuid field.
+	user.DefaultUUID = userDescUUID.Default.(func() uuid.UUID)
+	// userDescActive is the schema descriptor for active field.
+	userDescActive := userFields[4].Descriptor()
+	// user.DefaultActive holds the default value on creation for the active field.
+	user.DefaultActive = userDescActive.Default.(bool)
+	// userDescLogin is the schema descriptor for login field.
+	userDescLogin := userFields[6].Descriptor()
+	// user.DefaultLogin holds the default value on creation for the login field.
+	user.DefaultLogin = userDescLogin.Default.(func() time.Time)
+	userdetailFields := schema.UserDetail{}.Fields()
+	_ = userdetailFields
+	// userdetailDescAge is the schema descriptor for age field.
+	userdetailDescAge := userdetailFields[2].Descriptor()
+	// userdetail.AgeValidator is a validator for the "age" field. It is called by the builders before save.
+	userdetail.AgeValidator = userdetailDescAge.Validators[0].(func(int) error)
 }

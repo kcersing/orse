@@ -18,6 +18,8 @@ import (
 	"orse/ent/productcate"
 	"orse/ent/productspecs"
 	"orse/ent/productspecsitem"
+	"orse/ent/user"
+	"orse/ent/userdetail"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -54,6 +56,8 @@ func columnChecker(table string) func(string) error {
 		productcate.Table:           productcate.ValidColumn,
 		productspecs.Table:          productspecs.ValidColumn,
 		productspecsitem.Table:      productspecsitem.ValidColumn,
+		user.Table:                  user.ValidColumn,
+		userdetail.Table:            userdetail.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {
