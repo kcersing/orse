@@ -1,0 +1,10 @@
+Name: User
+Host: 127.0.0.1
+Port: 8000
+Mysql:
+  DataSource: root:X3MeAGAmPSZp8A3H@tcp(121.40.98.240:3306)/saas?parseTime=True&loc=Asia%2FShanghai
+Auth:
+  AccessSecret: eflH6vCe4TlprxlrOGAk9EWP3I7kiU68
+  AccessExpire: 86400
+Pass:
+  Salt: fhkg8uRnoovUHy96Xls5cIPvhmF09Nkt

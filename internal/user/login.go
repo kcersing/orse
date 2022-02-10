@@ -11,13 +11,16 @@ import (
 	"orse/internal/jwt"
 )
 
-type loginUsers struct {
+type LoginRequest  struct {
 	Mobile string `form:"mobile" json:"mobile" binding:"required" `
 	Pass   string `form:"pass" json:"pass" binding:"required" `
 }
-
+type  LoginResponse struct{
+	AccessToken  string `json:"accessToken"`
+	AccessExpire int64  `json:"accessExpire"`
+}
 func GetTokenHandler(c *gin.Context) {
-	var l loginUsers
+	var l LoginRequest
 	if err := c.ShouldBind(&l); err != nil {
 		if fe, ok := err.(validator.ValidationErrors); ok {
 			c.JSON(http.StatusBadRequest, gin.H{

@@ -35,5 +35,7 @@ func dsn()(driver string,dsn string)  {
 	dataName := cfg.Section("database").Key("NAME").String()
 	dataType := cfg.Section("database").Key("TYPE").String()
 
+
+
 	return  dataType,dataUser + ":" + dataPassword + "@tcp(" + dataHost + ")/" + dataName + "?parseTime=True"
 }

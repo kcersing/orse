@@ -9,9 +9,8 @@ import (
 	"orse/internal/database"
 )
 
-
-func Info(c *gin.Context){
-	userId,ok := c.Get("userID")
+func Info(c *gin.Context) {
+	userId, ok := c.Get("userID")
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "userID值不存在",
@@ -25,7 +24,7 @@ func Info(c *gin.Context){
 		Query().
 		Where(user.ID(userId.(int))).
 		Only(c)
-	if err != nil{
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "会员不存在",
 			"code":    201,
@@ -33,14 +32,13 @@ func Info(c *gin.Context){
 		return
 	}
 	c.JSON(http.StatusBadRequest, gin.H{
-		"code":   0,
+		"code": 0,
 		"data": u,
 	})
 
 	log.Println(userId)
 	return
 }
-
 
 // SetPass 设置密码
 func SetPass(pwd []byte) string {
@@ -52,7 +50,7 @@ func SetPass(pwd []byte) string {
 }
 
 // VerifyPass 验证密码
-func  VerifyPass( pass string,pad []byte) bool {
+func VerifyPass(pass string, pad []byte) bool {
 	byteHash := []byte(pass)
 	err := bcrypt.CompareHashAndPassword(byteHash, pad)
 	if err != nil {

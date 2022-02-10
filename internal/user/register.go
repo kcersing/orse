@@ -3,22 +3,21 @@ package user
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"net/http"
 	"orse/ent/user"
 	"orse/internal/database"
-
-	"net/http"
 	"orse/internal/errors"
 )
 
-type profile struct {
+type RegisterRequest struct {
 	Mobile   string `form:"mobile" json:"mobile" binding:"required"`
 	Username string `form:"username" json:"username" binding:"required" `
 	Pass     string `form:"pass" json:"pass" binding:"required" `
 }
 
 func Register(c *gin.Context) {
-	var p profile
-	if err := c.ShouldBind(&p); err != nil {
+	var r RegisterRequest
+	if err := c.ShouldBind(&r); err != nil {
 		if fe, ok := err.(validator.ValidationErrors); ok {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": errors.GetError(fe),
@@ -33,7 +32,7 @@ func Register(c *gin.Context) {
 
 	_, err := client.User.
 		Query().
-		Where(user.Mobile(p.Mobile)).
+		Where(user.Mobile(r.Mobile)).
 		Only(c)
 	if err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -47,9 +46,9 @@ func Register(c *gin.Context) {
 
 	xu, err := tx.User.
 		Create().
-		SetUsername(p.Username).
-		SetPass(SetPass([]byte(p.Pass))).
-		SetMobile(p.Mobile).
+		SetUsername(r.Username).
+		SetPass(SetPass([]byte(r.Pass))).
+		SetMobile(r.Mobile).
 		Save(c)
 
 	if err != nil {
