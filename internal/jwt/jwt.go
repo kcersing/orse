@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"net/http"
+	"orse/internal/auth"
 	"orse/internal/config"
 	"time"
 )
@@ -148,6 +149,7 @@ func JWThMiddleware() func(c *gin.Context) {
 			return
 		}
 		c.Set("claims", claims)
+		auth.AuthCheckRole()
 		c.Next()
 	}
 }
