@@ -34,3 +34,7 @@ func GetConfig(filePath string)  Config{
 	}
 	return c
 }
+
+func NewConfig() Config {
+	return GetConfig("config/user/user.yaml")
+}

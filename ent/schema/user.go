@@ -43,6 +43,9 @@ func (User) Fields() []ent.Field {
 			Comment("密码"),
 		field.UUID("uuid", uuid.UUID{}).
 			Default(uuid.New),
+		field.Int("role").
+			Optional().
+			Comment("Role"),
 		field.Bool("active").
 			Default(false),
 		field.Enum("state").

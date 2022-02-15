@@ -18,9 +18,9 @@ func Api(r *gin.Engine)  {
 		v1.POST("/roleAuths",auth.RoleAuths)
 		v1.POST("/addMenu",menu.AddMenu)
 		v1.POST("/user/register",user.Register)
-		v1.POST("/user/login",user.GetTokenHandler)
+		v1.POST("/user/login",user.GetToken)
 		v1.POST("/user/r-token",user.RefreshToken)
-		v1.POST("/user/v-token",user.VerifyToken)
+
 
 		users := v1.Group("/user")
 		users.Use(jwt.JWThMiddleware())

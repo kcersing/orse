@@ -311,11 +311,11 @@ func init() {
 	// user.DefaultUUID holds the default value on creation for the uuid field.
 	user.DefaultUUID = userDescUUID.Default.(func() uuid.UUID)
 	// userDescActive is the schema descriptor for active field.
-	userDescActive := userFields[4].Descriptor()
+	userDescActive := userFields[5].Descriptor()
 	// user.DefaultActive holds the default value on creation for the active field.
 	user.DefaultActive = userDescActive.Default.(bool)
 	// userDescLogin is the schema descriptor for login field.
-	userDescLogin := userFields[6].Descriptor()
+	userDescLogin := userFields[7].Descriptor()
 	// user.DefaultLogin holds the default value on creation for the login field.
 	user.DefaultLogin = userDescLogin.Default.(func() time.Time)
 	userdetailFields := schema.UserDetail{}.Fields()

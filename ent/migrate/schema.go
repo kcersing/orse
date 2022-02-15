@@ -343,6 +343,7 @@ var (
 		{Name: "mobile", Type: field.TypeString, Unique: true},
 		{Name: "pass", Type: field.TypeString, Nullable: true},
 		{Name: "uuid", Type: field.TypeUUID},
+		{Name: "role", Type: field.TypeInt, Nullable: true},
 		{Name: "active", Type: field.TypeBool, Default: false},
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"on", "off"}},
 		{Name: "login", Type: field.TypeTime},

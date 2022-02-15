@@ -26,6 +26,8 @@ const (
 	FieldPass = "pass"
 	// FieldUUID holds the string denoting the uuid field in the database.
 	FieldUUID = "uuid"
+	// FieldRole holds the string denoting the role field in the database.
+	FieldRole = "role"
 	// FieldActive holds the string denoting the active field in the database.
 	FieldActive = "active"
 	// FieldState holds the string denoting the state field in the database.
@@ -54,6 +56,7 @@ var Columns = []string{
 	FieldMobile,
 	FieldPass,
 	FieldUUID,
+	FieldRole,
 	FieldActive,
 	FieldState,
 	FieldLogin,

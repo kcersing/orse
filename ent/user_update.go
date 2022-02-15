@@ -99,6 +99,33 @@ func (uu *UserUpdate) SetUUID(u uuid.UUID) *UserUpdate {
 	return uu
 }
 
+// SetRole sets the "role" field.
+func (uu *UserUpdate) SetRole(i int) *UserUpdate {
+	uu.mutation.ResetRole()
+	uu.mutation.SetRole(i)
+	return uu
+}
+
+// SetNillableRole sets the "role" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableRole(i *int) *UserUpdate {
+	if i != nil {
+		uu.SetRole(*i)
+	}
+	return uu
+}
+
+// AddRole adds i to the "role" field.
+func (uu *UserUpdate) AddRole(i int) *UserUpdate {
+	uu.mutation.AddRole(i)
+	return uu
+}
+
+// ClearRole clears the value of the "role" field.
+func (uu *UserUpdate) ClearRole() *UserUpdate {
+	uu.mutation.ClearRole()
+	return uu
+}
+
 // SetActive sets the "active" field.
 func (uu *UserUpdate) SetActive(b bool) *UserUpdate {
 	uu.mutation.SetActive(b)
@@ -345,6 +372,26 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldUUID,
 		})
 	}
+	if value, ok := uu.mutation.Role(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldRole,
+		})
+	}
+	if value, ok := uu.mutation.AddedRole(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldRole,
+		})
+	}
+	if uu.mutation.RoleCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: user.FieldRole,
+		})
+	}
 	if value, ok := uu.mutation.Active(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
@@ -512,6 +559,33 @@ func (uuo *UserUpdateOne) ClearPass() *UserUpdateOne {
 // SetUUID sets the "uuid" field.
 func (uuo *UserUpdateOne) SetUUID(u uuid.UUID) *UserUpdateOne {
 	uuo.mutation.SetUUID(u)
+	return uuo
+}
+
+// SetRole sets the "role" field.
+func (uuo *UserUpdateOne) SetRole(i int) *UserUpdateOne {
+	uuo.mutation.ResetRole()
+	uuo.mutation.SetRole(i)
+	return uuo
+}
+
+// SetNillableRole sets the "role" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableRole(i *int) *UserUpdateOne {
+	if i != nil {
+		uuo.SetRole(*i)
+	}
+	return uuo
+}
+
+// AddRole adds i to the "role" field.
+func (uuo *UserUpdateOne) AddRole(i int) *UserUpdateOne {
+	uuo.mutation.AddRole(i)
+	return uuo
+}
+
+// ClearRole clears the value of the "role" field.
+func (uuo *UserUpdateOne) ClearRole() *UserUpdateOne {
+	uuo.mutation.ClearRole()
 	return uuo
 }
 
@@ -783,6 +857,26 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Type:   field.TypeUUID,
 			Value:  value,
 			Column: user.FieldUUID,
+		})
+	}
+	if value, ok := uuo.mutation.Role(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldRole,
+		})
+	}
+	if value, ok := uuo.mutation.AddedRole(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldRole,
+		})
+	}
+	if uuo.mutation.RoleCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: user.FieldRole,
 		})
 	}
 	if value, ok := uuo.mutation.Active(); ok {

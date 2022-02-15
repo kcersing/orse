@@ -13227,6 +13227,8 @@ type UserMutation struct {
 	mobile        *string
 	pass          *string
 	uuid          *uuid.UUID
+	role          *int
+	addrole       *int
 	active        *bool
 	state         *user.State
 	login         *time.Time
@@ -13573,6 +13575,76 @@ func (m *UserMutation) ResetUUID() {
 	m.uuid = nil
 }
 
+// SetRole sets the "role" field.
+func (m *UserMutation) SetRole(i int) {
+	m.role = &i
+	m.addrole = nil
+}
+
+// Role returns the value of the "role" field in the mutation.
+func (m *UserMutation) Role() (r int, exists bool) {
+	v := m.role
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRole returns the old "role" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldRole(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldRole is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldRole requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRole: %w", err)
+	}
+	return oldValue.Role, nil
+}
+
+// AddRole adds i to the "role" field.
+func (m *UserMutation) AddRole(i int) {
+	if m.addrole != nil {
+		*m.addrole += i
+	} else {
+		m.addrole = &i
+	}
+}
+
+// AddedRole returns the value that was added to the "role" field in this mutation.
+func (m *UserMutation) AddedRole() (r int, exists bool) {
+	v := m.addrole
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearRole clears the value of the "role" field.
+func (m *UserMutation) ClearRole() {
+	m.role = nil
+	m.addrole = nil
+	m.clearedFields[user.FieldRole] = struct{}{}
+}
+
+// RoleCleared returns if the "role" field was cleared in this mutation.
+func (m *UserMutation) RoleCleared() bool {
+	_, ok := m.clearedFields[user.FieldRole]
+	return ok
+}
+
+// ResetRole resets all changes to the "role" field.
+func (m *UserMutation) ResetRole() {
+	m.role = nil
+	m.addrole = nil
+	delete(m.clearedFields, user.FieldRole)
+}
+
 // SetActive sets the "active" field.
 func (m *UserMutation) SetActive(b bool) {
 	m.active = &b
@@ -13767,7 +13839,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
@@ -13785,6 +13857,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.uuid != nil {
 		fields = append(fields, user.FieldUUID)
+	}
+	if m.role != nil {
+		fields = append(fields, user.FieldRole)
 	}
 	if m.active != nil {
 		fields = append(fields, user.FieldActive)
@@ -13815,6 +13890,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Pass()
 	case user.FieldUUID:
 		return m.UUID()
+	case user.FieldRole:
+		return m.Role()
 	case user.FieldActive:
 		return m.Active()
 	case user.FieldState:
@@ -13842,6 +13919,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldPass(ctx)
 	case user.FieldUUID:
 		return m.OldUUID(ctx)
+	case user.FieldRole:
+		return m.OldRole(ctx)
 	case user.FieldActive:
 		return m.OldActive(ctx)
 	case user.FieldState:
@@ -13899,6 +13978,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUUID(v)
 		return nil
+	case user.FieldRole:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRole(v)
+		return nil
 	case user.FieldActive:
 		v, ok := value.(bool)
 		if !ok {
@@ -13927,13 +14013,21 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *UserMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addrole != nil {
+		fields = append(fields, user.FieldRole)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case user.FieldRole:
+		return m.AddedRole()
+	}
 	return nil, false
 }
 
@@ -13942,6 +14036,13 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UserMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case user.FieldRole:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRole(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
 }
@@ -13958,6 +14059,9 @@ func (m *UserMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(user.FieldPass) {
 		fields = append(fields, user.FieldPass)
+	}
+	if m.FieldCleared(user.FieldRole) {
+		fields = append(fields, user.FieldRole)
 	}
 	if m.FieldCleared(user.FieldState) {
 		fields = append(fields, user.FieldState)
@@ -13984,6 +14088,9 @@ func (m *UserMutation) ClearField(name string) error {
 		return nil
 	case user.FieldPass:
 		m.ClearPass()
+		return nil
+	case user.FieldRole:
+		m.ClearRole()
 		return nil
 	case user.FieldState:
 		m.ClearState()
@@ -14013,6 +14120,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldUUID:
 		m.ResetUUID()
+		return nil
+	case user.FieldRole:
+		m.ResetRole()
 		return nil
 	case user.FieldActive:
 		m.ResetActive()

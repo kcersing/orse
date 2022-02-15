@@ -12,6 +12,7 @@ require (
 	github.com/google/uuid v1.3.0
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce
 	gopkg.in/ini.v1 v1.66.2
+	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/yaml.v2 v2.4.0
 )
 

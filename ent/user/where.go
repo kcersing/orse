@@ -136,6 +136,13 @@ func UUID(v uuid.UUID) predicate.User {
 	})
 }
 
+// Role applies equality check predicate on the "role" field. It's identical to RoleEQ.
+func Role(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRole), v))
+	})
+}
+
 // Active applies equality check predicate on the "active" field. It's identical to ActiveEQ.
 func Active(v bool) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -750,6 +757,96 @@ func UUIDLT(v uuid.UUID) predicate.User {
 func UUIDLTE(v uuid.UUID) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldUUID), v))
+	})
+}
+
+// RoleEQ applies the EQ predicate on the "role" field.
+func RoleEQ(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRole), v))
+	})
+}
+
+// RoleNEQ applies the NEQ predicate on the "role" field.
+func RoleNEQ(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldRole), v))
+	})
+}
+
+// RoleIn applies the In predicate on the "role" field.
+func RoleIn(vs ...int) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldRole), v...))
+	})
+}
+
+// RoleNotIn applies the NotIn predicate on the "role" field.
+func RoleNotIn(vs ...int) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldRole), v...))
+	})
+}
+
+// RoleGT applies the GT predicate on the "role" field.
+func RoleGT(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldRole), v))
+	})
+}
+
+// RoleGTE applies the GTE predicate on the "role" field.
+func RoleGTE(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldRole), v))
+	})
+}
+
+// RoleLT applies the LT predicate on the "role" field.
+func RoleLT(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldRole), v))
+	})
+}
+
+// RoleLTE applies the LTE predicate on the "role" field.
+func RoleLTE(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldRole), v))
+	})
+}
+
+// RoleIsNil applies the IsNil predicate on the "role" field.
+func RoleIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldRole)))
+	})
+}
+
+// RoleNotNil applies the NotNil predicate on the "role" field.
+func RoleNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldRole)))
 	})
 }
 

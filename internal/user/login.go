@@ -3,7 +3,6 @@ package user
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"log"
 	"net/http"
 	"orse/ent/user"
 	"orse/internal/database"
@@ -19,13 +18,13 @@ type  LoginResponse struct{
 	AccessToken  string `json:"accessToken"`
 	AccessExpire int64  `json:"accessExpire"`
 }
-func GetTokenHandler(c *gin.Context) {
+func GetToken(c *gin.Context) {
 	var l LoginRequest
 	if err := c.ShouldBind(&l); err != nil {
 		if fe, ok := err.(validator.ValidationErrors); ok {
-			c.JSON(http.StatusBadRequest, gin.H{
+			c.JSON(http.StatusOK, gin.H{
+				"code":    201,
 				"message": errors.GetError(fe),
-				"code":    1,
 			})
 		}
 		return
@@ -41,65 +40,48 @@ func GetTokenHandler(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    201,
 			"message": "手机号不存在",
-			"code":    1,
 		})
 		return
 	}
 	if !VerifyPass(u.Pass, []byte(l.Pass)) {
 		c.JSON(http.StatusOK, gin.H{
 			"code": 202,
-			"msg":  "用户名或密码错误",
+			"message":  "用户名或密码错误",
 		})
 		return
 	}
 
 	//生成token
-	tokenString, err := jwt.GenToken(u.ID)
+	j := jwt.NewJWT()
+	tokenString, err := j.GenToken(	jwt.NewClaims(u.ID,u.Role,u.Username))
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"code": 101,
-			"err":  err,
+			"code": 201,
+			"message":  err.Error(),
 		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
-		"data": gin.H{"token": tokenString},
+		"message":    "登录成功",
+		"data": gin.H{"token": tokenString,"data":u},
 	})
 	return
-
 }
 
-type token struct {
-	Token string `form:"token" json:"token" `
-	Id    int    `form:"id" json:"id" binding:"required" `
-}
-
-func VerifyToken(c *gin.Context) {
-	var k token
-	if err := c.ShouldBind(&k); err != nil {
-		if fe, ok := err.(validator.ValidationErrors); ok {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"message": errors.GetError(fe),
-				"code":    1,
-			})
-			return
-		}
-	}
-
-	l, err := jwt.VerifyToken(k.Token)
-	log.Println(l, err)
-
+type refreshToken struct {
+	Token string `form:"token" json:"token" binding:"required" `
 }
 
 func RefreshToken(c *gin.Context) {
-	var k token
+	var k refreshToken
 	if err := c.ShouldBind(&k); err != nil {
 		if fe, ok := err.(validator.ValidationErrors); ok {
-			c.JSON(http.StatusBadRequest, gin.H{
+			c.JSON(http.StatusOK, gin.H{
+				"code":    201,
 				"message": errors.GetError(fe),
-				"code":    1,
 			})
 			return
 		}
@@ -110,24 +92,24 @@ func RefreshToken(c *gin.Context) {
 	}
 
 	if k.Token == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(http.StatusOK, gin.H{
+			"code":    201,
 			"message": "token不存在",
-			"code":    1,
 		})
 		return
 	}
 
-	tokenString, err := jwt.RefreshToken(k.Id, k.Token)
-
+	j := jwt.NewJWT()
+	tokenString, err := j.RefreshToken(k.Token)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"message": err.Error(),
 			"code":    1,
 		})
 		return
 	}
 
-	c.JSON(http.StatusBadRequest, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"data": gin.H{ "token": tokenString },
 		"code": 0,
 	})

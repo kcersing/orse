@@ -2,90 +2,71 @@ package auth
 
 import (
 	"github.com/casbin/casbin/v2"
-	"github.com/casbin/casbin/v2/util"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"log"
+	"gopkg.in/mgo.v2/bson"
+	"net/http"
 	"orse/internal/database"
 )
 
-func main() {
-	a,_ := database.Open()
-	e, err := casbin.NewEnforcer("configs/casbin_model.ini", a)
-	if err != nil{
+type CasbinModel struct {
+	ID     bson.ObjectId `json:"id" bson:"_id"`
+	Ptype  string        `json:"ptype" bson:"ptype"`
+	Role   string        `json:"role" bson:"v0"`
+	Path   string        `json:"path" bson:"v1"`
+	Method string        `json:"method" bson:"v2"`
+}
+
+func Casbin() *casbin.Enforcer {
+	a, _ := database.Open()
+	e, err := casbin.NewEnforcer("config/casbin/casbin_model.ini", a)
+	if err != nil {
 		panic(err)
 	}
-
-	dded,_:=e.AddPolicy("alice","dara","read")
-	log.Println(dded)
-	Policy:=e.GetPolicy()
- 	log.Println(Policy)
-
-	GetPolicy(e, [][]string{{"eve", "data3", "read"},{"alice","dara","read"}})
-
-}
-func Roles(c *gin.Context)  {
-
-	sub,_:=c.GetPostForm("sub")// 想要访问资源的用户。
-	obj,_:=c.GetPostForm("obj")// 将被访问的资源。
-	act,_:=c.GetPostForm("act") // 用户对资源执行的操作。
-	e := newEnforcer()
-	ok,err := e.AddPolicy(sub,obj,act)
-
-	if err != nil{
-		c.JSON(200,gin.H{
-			"message":err,
-			"code":1,
-		})
-	}
-	if ok{
-		c.JSON(200,gin.H{
-			"message":"成功",
-			"code":0,
-		})
-	}
-}
-
-func DelRoles(c *gin.Context){
-
-}
-
-func RoleAuths(c *gin.Context)   {
-	sub,_:=c.GetPostForm("sub")// 想要访问资源的用户。
-	obj,_:=c.GetPostForm("obj")// 将被访问的资源。
-	act,_:=c.GetPostForm("act") // 用户对资源执行的操作。
-
-	e := newEnforcer()
-	ok,err := e.AddPolicy(sub,obj,act)
-
-	if err != nil{
-		c.JSON(200,gin.H{
-			"message":err,
-			"code":1,
-		})
-	}
-	if ok{
-		c.JSON(200,gin.H{
-			"message":"成功",
-			"code":0,
-		})
-	}
-}
-
-func newEnforcer() *casbin.Enforcer{
-	a,_ := database.Open()
-	e, err := casbin.NewEnforcer("configs/                                    .ini", a)
-	if err != nil{
-		panic(err)
-	}
+	e.LoadPolicy()
 	return e
 }
+func (c *CasbinModel) AddCasbin(cm CasbinModel) (bool, error) {
+	n := Casbin()
+	return n.AddPolicy(cm.Role, cm.Path, cm.Method)
+}
 
-func GetPolicy(e *casbin.Enforcer, res [][]string) {
-	myRes := e.GetPolicy()
-	log.Println("Policy: ", myRes)
+func AddCasbin(c *gin.Context) {
 
-	if !util.Array2DEquals(res, myRes) {
-		log.Fatalf("Policy: %v, supposed to be %v", myRes, res)
-	}}
+	role, _ := c.GetPostForm("role") // 想要访问资源的用户。
+	path, _ := c.GetPostForm("path") // 将被访问的资源。
+	method, _ := c.GetPostForm("method") // 用户对资源执行的操作。
+
+	ptype := "p"
+	ca := CasbinModel{
+		ID:     bson.NewObjectId(),
+		Ptype:  ptype,
+		Role:   role,
+		Path:   path,
+		Method: method,
+	}
+	_, err := ca.AddCasbin(ca)
+	if err!=nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 201,
+			"message":  "保存失败",
+		})
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"message":  "保存成功",
+	})
+}
+
+
+
+
+
+
+
+
+
+
+
+
 

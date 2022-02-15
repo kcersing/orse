@@ -29,9 +29,12 @@ type User struct {
 	Mobile string `json:"mobile,omitempty"`
 	// Pass holds the value of the "pass" field.
 	// 密码
-	Pass string `json:"pass,omitempty"`
+	Pass string `json:"-"`
 	// UUID holds the value of the "uuid" field.
 	UUID uuid.UUID `json:"uuid,omitempty"`
+	// Role holds the value of the "role" field.
+	// Role
+	Role int `json:"role,omitempty"`
 	// Active holds the value of the "active" field.
 	Active bool `json:"active,omitempty"`
 	// State holds the value of the "state" field.
@@ -69,7 +72,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case user.FieldActive:
 			values[i] = new(sql.NullBool)
-		case user.FieldID:
+		case user.FieldID, user.FieldRole:
 			values[i] = new(sql.NullInt64)
 		case user.FieldUsername, user.FieldMobile, user.FieldPass, user.FieldState:
 			values[i] = new(sql.NullString)
@@ -134,6 +137,12 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value != nil {
 				u.UUID = *value
 			}
+		case user.FieldRole:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field role", values[i])
+			} else if value.Valid {
+				u.Role = int(value.Int64)
+			}
 		case user.FieldActive:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field active", values[i])
@@ -193,10 +202,11 @@ func (u *User) String() string {
 	builder.WriteString(u.Username)
 	builder.WriteString(", mobile=")
 	builder.WriteString(u.Mobile)
-	builder.WriteString(", pass=")
-	builder.WriteString(u.Pass)
+	builder.WriteString(", pass=<sensitive>")
 	builder.WriteString(", uuid=")
 	builder.WriteString(fmt.Sprintf("%v", u.UUID))
+	builder.WriteString(", role=")
+	builder.WriteString(fmt.Sprintf("%v", u.Role))
 	builder.WriteString(", active=")
 	builder.WriteString(fmt.Sprintf("%v", u.Active))
 	builder.WriteString(", state=")

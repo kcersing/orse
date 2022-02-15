@@ -82,6 +82,20 @@ func (uc *UserCreate) SetUUID(u uuid.UUID) *UserCreate {
 	return uc
 }
 
+// SetRole sets the "role" field.
+func (uc *UserCreate) SetRole(i int) *UserCreate {
+	uc.mutation.SetRole(i)
+	return uc
+}
+
+// SetNillableRole sets the "role" field if the given value is not nil.
+func (uc *UserCreate) SetNillableRole(i *int) *UserCreate {
+	if i != nil {
+		uc.SetRole(*i)
+	}
+	return uc
+}
+
 // SetActive sets the "active" field.
 func (uc *UserCreate) SetActive(b bool) *UserCreate {
 	uc.mutation.SetActive(b)
@@ -328,6 +342,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldUUID,
 		})
 		_node.UUID = value
+	}
+	if value, ok := uc.mutation.Role(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldRole,
+		})
+		_node.Role = value
 	}
 	if value, ok := uc.mutation.Active(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
