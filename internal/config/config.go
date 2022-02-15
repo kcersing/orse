@@ -23,8 +23,8 @@ type Auth struct{
 }
 
 
-func GetConfig(filePath string)  {
-	c :=Config{}
+func GetConfig(filePath string)  Config{
+	c := Config{}
 	buffer,err:=ioutil.ReadFile(filePath)
 	if err != nil {
 		log.Fatalf("解析config.yaml读取错误: %v", err)
@@ -32,4 +32,5 @@ func GetConfig(filePath string)  {
 	if yaml.Unmarshal(buffer, &c) != nil {
 		log.Fatalf("解析config.yaml出错: %v", err)
 	}
+	return c
 }

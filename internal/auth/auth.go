@@ -1,19 +1,16 @@
 package auth
 
 import (
-	"fmt"
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/util"
-	"github.com/casbin/ent-adapter"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"gopkg.in/ini.v1"
 	"log"
-	"os"
+	"orse/internal/database"
 )
 
 func main() {
-	a := initAdapter()
+	a,_ := database.Open()
 	e, err := casbin.NewEnforcer("configs/casbin_model.ini", a)
 	if err != nil{
 		panic(err)
@@ -75,30 +72,9 @@ func RoleAuths(c *gin.Context)   {
 	}
 }
 
-
-func initAdapter() *entadapter.Adapter {
-	cfg, err := ini.Load("configs/config.ini")
-	if err != nil {
-		fmt.Printf("Fail to read file: %v", err)
-		os.Exit(1)
-	}
-	dataType := cfg.Section("database").Key("TYPE").String()
-	dataUser := cfg.Section("database").Key("USER").String()
-	dataPassword := cfg.Section("database").Key("PASSWORD").String()
-	dataHost := cfg.Section("database").Key("HOST").String()
-	dataName := cfg.Section("database").Key("NAME").String()
-
-	a, err := entadapter.NewAdapter(dataType, dataUser+":"+dataPassword+"@tcp("+dataHost+")/"+dataName)
-	if err != nil {
-		log.Fatalf("failed opening connection to mysql: %v", err)
-	}
-
-	return a
-}
-
 func newEnforcer() *casbin.Enforcer{
-	a := initAdapter()
-	e, err := casbin.NewEnforcer("configs/casbin_model.ini", a)
+	a,_ := database.Open()
+	e, err := casbin.NewEnforcer("configs/                                    .ini", a)
 	if err != nil{
 		panic(err)
 	}
@@ -111,5 +87,5 @@ func GetPolicy(e *casbin.Enforcer, res [][]string) {
 
 	if !util.Array2DEquals(res, myRes) {
 		log.Fatalf("Policy: %v, supposed to be %v", myRes, res)
-	}
-}
+	}}
+

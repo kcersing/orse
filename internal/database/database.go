@@ -3,10 +3,8 @@ package database
 import (
 	"database/sql"
 	entsql "entgo.io/ent/dialect/sql"
-	"fmt"
-	"gopkg.in/ini.v1"
 	"orse/ent"
-	"os"
+	"orse/internal/config"
 	"time"
 )
 
@@ -24,18 +22,8 @@ func Open() (*ent.Client, error) {
 }
 
 func dsn()(driver string,dsn string)  {
-	cfg, err := ini.Load("configs/config.ini")
-	if err != nil {
-		fmt.Printf("Fail to read file: %v", err)
-		os.Exit(1)
-	}
-	dataUser := cfg.Section("database").Key("USER").String()
-	dataPassword := cfg.Section("database").Key("PASSWORD").String()
-	dataHost := cfg.Section("database").Key("HOST").String()
-	dataName := cfg.Section("database").Key("NAME").String()
-	dataType := cfg.Section("database").Key("TYPE").String()
 
+	cfg := config.GetConfig("config/user/user.yaml")
 
-
-	return  dataType,dataUser + ":" + dataPassword + "@tcp(" + dataHost + ")/" + dataName + "?parseTime=True"
+	return  "mysql",cfg.Mysql.DataSource
 }
