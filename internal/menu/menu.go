@@ -104,8 +104,25 @@ func editMenu(c *gin.Context) {
 	return
 }
 
-func  GetMene()  {
+func  GetMenu(c *gin.Context) {
 	client,_ := database.Open()
 	defer client.Close()
 
+
+
+
+	//menus, err := client.Menu.      // UserClient.
+	//	Query().                    // User query builder.
+	//	Where(menus.HasFollowers()). // filter only users with followers.
+	//	All(c)                    // query and return.
+	//
+	//
+	//
+	//
+	//c.JSON(http.StatusOK, gin.H{
+	//	"message": "成功",
+	//	"data":    model,
+	//	"code":    0,
+	//})
+	return
 }

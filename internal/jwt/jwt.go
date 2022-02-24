@@ -3,10 +3,8 @@ package jwt
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	"net/http"
-	"orse/internal/auth"
+	"log"
 	"orse/internal/config"
 	"time"
 )
@@ -68,6 +66,7 @@ func (j *JWT) VerifyToken(tokenStr string) (*Claims, error) {
 	// 解析JWT字符串并将结果存储在`claims`中。
 	// 请注意，我们也在此方法中传递了密钥。
 	// 如果令牌无效（如果令牌已根据我们设置的登录到期时间过期）或者签名不匹配,此方法会返回错误.
+	log.Println(tokenStr)
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (i interface{}, err error) {
 		return j.SigningKey, nil
 	})
@@ -113,43 +112,4 @@ func (j *JWT) RefreshToken(tokenStr string) (string, error) {
 		return j.GenToken(*claims)
 	}
 	return "", TokenInvalid
-}
-
-// JWThMiddleware 中间件
-func JWThMiddleware() func(c *gin.Context) {
-	return func(c *gin.Context) {
-		token := c.GetHeader("token")
-		if token == "" {
-			// 处理 没有token的时候
-			c.JSON(http.StatusOK, gin.H{
-				"message": "缺少token信息",
-				"code":    401,
-			})
-			c.Abort() // 不会继续停止
-			return
-		}
-		// 解析
-		j := NewJWT()
-		claims, err := j.VerifyToken(token)
-		if err != nil {
-			if err == TokenExpired {
-				c.JSON(http.StatusOK, gin.H{
-					"status": 401,
-					"msg":    "授权已过期",
-				})
-				c.Abort()
-				return
-			}
-			// 处理 解析失败
-			c.JSON(http.StatusOK, gin.H{
-				"message": err.Error(),
-				"code":    401,
-			})
-			c.Abort()
-			return
-		}
-		c.Set("claims", claims)
-		auth.AuthCheckRole()
-		c.Next()
-	}
 }

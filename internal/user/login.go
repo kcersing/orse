@@ -12,12 +12,12 @@ import (
 
 type LoginRequest  struct {
 	Mobile string `form:"mobile" json:"mobile" binding:"required" `
-	Pass   string `form:"pass" json:"pass" binding:"required" `
+	Pass   string `form:"password" json:"password" binding:"required" `
 }
-type  LoginResponse struct{
-	AccessToken  string `json:"accessToken"`
-	AccessExpire int64  `json:"accessExpire"`
+type VerifyTokenUser struct{
+	Token  string `form:"token" json:"token" binding:"required" `
 }
+
 func GetToken(c *gin.Context) {
 	var l LoginRequest
 	if err := c.ShouldBind(&l); err != nil {
@@ -39,7 +39,7 @@ func GetToken(c *gin.Context) {
 		Only(c)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"code":    201,
 			"message": "手机号不存在",
 		})
@@ -66,10 +66,40 @@ func GetToken(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"message":    "登录成功",
-		"data": gin.H{"token": tokenString,"data":u},
+		"data": gin.H{"token": tokenString},
 	})
 	return
 }
+
+func GetTokenUser(c *gin.Context){
+	var l VerifyTokenUser
+	if err := c.ShouldBind(&l); err != nil {
+		if fe, ok := err.(validator.ValidationErrors); ok {
+			c.JSON(http.StatusOK, gin.H{
+				"code":    201,
+				"message": errors.GetError(fe),
+			})
+		}
+		return
+	}
+	//生成token
+	j := jwt.NewJWT()
+	claims, err := j.VerifyToken(l.Token)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 201,
+			"message":  err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"message":    "获取成功",
+		"data": claims,
+	})
+	return
+}
+
 
 type refreshToken struct {
 	Token string `form:"token" json:"token" binding:"required" `

@@ -16,14 +16,17 @@ var (
 	})
 	//handlerConfirm 确定订单
 	handlerConfirm = Handler(func(opt *Opt) (State, error) {
+		//业务逻辑
 		return StatusConfirmed, nil
 	})
 	//handlerModify 修改订单
 	handlerModify = Handler(func(opt *Opt) (State, error) {
+		//业务逻辑
 		return StatusReserved,nil
 	})
 	//handlerPay 支付订单
 	handlerPay= Handler(func(opt *Opt) (State, error) {
+		//业务逻辑
 		return StatusLocked,nil
 	})
 
