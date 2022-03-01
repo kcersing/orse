@@ -5,33 +5,30 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
-	"orse/ent/user"
 	"orse/internal/database"
 )
 
 func Info(c *gin.Context) {
 	userId, ok := c.Get("userID")
 	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"message": "userID值不存在",
 			"code":    401,
 		})
 		return
 	}
 	client, _ := database.Open()
-	defer client.Close()
-	u, err := client.User.
-		Query().
-		Where(user.ID(userId.(int))).
-		Only(c)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+
+	result := client.Where("id = ?", userId.(int)).First(&u)
+
+	if result.Error != nil {
+		c.JSON(http.StatusOK, gin.H{
 			"message": "会员不存在",
 			"code":    201,
 		})
 		return
 	}
-	c.JSON(http.StatusBadRequest, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"data": u,
 	})

@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"net/http"
-	"orse/ent/user"
+	"orse/common/models"
 	"orse/internal/database"
 	"orse/internal/errors"
 )
@@ -14,7 +14,7 @@ type RegisterRequest struct {
 	Username string `form:"username" json:"username" binding:"required" `
 	Pass     string `form:"pass" json:"pass" binding:"required" `
 }
-
+var u = models.User{}
 func Register(c *gin.Context) {
 	var r RegisterRequest
 	if err := c.ShouldBind(&r); err != nil {
@@ -28,13 +28,10 @@ func Register(c *gin.Context) {
 	}
 
 	client, _ := database.Open()
-	defer client.Close()
 
-	_, err := client.User.
-		Query().
-		Where(user.Mobile(r.Mobile)).
-		Only(c)
-	if err == nil {
+	result := client.Where("mobile = ?", r.Mobile).First(&u)
+
+	if result.Error == nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "手机号已存在",
 			"code":    1,
@@ -42,38 +39,36 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	tx, _ := client.Tx(c)
+	user := models.User{
+		Username : r.Username,
+		Pass : SetPass([]byte(r.Pass)),
+		Mobile : r.Mobile,
 
-	xu, err := tx.User.
-		Create().
-		SetUsername(r.Username).
-		SetPass(SetPass([]byte(r.Pass))).
-		SetMobile(r.Mobile).
-		Save(c)
+	}
+	result = client.Create(&user)
+	if result.Error != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"message": result.Error,
+			"code":    1,
+		})
+		return
+	}
+	result = client.Create(&models.UserDetail{
+		UserId:user.Id,
+		Name: r.Username,
 
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err,
-			"code":    0,
+
+	})
+	if result.Error != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"message": result.Error,
+			"code":    1,
 		})
 		return
 	}
 
-	_, err = tx.UserDetail.
-		Create().
-		SetName(xu.Username).
-		SetUser(xu).
-		Save(c)
 
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err,
-			"code":    0,
-		})
-		return
-	}
 
-	tx.Commit()
 
 	c.JSON(http.StatusBadRequest, gin.H{
 		"message": "注册成功",

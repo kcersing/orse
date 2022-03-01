@@ -9,7 +9,6 @@ import (
 	"crypto/md5"
 	"fmt"
 	"math"
-	"sort"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -105,18 +104,19 @@ func (f CreateFunc) Create(ctx context.Context, tables ...*Table) error {
 // Migrate runs the migrations logic for the SQL dialects.
 type Migrate struct {
 	sqlDialect
-	universalID     bool     // global unique ids.
-	dropColumns     bool     // drop deleted columns.
-	dropIndexes     bool     // drop deleted indexes.
-	withFixture     bool     // with fks rename fixture.
-	withForeignKeys bool     // with foreign keys
-	typeRanges      []string // types order by their range.
-	hooks           []Hook   // hooks to apply before creation
+	universalID     bool          // global unique ids.
+	dropColumns     bool          // drop deleted columns.
+	dropIndexes     bool          // drop deleted indexes.
+	withFixture     bool          // with fks rename fixture.
+	withForeignKeys bool          // with foreign keys
+	atlas           *atlasOptions // migrate with atlas.
+	typeRanges      []string      // types order by their range.
+	hooks           []Hook        // hooks to apply before creation
 }
 
 // NewMigrate create a migration structure for the given SQL driver.
 func NewMigrate(d dialect.Driver, opts ...MigrateOption) (*Migrate, error) {
-	m := &Migrate{withForeignKeys: true}
+	m := &Migrate{withForeignKeys: true, atlas: &atlasOptions{}}
 	for _, opt := range opts {
 		opt(m)
 	}
@@ -129,6 +129,9 @@ func NewMigrate(d dialect.Driver, opts ...MigrateOption) (*Migrate, error) {
 		m.sqlDialect = &Postgres{Driver: d}
 	default:
 		return nil, fmt.Errorf("sql/schema: unsupported dialect %q", d.Dialect())
+	}
+	if err := m.setupAtlas(); err != nil {
+		return nil, err
 	}
 	return m, nil
 }
@@ -147,10 +150,12 @@ func (m *Migrate) Create(ctx context.Context, tables ...*Table) error {
 		m.setupTable(t)
 	}
 	var creator Creator = CreateFunc(m.create)
+	if m.atlas.enabled {
+		creator = CreateFunc(m.atCreate)
+	}
 	for i := len(m.hooks) - 1; i >= 0; i-- {
 		creator = m.hooks[i](creator)
 	}
-
 	return creator.Create(ctx, tables...)
 }
 
@@ -322,8 +327,6 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 	if len(curr.PrimaryKey) != len(new.PrimaryKey) {
 		return nil, fmt.Errorf("cannot change primary key for table: %q", curr.Name)
 	}
-	sort.Slice(new.PrimaryKey, func(i, j int) bool { return new.PrimaryKey[i].Name < new.PrimaryKey[j].Name })
-	sort.Slice(curr.PrimaryKey, func(i, j int) bool { return curr.PrimaryKey[i].Name < curr.PrimaryKey[j].Name })
 	for i := range curr.PrimaryKey {
 		if curr.PrimaryKey[i].Name != new.PrimaryKey[i].Name {
 			return nil, fmt.Errorf("cannot change primary key for table: %q", curr.Name)
@@ -342,17 +345,28 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 			return nil, fmt.Errorf("invalid type %q for column %q", c2.typ, c2.Name)
 		// Modify a non-unique column to unique.
 		case c1.Unique && !c2.Unique:
-			change.index.add.append(&Index{
-				Name:    c1.Name,
-				Unique:  true,
-				Columns: []*Column{c1},
-				columns: []string{c1.Name},
-			})
+			// Make sure the table does not have unique index for this column
+			// before adding it to the changeset, because there are 2 ways to
+			// configure uniqueness on ent.Field (using the Unique modifier or
+			// adding rule on the Indexes option).
+			if idx, ok := curr.index(c1.Name); !ok || !idx.Unique {
+				change.index.add.append(&Index{
+					Name:    c1.Name,
+					Unique:  true,
+					Columns: []*Column{c1},
+					columns: []string{c1.Name},
+				})
+			}
 		// Modify a unique column to non-unique.
 		case !c1.Unique && c2.Unique:
+			// If the uniqueness was defined on the Indexes option,
+			// or was moved from the Unique modifier to the Indexes.
+			if idx, ok := new.index(c1.Name); ok && idx.Unique {
+				continue
+			}
 			idx, ok := curr.index(c2.Name)
 			if !ok {
-				return nil, fmt.Errorf("missing index to drop for column %q", c2.Name)
+				return nil, fmt.Errorf("missing index to drop for unique column %q", c2.Name)
 			}
 			change.index.drop.append(idx)
 		// Extending column types.
@@ -363,6 +377,9 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 			fallthrough
 		// Change nullability of a column.
 		case c1.Nullable != c2.Nullable:
+			change.column.modify = append(change.column.modify, c1)
+		// Change default value.
+		case c1.Default != nil && c2.Default == nil:
 			change.column.modify = append(change.column.modify, c1)
 		}
 	}
@@ -491,12 +508,12 @@ func (m *Migrate) verify(ctx context.Context, tx dialect.Tx, t *Table) error {
 	if id == -1 {
 		return nil
 	}
-	return vr.verifyRange(ctx, tx, t, id<<32)
+	return vr.verifyRange(ctx, tx, t, int64(id<<32))
 }
 
 // types loads the type list from the database.
 // If the table does not create, it will create one.
-func (m *Migrate) types(ctx context.Context, tx dialect.Tx) error {
+func (m *Migrate) types(ctx context.Context, tx dialect.ExecQuerier) error {
 	exists, err := m.tableExist(ctx, tx, TypeTable)
 	if err != nil {
 		return err
@@ -521,24 +538,31 @@ func (m *Migrate) types(ctx context.Context, tx dialect.Tx) error {
 	return sql.ScanSlice(rows, &m.typeRanges)
 }
 
-func (m *Migrate) allocPKRange(ctx context.Context, tx dialect.Tx, t *Table) error {
+func (m *Migrate) allocPKRange(ctx context.Context, conn dialect.ExecQuerier, t *Table) error {
+	r, err := m.pkRange(ctx, conn, t)
+	if err != nil {
+		return err
+	}
+	return m.setRange(ctx, conn, t, r)
+}
+
+func (m *Migrate) pkRange(ctx context.Context, conn dialect.ExecQuerier, t *Table) (int64, error) {
 	id := indexOf(m.typeRanges, t.Name)
 	// If the table re-created, re-use its range from
-	// the past. otherwise, allocate a new id-range.
+	// the past. Otherwise, allocate a new id-range.
 	if id == -1 {
 		if len(m.typeRanges) > MaxTypes {
-			return fmt.Errorf("max number of types exceeded: %d", MaxTypes)
+			return 0, fmt.Errorf("max number of types exceeded: %d", MaxTypes)
 		}
 		query, args := sql.Dialect(m.Dialect()).
 			Insert(TypeTable).Columns("type").Values(t.Name).Query()
-		if err := tx.Exec(ctx, query, args, nil); err != nil {
-			return fmt.Errorf("insert into type: %w", err)
+		if err := conn.Exec(ctx, query, args, nil); err != nil {
+			return 0, fmt.Errorf("insert into ent_types: %w", err)
 		}
 		id = len(m.typeRanges)
 		m.typeRanges = append(m.typeRanges, t.Name)
 	}
-	// Set the id offset for table.
-	return m.setRange(ctx, tx, t, id<<32)
+	return int64(id << 32), nil
 }
 
 // fkColumn returns the column name of a foreign-key.
@@ -619,9 +643,9 @@ func rollback(tx dialect.Tx, err error) error {
 }
 
 // exist checks if the given COUNT query returns a value >= 1.
-func exist(ctx context.Context, tx dialect.Tx, query string, args ...interface{}) (bool, error) {
+func exist(ctx context.Context, conn dialect.ExecQuerier, query string, args ...interface{}) (bool, error) {
 	rows := &sql.Rows{}
-	if err := tx.Query(ctx, query, args, rows); err != nil {
+	if err := conn.Query(ctx, query, args, rows); err != nil {
 		return false, fmt.Errorf("reading schema information %w", err)
 	}
 	defer rows.Close()
@@ -642,12 +666,13 @@ func indexOf(a []string, s string) int {
 }
 
 type sqlDialect interface {
+	atBuilder
 	dialect.Driver
-	init(context.Context, dialect.Tx) error
+	init(context.Context, dialect.ExecQuerier) error
 	table(context.Context, dialect.Tx, string) (*Table, error)
-	tableExist(context.Context, dialect.Tx, string) (bool, error)
+	tableExist(context.Context, dialect.ExecQuerier, string) (bool, error)
 	fkExist(context.Context, dialect.Tx, string) (bool, error)
-	setRange(context.Context, dialect.Tx, *Table, int) error
+	setRange(context.Context, dialect.ExecQuerier, *Table, int64) error
 	dropIndex(context.Context, dialect.Tx, *Index, string) error
 	// table, column and index builder per dialect.
 	cType(*Column) string
@@ -672,5 +697,5 @@ type fkRenamer interface {
 
 // verifyRanger wraps the method for verifying global-id range correctness.
 type verifyRanger interface {
-	verifyRange(context.Context, dialect.Tx, *Table, int) error
+	verifyRange(context.Context, dialect.Tx, *Table, int64) error
 }

@@ -4,7 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"net/http"
-	"orse/ent/user"
+	"orse/common/models"
+
 	"orse/internal/database"
 	"orse/internal/errors"
 	"orse/internal/jwt"
@@ -31,14 +32,10 @@ func GetToken(c *gin.Context) {
 	}
 
 	client, _ := database.Open()
-	defer client.Close()
-
-	u, err := client.User.
-		Query().
-		Where(user.Mobile(l.Mobile)).
-		Only(c)
-
-	if err != nil {
+	//defer client.Close()
+	u:=models.User{}
+	result := client.Where("mobile = ?", l.Mobile).First(&u)
+	if result.Error != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    201,
 			"message": "手机号不存在",
@@ -52,10 +49,9 @@ func GetToken(c *gin.Context) {
 		})
 		return
 	}
-
 	//生成token
 	j := jwt.NewJWT()
-	tokenString, err := j.GenToken(	jwt.NewClaims(u.ID,u.Role,u.Username))
+	tokenString, err := j.GenToken(	jwt.NewClaims(int(u.Id), int(u.Role),u.Username))
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code": 201,

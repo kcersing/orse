@@ -14,7 +14,7 @@ func Api(r *gin.Engine)  {
 	{
 		v1.POST("/add-casbin",auth.AddCasbin)
 
-		v1.POST("/addMenu",menu.AddMenu)
+		v1.POST("/editMenu",menu.EditMenu)
 		v1.POST("/get-menu",menu.GetMenu)
 		v1.POST("/user/register",user.Register)
 		v1.POST("/user/login",user.GetToken)

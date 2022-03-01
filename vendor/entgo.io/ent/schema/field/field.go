@@ -129,10 +129,9 @@ func UUID(name string, typ driver.Valuer) *uuidBuilder {
 	b := &uuidBuilder{&Descriptor{
 		Name: name,
 		Info: &TypeInfo{
-			Type:     TypeUUID,
-			Nillable: true,
-			Ident:    rt.String(),
-			PkgPath:  indirect(rt).PkgPath(),
+			Type:    TypeUUID,
+			Ident:   rt.String(),
+			PkgPath: indirect(rt).PkgPath(),
 		},
 	}}
 	b.desc.goType(typ, valueScannerType)
@@ -345,7 +344,8 @@ func (b *timeBuilder) Optional() *timeBuilder {
 	return b
 }
 
-// Immutable indicates that this field cannot be updated.
+// Immutable fields are fields that can be set only in the creation of the entity.
+// i.e., no setters will be generated for the entity updaters (one and many).
 func (b *timeBuilder) Immutable() *timeBuilder {
 	b.desc.Immutable = true
 	return b
@@ -549,6 +549,12 @@ func (b *bytesBuilder) Optional() *bytesBuilder {
 	return b
 }
 
+// Sensitive fields not printable and not serializable.
+func (b *bytesBuilder) Sensitive() *bytesBuilder {
+	b.desc.Sensitive = true
+	return b
+}
+
 // Unique makes the field unique within all vertices of this type.
 // Only supported in PostgreSQL.
 func (b *bytesBuilder) Unique() *bytesBuilder {
@@ -579,7 +585,31 @@ func (b *bytesBuilder) StructTag(s string) *bytesBuilder {
 // In SQLite, it does not have any effect on the type size, which is default to 1B bytes.
 func (b *bytesBuilder) MaxLen(i int) *bytesBuilder {
 	b.desc.Size = i
+	b.desc.Validators = append(b.desc.Validators, func(buf []byte) error {
+		if len(buf) > i {
+			return errors.New("value is greater than the required length")
+		}
+		return nil
+	})
 	return b
+}
+
+// MinLen adds a length validator for this field.
+// Operation fails if the length of the buffer is less than the given value.
+func (b *bytesBuilder) MinLen(i int) *bytesBuilder {
+	b.desc.Validators = append(b.desc.Validators, func(b []byte) error {
+		if len(b) < i {
+			return errors.New("value is less than the required length")
+		}
+		return nil
+	})
+	return b
+}
+
+// NotEmpty adds a length validator for this field.
+// Operation fails if the length of the buffer is zero.
+func (b *bytesBuilder) NotEmpty() *bytesBuilder {
+	return b.MinLen(1)
 }
 
 // Validate adds a validator for this field. Operation fails if the validation fails.
@@ -698,6 +728,28 @@ func (b *jsonBuilder) SchemaType(types map[string]string) *jsonBuilder {
 // codegen extensions.
 func (b *jsonBuilder) Annotations(annotations ...schema.Annotation) *jsonBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// Default sets the default value of the field. For example:
+//
+//	field.JSON("dirs", []http.Dir{}).
+//		// A static default value.
+//		Default([]http.Dir{"/tmp"})
+//
+//	field.JSON("dirs", []http.Dir{}).
+//		// A function for generating the default value.
+//		Default(DefaultDirs)
+//
+func (b *jsonBuilder) Default(v interface{}) *jsonBuilder {
+	b.desc.Default = v
+	switch fieldT, defaultT := b.desc.Info.RType.rtype, reflect.TypeOf(v); {
+	case fieldT == defaultT:
+	case defaultT.Kind() == reflect.Func:
+		b.desc.checkDefaultFunc(b.desc.Info.RType.rtype)
+	default:
+		b.desc.Err = fmt.Errorf("expect type (func() %[1]s) or (%[1]s) for other default value", b.desc.Info)
+	}
 	return b
 }
 
@@ -1106,7 +1158,7 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 		},
 	}
 	switch t.Kind() {
-	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
+	case reflect.Slice, reflect.Ptr, reflect.Map:
 		info.Nillable = true
 	}
 	switch pt := reflect.PtrTo(t); {
