@@ -1,6 +1,5 @@
 # orse
 
-gin + ent 
 
 用户
 权限
