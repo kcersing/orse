@@ -1,5 +1,7 @@
 package models
-
+func (User) TableName() string {
+	return "user"
+}
 type User struct {
 	CommonFields
 	Username string `gorm:"column:username" db:"username" json:"username" form:"username"`
@@ -9,6 +11,9 @@ type User struct {
 	State    string `gorm:"column:state" db:"state" json:"state" form:"state"`
 	Login    int64  `gorm:"column:login" db:"login" json:"login" form:"login"`
 	Role     int64  `gorm:"column:role" db:"role" json:"role" form:"role"`
+}
+func (UserDetail) TableName() string {
+	return "user_detail"
 }
 type UserDetail struct {
 	CommonFields

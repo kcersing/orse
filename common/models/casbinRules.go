@@ -1,5 +1,7 @@
 package models
-
+func (CasbinRules) TableName() string {
+	return "casbin_rules"
+}
 type CasbinRules struct {
 	Id     int64  `gorm:"column:id" db:"id" json:"id" form:"id"`
 	Ptype  string `gorm:"column:ptype" db:"ptype" json:"ptype" form:"ptype"`
