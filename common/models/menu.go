@@ -1,5 +1,9 @@
 package models
 
+func (Menu) TableName() string {
+	return "menu"
+}
+
 type Menu struct {
 	CommonFields
 	Title string `gorm:"column:title" db:"title" json:"title" form:"title"`
@@ -13,5 +17,5 @@ type Menu struct {
 	Icon string `gorm:"column:icon" db:"icon" json:"icon" form:"icon"`
 	Hidden string `gorm:"column:hidden" db:"hidden" json:"hidden" form:"hidden"`
 	Desc string `gorm:"column:desc" db:"desc" json:"desc" form:"desc"`
-
 }
+

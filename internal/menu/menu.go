@@ -16,17 +16,17 @@ type Menu struct {
 	Url      string `form:"url" json:"url" binding:"required" `
 	ParentId int    `form:"parent_id" json:"parent_id" binding:"required" `
 }
-var menus models.Menu
+
 func (menu *Menu) EditMenu(c *gin.Context) {
 	client, _ := database.Open()
-
+	var menus models.Menu
 	if menu.ParentId != 0 {
 		client.First(&menus)
 		menus.Title = menu.Title
 		menus.Name = menu.Name
 		menus.Url = menu.Url
 		menus.ParentId = int64(menu.ParentId)
-		result :=client.Save(&menus)
+		result := client.Save(&menus)
 		if result.Error != nil {
 			c.JSON(http.StatusOK, gin.H{
 				"message": result.Error,
@@ -35,7 +35,7 @@ func (menu *Menu) EditMenu(c *gin.Context) {
 			return
 		}
 	} else {
-		createMenu := models.Menu{Name:  menu.Name, Title: menu.Title, Url: menu.Url,ParentId:int64(menu.ParentId)}
+		createMenu := models.Menu{Name: menu.Name, Title: menu.Title, Url: menu.Url, ParentId: int64(menu.ParentId)}
 		result := client.Create(&createMenu)
 		if result.Error != nil {
 			c.JSON(http.StatusOK, gin.H{
@@ -72,10 +72,56 @@ func EditMenu(c *gin.Context) {
 	return
 }
 
+type AllMenu struct {
+	Id        int
+	Title     string
+	Name      string
+	Url       string
+	ParentId  int
+	Component string
+	Icon      string
+}
+
+type AllMenuNode struct {
+	Id        int
+	Title     string
+	Name      string
+	Url       string
+	ParentId  int
+	Component string
+	Icon      string
+	Children  []AllMenuNode
+}
+
+func GetChildNode(m []AllMenu, pid int) []AllMenuNode {
+	tree := make([]AllMenuNode, 0)
+	for _, item := range m {
+		if pid == item.ParentId {
+			node := AllMenuNode{
+				Id:        item.Id,
+				Title:     item.Title,
+				Name:      item.Name,
+				Url:       item.Url,
+				ParentId:  item.ParentId,
+				Component: item.Component,
+				Icon:      item.Icon,
+				Children:  nil,
+			}
+			node.Children = GetChildNode(m, node.Id)
+
+			tree = append(tree, node)
+		}
+	}
+	return tree
+}
+
 func GetMenu(c *gin.Context) {
 	client, _ := database.Open()
+	var lists []AllMenu
+	result := client.Model(&models.Menu{}).Find(&lists)
 
-	result := client.Select("id", "title","name","url","parent_id","component","icon").Find(&menus)
+	tree := GetChildNode(lists, 0)
+
 	if result.Error != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"message": result.Error,
@@ -85,7 +131,7 @@ func GetMenu(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "成功",
-		"data":    menus,
+		"data":    tree,
 		"code":    0,
 	})
 	return

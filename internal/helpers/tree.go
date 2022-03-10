@@ -1,6 +1,6 @@
 package helpers
 
-func autoUpdateTree()  {
+func ArrTree(arr []string,pid int ,pidField string,child string ,addChild bool )  {
 
 //	       if ($this->isNewRecord) {
 	//            if ($this->pid == 0) {
