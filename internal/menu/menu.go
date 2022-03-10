@@ -93,7 +93,7 @@ type AllMenuNode struct {
 	Children  []AllMenuNode
 }
 
-func GetChildNode(m []AllMenu, pid int) []AllMenuNode {
+func getChildNode(m []AllMenu, pid int) []AllMenuNode {
 	tree := make([]AllMenuNode, 0)
 	for _, item := range m {
 		if pid == item.ParentId {
@@ -107,7 +107,7 @@ func GetChildNode(m []AllMenu, pid int) []AllMenuNode {
 				Icon:      item.Icon,
 				Children:  nil,
 			}
-			node.Children = GetChildNode(m, node.Id)
+			node.Children = getChildNode(m, node.Id)
 
 			tree = append(tree, node)
 		}
@@ -120,7 +120,7 @@ func GetMenu(c *gin.Context) {
 	var lists []AllMenu
 	result := client.Model(&models.Menu{}).Find(&lists)
 
-	tree := GetChildNode(lists, 0)
+	tree := getChildNode(lists, 0)
 
 	if result.Error != nil {
 		c.JSON(http.StatusOK, gin.H{
