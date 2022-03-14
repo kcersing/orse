@@ -6,12 +6,11 @@ func (ProductCate) TableName() string {
 
 // ProductCate 商品类别信息
 type ProductCate struct {
-	Id        int64  `gorm:"column:id" db:"id" json:"id" form:"id"`
-	ParentId  int64  `gorm:"column:parent_id" db:"parent_id" json:"parent_id" form:"parent_id"`
-	CreatedAt int64  `gorm:"column:created_at" db:"created_at" json:"created_at" form:"created_at"`
-	UpdatedAt int64  `gorm:"column:updated_at" db:"updated_at" json:"updated_at" form:"updated_at"`
-	Name      string `gorm:"column:name" db:"name" json:"name" form:"name"`
-	Sort      int64  `gorm:"column:sort" db:"sort" json:"sort" form:"sort"`
+	CommonFields
+	ParentId  int64  `gorm:"column:parent_id;index:product_cate_parent_id;not null;default:0;comment:上级ID" db:"parent_id" json:"parent_id" form:"parent_id"`
+	Status    int8   `gorm:"column:states;not null;default:0;comment:状态[0:禁用 1:启用]" db:"states" json:"states" form:"states"`
+	Name      string `gorm:"column:name;collate:utf8mb4_bin;comment:名称" db:"name" json:"name" form:"name"`
+	Sort      int64  `gorm:"column:sort;not null;default:0;comment:排序" db:"sort" json:"sort" form:"sort"`
 }
 
 func (Product) TableName() string {
@@ -20,13 +19,11 @@ func (Product) TableName() string {
 
 // Product 商品信息
 type Product struct {
-	Id        int64  `gorm:"column:id" db:"id" json:"id" form:"id"`
-	CreatedAt int64  `gorm:"column:created_at" db:"created_at" json:"created_at" form:"created_at"`
-	UpdatedAt int64  `gorm:"column:updated_at" db:"updated_at" json:"updated_at" form:"updated_at"`
-	Name      string `gorm:"column:name" db:"name" json:"name" form:"name"`
-	Status    string `gorm:"column:status" db:"status" json:"status" form:"status"`
-	CreateId  int64  `gorm:"column:create_id" db:"create_id" json:"create_id" form:"create_id"`
-	CateId    int64  `gorm:"column:cate_id" db:"cate_id" json:"cate_id" form:"cate_id"`
+	CommonFields
+	Name      string `gorm:"column:name;collate:utf8mb4_bin;comment:名称" db:"name" json:"name" form:"name"`
+	Status    int8   `gorm:"column:states;not null;default:0;comment:状态[0:禁用 1:启用]" db:"states" json:"states" form:"states"`
+	CreateId  int64  `gorm:"column:create_id;not null;default:0;" db:"create_id" json:"create_id" form:"create_id"`
+	CateId    int64  `gorm:"column:cate_id;not null;default:0;index:product_cate_id;comment:分类ID" db:"cate_id" json:"cate_id" form:"cate_id"`
 }
 
 func (ProductAttributeKey) TableName() string {
@@ -35,12 +32,10 @@ func (ProductAttributeKey) TableName() string {
 
 // ProductAttributeKey 商品信息
 type ProductAttributeKey struct {
-	Id        int64  `gorm:"column:id" db:"id" json:"id" form:"id"`
-	CreatedAt int64  `gorm:"column:created_at" db:"created_at" json:"created_at" form:"created_at"`
-	UpdatedAt int64  `gorm:"column:updated_at" db:"updated_at" json:"updated_at" form:"updated_at"`
-	ProductId int64  `gorm:"column:product_id" db:"product_id" json:"product_id" form:"product_id"`
-	Name      string `gorm:"column:name" db:"name" json:"name" form:"name"`
-	Sort      int64  `gorm:"column:sort" db:"sort" json:"sort" form:"sort"`
+	CommonFields
+	ProductId int64  `gorm:"column:product_id;not null;default:0;index:product_attribute_key_product_id;comment:商品ID" db:"product_id" json:"product_id" form:"product_id"`
+	Name      string `gorm:"column:name;collate:utf8mb4_bin;comment:商品属性名称" db:"name" json:"name" form:"name"`
+	Sort      int64  `gorm:"column:sort;not null;default:0;comment:排序" db:"sort" json:"sort" form:"sort"`
 }
 
 func (ProductAttributeValue) TableName() string {
@@ -49,12 +44,10 @@ func (ProductAttributeValue) TableName() string {
 
 // ProductAttributeValue 商品信息
 type ProductAttributeValue struct {
-	Id        int64  `gorm:"column:id" db:"id" json:"id" form:"id"`
-	CreatedAt int64  `gorm:"column:created_at" db:"created_at" json:"created_at" form:"created_at"`
-	UpdatedAt int64  `gorm:"column:updated_at" db:"updated_at" json:"updated_at" form:"updated_at"`
-	Value     string `gorm:"column:value" db:"value" json:"value" form:"value"`
-	Sort      int64  `gorm:"column:sort" db:"sort" json:"sort" form:"sort"`
-	KeyId     int64  `gorm:"column:key_id" db:"key_id" json:"key_id" form:"key_id"`
+	CommonFields
+	Value     string `gorm:"column:value,collate:utf8mb4_bin;comment:商品属性值" db:"value" json:"value" form:"value"`
+	Sort      int64  `gorm:"column:sort;not null;default:0;comment:排序" db:"sort" json:"sort" form:"sort"`
+	KeyId     int64  `gorm:"column:key_id;not null;default:0;index:product_attribute_value_key_id;comment:商品属性ID" db:"key_id" json:"key_id" form:"key_id"`
 }
 
 func (ProductSpecs) TableName() string {
@@ -63,17 +56,15 @@ func (ProductSpecs) TableName() string {
 
 // ProductSpecs 商品信息
 type ProductSpecs struct {
-	Id        int64   `gorm:"column:id" db:"id" json:"id" form:"id"`
-	CreatedAt int64   `gorm:"column:created_at" db:"created_at" json:"created_at" form:"created_at"`
-	UpdatedAt int64   `gorm:"column:updated_at" db:"updated_at" json:"updated_at" form:"updated_at"`
-	Name      string  `gorm:"column:name" db:"name" json:"name" form:"name"`
-	Sn        string  `gorm:"column:sn" db:"sn" json:"sn" form:"sn"`
-	Stock     int64   `gorm:"column:stock" db:"stock" json:"stock" form:"stock"`
-	Sales     int64   `gorm:"column:sales" db:"sales" json:"sales" form:"sales"`
-	Price     float64 `gorm:"column:price" db:"price" json:"price" form:"price"`
-	SalePrice float64 `gorm:"column:sale_price" db:"sale_price" json:"sale_price" form:"sale_price"`
-	CreateId  int64   `gorm:"column:create_id" db:"create_id" json:"create_id" form:"create_id"`
-	ProductId int64   `gorm:"column:product_id" db:"product_id" json:"product_id" form:"product_id"`
+	CommonFields
+	Name      string  `gorm:"column:name;comment:商品规格名称" db:"name" json:"name" form:"name"`
+	Sn        string  `gorm:"column:sn;comment:商品规格编号" db:"sn" json:"sn" form:"sn"`
+	Stock     int64   `gorm:"column:stock;not null;default:0;comment:库存" db:"stock" json:"stock" form:"stock"`
+	Sales     int64   `gorm:"column:sales;not null;default:0;comment:已销售数量" db:"sales" json:"sales" form:"sales"`
+	Price     float64 `gorm:"column:price;not null;default:0;comment:价格" db:"price" json:"price" form:"price"`
+	SalePrice float64 `gorm:"column:sale_price;not null;default:0;comment:销售价格" db:"sale_price" json:"sale_price" form:"sale_price"`
+	CreateId  int64   `gorm:"column:create_id;not null;default:0;comment:商品规格" db:"create_id" json:"create_id" form:"create_id"`
+	ProductId int64   `gorm:"column:product_id;not null;default:0;index:product_specs_product_id;comment:商品ID" db:"product_id" json:"product_id" form:"product_id"`
 }
 
 func (ProductSpecsItem) TableName() string {
@@ -82,12 +73,10 @@ func (ProductSpecsItem) TableName() string {
 
 // ProductSpecsItem 商品信息
 type ProductSpecsItem struct {
-	Id             int64 `gorm:"column:id" db:"id" json:"id" form:"id"`
-	CreatedAt      int64 `gorm:"column:created_at" db:"created_at" json:"created_at" form:"created_at"`
-	UpdatedAt      int64 `gorm:"column:updated_at" db:"updated_at" json:"updated_at" form:"updated_at"`
-	ValueId        int64 `gorm:"column:value_id" db:"value_id" json:"value_id" form:"value_id"`
-	Sort           int64 `gorm:"column:sort" db:"sort" json:"sort" form:"sort"`
-	ProductSpecsId int64 `gorm:"column:product_specs_id" db:"product_specs_id" json:"product_specs_id" form:"product_specs_id"`
+	CommonFields
+	ValueId        int64 `gorm:"column:value_id;not null;default:0;index:product_specs_item_value_id;comment:商品规格项目值" db:"value_id" json:"value_id" form:"value_id"`
+	Sort           int64 `gorm:"column:sort;not null;default:0;comment:排序" db:"sort" json:"sort" form:"sort"`
+	ProductSpecsId int64 `gorm:"column:product_specs_id;not null;default:0;index:product_specs_item_product_specs_id;comment:商品规格ID" db:"product_specs_id" json:"product_specs_id" form:"product_specs_id"`
 }
 
 func (ProductSpecsItemValues) TableName() string {
@@ -96,6 +85,6 @@ func (ProductSpecsItemValues) TableName() string {
 
 // ProductSpecsItemValues 商品信息
 type ProductSpecsItemValues struct {
-	ProductSpecsItemId      int64 `gorm:"column:product_specs_item_id" db:"product_specs_item_id" json:"product_specs_item_id" form:"product_specs_item_id"`
-	ProductAttributeValueId int64 `gorm:"column:product_attribute_value_id" db:"product_attribute_value_id" json:"product_attribute_value_id" form:"product_attribute_value_id"`
+	ProductSpecsItemId      int64 `gorm:"column:product_specs_item_id;not null;default:0;index:product_specs_item_values_product_specs_item_id;comment:商品规格项目ID" db:"product_specs_item_id" json:"product_specs_item_id" form:"product_specs_item_id"`
+	ProductAttributeValueId int64 `gorm:"column:product_attribute_value_id;not null;default:0;index:product_specs_item_values_product_attribute_value_id;comment:商品属性值ID" db:"product_attribute_value_id" json:"product_attribute_value_id" form:"product_attribute_value_id"`
 }

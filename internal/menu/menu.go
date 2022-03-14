@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"orse/common/models"
 	"orse/internal/database"
-	"orse/internal/errors"
+	"orse/internal/util"
 )
 
 type Menu struct {
@@ -57,7 +57,7 @@ func EditMenu(c *gin.Context) {
 	if err := c.ShouldBind(&menu); err != nil {
 		if fe, ok := err.(validator.ValidationErrors); ok {
 			c.JSON(http.StatusOK, gin.H{
-				"message": errors.GetError(fe),
+				"message": util.GetError(fe),
 				"code":    1,
 			})
 		} else {

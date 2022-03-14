@@ -5,9 +5,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"net/http"
 	"orse/common/models"
-
+	"orse/internal/util"
 	"orse/internal/database"
-	"orse/internal/errors"
 	"orse/internal/jwt"
 )
 
@@ -25,7 +24,7 @@ func GetToken(c *gin.Context) {
 		if fe, ok := err.(validator.ValidationErrors); ok {
 			c.JSON(http.StatusOK, gin.H{
 				"code":    201,
-				"message": errors.GetError(fe),
+				"message": util.GetError(fe),
 			})
 		}
 		return
@@ -73,7 +72,7 @@ func GetTokenUser(c *gin.Context){
 		if fe, ok := err.(validator.ValidationErrors); ok {
 			c.JSON(http.StatusOK, gin.H{
 				"code":    201,
-				"message": errors.GetError(fe),
+				"message": util.GetError(fe),
 			})
 		}
 		return
@@ -107,7 +106,7 @@ func RefreshToken(c *gin.Context) {
 		if fe, ok := err.(validator.ValidationErrors); ok {
 			c.JSON(http.StatusOK, gin.H{
 				"code":    201,
-				"message": errors.GetError(fe),
+				"message": util.GetError(fe),
 			})
 			return
 		}
