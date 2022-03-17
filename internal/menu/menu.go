@@ -38,17 +38,11 @@ func (menu *Menu) EditMenu(c *gin.Context) {
 		createMenu := models.Menu{Name: menu.Name, Title: menu.Title, Url: menu.Url, ParentId: int64(menu.ParentId)}
 		result := client.Create(&createMenu)
 		if result.Error != nil {
-			c.JSON(http.StatusOK, gin.H{
-				"message": result.Error,
-				"code":    1,
-			})
+			util.Error(c,1,result.Error.Error())
 			return
 		}
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"message": "成功",
-		"code":    0,
-	})
+	util.Success(c , nil)
 	return
 }
 
@@ -56,15 +50,9 @@ func EditMenu(c *gin.Context) {
 	var menu Menu
 	if err := c.ShouldBind(&menu); err != nil {
 		if fe, ok := err.(validator.ValidationErrors); ok {
-			c.JSON(http.StatusOK, gin.H{
-				"message": util.GetError(fe),
-				"code":    1,
-			})
+			util.Error(c,1,util.GetError(fe))
 		} else {
-			c.JSON(http.StatusOK, gin.H{
-				"message": err,
-				"code":    1,
-			})
+			util.Error(c,1,err.Error())
 		}
 		return
 	}
