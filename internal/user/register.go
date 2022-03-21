@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
-	"net/http"
 	"orse/common/models"
 	"orse/internal/database"
 	"orse/internal/util"
@@ -22,23 +21,17 @@ func Register(c *gin.Context) {
 	var r RegisterRequest
 	if err := c.ShouldBind(&r); err != nil {
 		if fe, ok := err.(validator.ValidationErrors); ok {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"message": util.GetError(fe),
-				"code":    1,
-			})
+			util.Error(c,1,util.GetError(fe))
 			return
 		}
 	}
 
-	client, _ := database.Open()
+	client := database.Open()
 
 	result := client.Where("mobile = ?", r.Mobile).First(&u)
 
 	if result.Error == nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "手机号已存在",
-			"code":    1,
-		})
+		util.Error(c,1,"手机号已存在")
 		return
 	}
 	user := models.User{
@@ -65,16 +58,9 @@ func Register(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"message": err,
-			"code":    1,
-		})
+		util.Error(c,1,err.Error())
 		return
 	}
-
-	c.JSON(http.StatusBadRequest, gin.H{
-		"message": "注册成功",
-		"code":    0,
-	})
+	util.Success(c,nil)
 	return
 }

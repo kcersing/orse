@@ -4,35 +4,25 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"log"
-	"net/http"
 	"orse/internal/database"
+	"orse/internal/util"
 )
 
 func Info(c *gin.Context) {
 	userId, ok := c.Get("userID")
 	if !ok {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "userID值不存在",
-			"code":    401,
-		})
+		util.Error(c, 1,"userID值不存在")
 		return
 	}
-	client, _ := database.Open()
+	client := database.Open()
 
 	result := client.Where("id = ?", userId.(int)).First(&u)
 
 	if result.Error != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "会员不存在",
-			"code":    201,
-		})
+		util.Error(c, 1,"会员不存在")
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"data": u,
-	})
-
+	util.Success(c, u)
 	log.Println(userId)
 	return
 }

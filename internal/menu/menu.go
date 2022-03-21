@@ -3,42 +3,39 @@ package menu
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"net/http"
 	"orse/common/models"
 	"orse/internal/database"
 	"orse/internal/util"
 )
 
 type Menu struct {
-	Id       int    `form:"Id" json:"Id" `
+	Id       int64    `form:"Id" json:"Id" `
 	Title    string `form:"title" json:"title" binding:"required"`
 	Name     string `form:"name" json:"name" binding:"required" `
 	Url      string `form:"url" json:"url" binding:"required" `
-	ParentId int    `form:"parent_id" json:"parent_id" binding:"required" `
+	ParentId int64    `form:"parent_id" json:"parent_id" binding:"required" `
 }
 
 func (menu *Menu) EditMenu(c *gin.Context) {
-	client, _ := database.Open()
+	client := database.Open()
 	var menus models.Menu
-	if menu.ParentId != 0 {
+	if menu.Id != 0 {
+		menus.Id = menu.Id
 		client.First(&menus)
 		menus.Title = menu.Title
 		menus.Name = menu.Name
 		menus.Url = menu.Url
-		menus.ParentId = int64(menu.ParentId)
+		menus.ParentId = menu.ParentId
 		result := client.Save(&menus)
 		if result.Error != nil {
-			c.JSON(http.StatusOK, gin.H{
-				"message": result.Error,
-				"code":    1,
-			})
+			util.Error(c,1,result.Error.Error())
 			return
 		}
 	} else {
 		createMenu := models.Menu{Name: menu.Name, Title: menu.Title, Url: menu.Url, ParentId: int64(menu.ParentId)}
 		result := client.Create(&createMenu)
 		if result.Error != nil {
-			util.Error(c,1,result.Error.Error())
+			util.Error(c, 1, result.Error.Error())
 			return
 		}
 	}
@@ -104,23 +101,16 @@ func getChildNode(m []AllMenu, pid int) []AllMenuNode {
 }
 
 func GetMenu(c *gin.Context) {
-	client, _ := database.Open()
+	client := database.Open()
 	var lists []AllMenu
 	result := client.Model(&models.Menu{}).Find(&lists)
 
 	tree := getChildNode(lists, 0)
 
 	if result.Error != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"message": result.Error,
-			"code":    1,
-		})
+		util.Error(c,1,result.Error.Error())
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"message": "成功",
-		"data":    tree,
-		"code":    0,
-	})
+	util.Success(c,tree)
 	return
 }

@@ -3,11 +3,10 @@ package user
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"net/http"
 	"orse/common/models"
-	"orse/internal/util"
 	"orse/internal/database"
 	"orse/internal/jwt"
+	"orse/internal/util"
 )
 
 type LoginRequest  struct {
@@ -22,47 +21,31 @@ func GetToken(c *gin.Context) {
 	var l LoginRequest
 	if err := c.ShouldBind(&l); err != nil {
 		if fe, ok := err.(validator.ValidationErrors); ok {
-			c.JSON(http.StatusOK, gin.H{
-				"code":    201,
-				"message": util.GetError(fe),
-			})
+			util.Error(c,1,util.GetError(fe))
 		}
 		return
 	}
 
-	client, _ := database.Open()
+	client := database.Open()
 	//defer client.Close()
 	u:=models.User{}
 	result := client.Where("mobile = ?", l.Mobile).First(&u)
 	if result.Error != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code":    201,
-			"message": "手机号不存在",
-		})
+		util.Error(c,1,"手机号不存在")
 		return
 	}
 	if !VerifyPass(u.Pass, []byte(l.Pass)) {
-		c.JSON(http.StatusOK, gin.H{
-			"code": 202,
-			"message":  "用户名或密码错误",
-		})
+		util.Error(c,1,"用户名或密码错误")
 		return
 	}
 	//生成token
 	j := jwt.NewJWT()
 	tokenString, err := j.GenToken(	jwt.NewClaims(int(u.Id), int(u.Role),u.Username))
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code": 201,
-			"message":  err.Error(),
-		})
+		util.Error(c,1, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": 200,
-		"message":    "登录成功",
-		"data": gin.H{"token": tokenString},
-	})
+	util.Success(c,gin.H{"token": tokenString})
 	return
 }
 
@@ -70,10 +53,7 @@ func GetTokenUser(c *gin.Context){
 	var l VerifyTokenUser
 	if err := c.ShouldBind(&l); err != nil {
 		if fe, ok := err.(validator.ValidationErrors); ok {
-			c.JSON(http.StatusOK, gin.H{
-				"code":    201,
-				"message": util.GetError(fe),
-			})
+			util.Error(c,1, util.GetError(fe))
 		}
 		return
 	}
@@ -81,17 +61,10 @@ func GetTokenUser(c *gin.Context){
 	j := jwt.NewJWT()
 	claims, err := j.VerifyToken(l.Token)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code": 201,
-			"message":  err.Error(),
-		})
+		util.Error(c,1, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": 200,
-		"message":    "获取成功",
-		"data": claims,
-	})
+	util.Success(c,claims)
 	return
 }
 
@@ -104,10 +77,7 @@ func RefreshToken(c *gin.Context) {
 	var k refreshToken
 	if err := c.ShouldBind(&k); err != nil {
 		if fe, ok := err.(validator.ValidationErrors); ok {
-			c.JSON(http.StatusOK, gin.H{
-				"code":    201,
-				"message": util.GetError(fe),
-			})
+			util.Error(c,1, util.GetError(fe))
 			return
 		}
 	}
@@ -117,26 +87,16 @@ func RefreshToken(c *gin.Context) {
 	}
 
 	if k.Token == "" {
-		c.JSON(http.StatusOK, gin.H{
-			"code":    201,
-			"message": "token不存在",
-		})
+		util.Error(c,1,"token不存在")
 		return
 	}
 
 	j := jwt.NewJWT()
 	tokenString, err := j.RefreshToken(k.Token)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"message": err.Error(),
-			"code":    1,
-		})
+		util.Error(c,1,err.Error())
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"data": gin.H{ "token": tokenString },
-		"code": 0,
-	})
+	util.Success(c,gin.H{"token": tokenString})
 	return
 }

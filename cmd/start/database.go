@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	client, _ := database.Open()
+	client := database.Open()
 	client.AutoMigrate(&models.Menu{})
 	client.AutoMigrate(&models.User{}, &models.UserDetail{})
 	client.AutoMigrate(&models.ProductCate{}, &models.Product{}, &models.ProductSpecs{}, models.ProductSpecsItem{},

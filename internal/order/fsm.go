@@ -87,9 +87,7 @@ func (f *FSM) Call(event Event, opts ...Option) (State, error) {
 	oldState := f.getState()
 	f.setState(status)
 	newState := f.getState()
-
 	fmt.Println(fmt.Sprintf("操作[%s]，状态从 [%s] 变成 [%s]", event, StatusText(oldState), StatusText(newState)))
-
 	return f.getState(), nil
 }
 
