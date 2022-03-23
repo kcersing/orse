@@ -22,7 +22,7 @@ func init() {
 
 type CasbinModel struct {
 	ID     bson.ObjectId `json:"id" bson:"_id"`
-	Uid    int           `json:"uid"`
+	Uid    string        `json:"uid"`
 	Ptype  string        `json:"ptype" bson:"ptype"`
 	Role   string        `json:"role" bson:"v0"`
 	Path   string        `json:"path" bson:"v1"`

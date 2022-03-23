@@ -12,7 +12,7 @@ func Api(r *gin.Engine)  {
 
 	v1 := r.Group("/v1")
 	{
-		v1.POST("/add-casbin",auth.AddRole)
+		v1.POST("/add-role-for-user",auth.AddRoleForUser)
 
 		v1.POST("/editMenu",menu.EditMenu)
 		v1.POST("/get-menu",menu.GetMenu)
