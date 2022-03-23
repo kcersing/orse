@@ -6,16 +6,4 @@ import (
 
 func TestYaml(t *testing.T) {
 
-
-
-
-
-
-
-}
-func GetMenu() {
-
-
-
-
 }
