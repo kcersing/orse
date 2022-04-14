@@ -8,7 +8,7 @@ import (
 
 //返回的结果：
 type Result struct {
-	Time  time.Time   `json:"time"`
+	Time  string   `json:"time"`
 	Code  int         `json:"code"`
 	Message   string      `json:"msg"`
 	Data  interface{} `json:"data"`
@@ -21,7 +21,7 @@ func Success(c *gin.Context, data interface{}) {
 		data = gin.H{}
 	}
 	res := Result{
-		Time:    time.Now(),
+		Time:    time.Now().Format("2006-01-02 15:04:05"),
 		Code:    200,
 		Message: "成功",
 		Data:    data,
@@ -32,7 +32,7 @@ func Success(c *gin.Context, data interface{}) {
 //出错
 func Error(c *gin.Context, code int,message string) {
 	res := Result{
-		Time:    time.Now(),
+		Time:    time.Now().Format("2006-01-02 15:04:05"),
 		Code:    code,
 		Message: message,
 		Data:    gin.H{},

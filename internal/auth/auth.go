@@ -3,6 +3,7 @@ package auth
 import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gookit/goutil/dump"
 	"gopkg.in/mgo.v2/bson"
 	"orse/internal/util"
 )
@@ -19,6 +20,7 @@ func AddRoleForUser(c *gin.Context) {
 		util.Error(c, 1, err.Error())
 		return
 	}
+	dump.P("!")
 	util.Success(c, nil)
 	return
 }

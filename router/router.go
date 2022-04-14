@@ -2,23 +2,16 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
+var R *gin.Engine
 func init() {
-
-}
-
-func Router() *gin.Engine  {
-	r:=gin.Default()
-	r.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK,"hello world")
+	R = gin.Default()
+	R.NoRoute(func(c *gin.Context) {
+		c.JSON(400, gin.H{"code": 400, "message": "Bad Request"})
 	})
 
-	return r
-
 }
-
 
 
 

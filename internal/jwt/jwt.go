@@ -10,6 +10,7 @@ import (
 )
 
 const TokenExpireDuration = time.Hour //* 24 * 2 过期时间 -2天
+
 var (
 	TokenInvalid     = errors.New("Token Invalid")
 	TokenMalformed   = errors.New("Token Malformed")
